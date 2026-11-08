@@ -119,10 +119,14 @@ place : exporter sans attendre.
 
 ## 7. Le hub — reprendre les JSON sur l'ordinateur
 
-Double-clic sur `serveur.bat` à la racine du dépôt : le serveur local démarre
-et la page de gestion s'ouvre quelques secondes plus tard sur
-<http://127.0.0.1:5005>. Il n'écoute que sur ce poste, sans compte : la
-protection est celle de la session Windows. Saisir ses initiales en haut à
+Double-clic sur `serveur.command` sur Mac ou `serveur.bat` sur Windows, à la
+racine du dépôt : le serveur local Stéphanie démarre et la page de gestion
+s'ouvre sur <http://127.0.0.1:5006>. Le lanceur Mac installe automatiquement
+les dépendances au premier lancement (Python 3.10+ et Internet nécessaires ;
+voir [le guide macOS](../hub/README.md#macos--lancement-par-double-clic)).
+L'original peut rester ouvert sur 5005 dans un autre dossier.
+Le serveur n'écoute que sur ce poste, sans compte : la protection est celle
+de la session du poste. Saisir ses initiales en haut à
 droite, elles sont recopiées dans chaque saisie faite depuis le hub.
 
 1. Copier les JSON récupérés du téléphone dans `hub/arrivee/`, ou les glisser

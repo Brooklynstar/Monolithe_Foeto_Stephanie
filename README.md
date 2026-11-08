@@ -36,8 +36,10 @@ dévie de sa source.
 `hub/` reprend les JSON exportés par les modules sur l'ordinateur : archive
 horodatée, base SQLite (`hub/hub.sqlite`), clichés reconstitués en JPEG,
 page de gestion des cas, comptes rendus Jinja et préparation du document
-BaMaRa. **`serveur.bat` à la racine** lance le serveur local
-(<http://127.0.0.1:5005>) et ouvre la page après quelques secondes ;
+BaMaRa. **`serveur.command` sur Mac**, ou **`serveur.bat` sur Windows**, à la
+racine, lance le serveur local Stéphanie sur <http://127.0.0.1:5006> et ouvre
+la page. Sur Mac, les dépendances s'installent au premier lancement ; voir
+[l'installation macOS](hub/README.md#macos--lancement-par-double-clic).
 `hub/app/ingest.py` fait la reprise seule, en bibliothèque standard.
 L'onglet **Biblio** du hub reprend le paquet `data_hub_vN.zip` publié par
 [data.pazuzu.uk](https://data.pazuzu.uk/browse/scripts) — Foekinator

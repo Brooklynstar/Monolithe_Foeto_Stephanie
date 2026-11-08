@@ -24,6 +24,7 @@ hub/exemples/cas/
 # python portable pose dans app/ pour le partage — jamais dans le depot
 hub/app/python/
 hub/app/WPy*/
+hub/app/.venv/
 
 # étui des grilles, produit par micro/assembler.py
 micro/microscopie.html

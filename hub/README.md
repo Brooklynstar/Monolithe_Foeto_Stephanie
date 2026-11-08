@@ -60,7 +60,9 @@ la clôture — des décisions, pas des constatations.
 hub/
   app/                tout ce qu'il faut pour faire tourner le hub — c'est ce
                       dossier que l'on partage ; les données restent au-dessus
-    serveur.bat       double-clic : lance le serveur et ouvre la page
+    serveur.bat       double-clic sur Windows : lance le serveur et ouvre la page
+    serveur.command   double-clic sur Mac : installe les dépendances et lance le hub
+    requirements.txt  dépendances du lanceur Mac, installées dans app/.venv/
     ingest.bat        double-clic : reprend ce qui attend dans ../arrivee/
     python/           (facultatif, hors dépôt) un python portable ; sinon celui du PATH
     ingest.py         la reprise des JSON — bibliothèque standard seule
@@ -110,14 +112,67 @@ Pour recommencer : `copy exemples\*.json arrivee\` puis relancer.
 
 ## Le serveur local
 
+### macOS — lancement par double-clic
+
+Prérequis : un Mac Intel ou Apple Silicon avec **Python 3.10 ou plus récent**
+(installateur macOS de [python.org](https://www.python.org/downloads/macos/),
+ou Python installé par Homebrew), et une connexion Internet au premier lancement.
+Le lanceur n'installe pas Python lui-même et ne demande pas de droits administrateur.
+
+1. Placer le dépôt complet dans un dossier propre à Stéphanie, distinct de la
+   version originale. Garder les sous-dossiers ensemble.
+2. Dans le Finder, double-cliquer sur **`serveur.command` à la racine**
+   (celui de `hub/app/` fonctionne aussi). Le premier lancement crée
+   `hub/app/.venv/` et y installe Flask et Pillow automatiquement.
+3. Le navigateur par défaut ouvre **<http://127.0.0.1:5006/>**, une fois le
+   serveur prêt. Garder la fenêtre Terminal ouverte ; **Ctrl+C** arrête ce hub.
+
+Les lancements suivants réutilisent cet environnement, sans installation ni
+connexion Internet tant que les dépendances n'ont pas changé. Si l'installation
+échoue, l'erreur reste visible : vérifier la connexion, puis refaire un double-clic.
+Si Python est absent, le lanceur indique où l'installer. Si macOS bloque un fichier
+téléchargé, utiliser clic droit → **Ouvrir**, puis autoriser son ouverture dans
+les réglages de confidentialité et sécurité si macOS le demande. Le fichier doit
+rester exécutable : préférer un clone Git si l'outil de décompression a perdu ce droit.
+
+Pour un autre Mac, transférer le dépôt **sans `hub/app/.venv/`** : ce dossier
+est propre au Python et à l'architecture du poste, et sera recréé automatiquement.
+Après remplacement de Python ou déplacement rendant cet environnement inutilisable,
+supprimer uniquement `hub/app/.venv/`, puis relancer. Ne pas supprimer les dossiers
+de données du hub. Pour un premier lancement entièrement hors ligne, les dépendances
+doivent avoir été préparées sur ce Mac auparavant.
+
+### Deux versions en même temps
+
+La version originale peut continuer sur **5005** dans son propre dossier ; cette
+version Stéphanie utilise **5006**. Chaque dossier conserve sa base SQLite, ses
+archives, ses photos et son environnement Python. Ne pas partager `hub/` entre
+les deux, ni leur donner le même `--base`. Aucun dossier de l'autre version n'est
+recherché ou déplacé par le lanceur. Les brouillons du navigateur sont liés à
+l'adresse : ceux de `:5005` ne sont pas transférés automatiquement à `:5006`.
+
+Si 5006 est déjà occupé, le lanceur affiche l'erreur et n'ouvre pas le navigateur
+sur ce service. Il n'arrête aucun autre processus. Revenir à la fenêtre du hub
+déjà lancé, ou arrêter ce hub avec Ctrl+C avant de relancer.
+
+Vérification sur Mac : lancer l'original, puis Stéphanie ; ouvrir les deux adresses,
+vérifier leurs dossiers respectifs, arrêter Stéphanie avec Ctrl+C et vérifier que
+5005 répond toujours. Refaire le double-clic Stéphanie pour vérifier le redémarrage
+sans réinstallation. Sur un deuxième Mac compatible, vérifier aussi le premier
+lancement avec téléchargement des dépendances.
+
+### Windows et ligne de commande
+
 ```
 app\serveur.bat
 ```
 
 ou `serveur.bat` à la racine du dépôt (il appelle celui-ci), ou
-`python app/serveur.py` (depuis `hub/`), puis <http://127.0.0.1:5005>. Le
+`python app/serveur.py` (depuis `hub/`), puis <http://127.0.0.1:5006>. Le
 navigateur s'ouvre après 4 s, le temps que le serveur écoute ; second argument
-du `.bat` pour changer ce délai (`serveur.bat 5005 8`).
+du `.bat` pour changer ce délai (`serveur.bat 5006 8`). Le port reste réglable :
+`python app/serveur.py --port 5010`, ou `./serveur.command --port 5010` depuis
+la racine. Le lanceur Mac attend l'écoute réelle plutôt qu'un délai fixe.
 
 Pour partager le hub, on donne le dossier `app/` complet. Il embarque dans
 `app/python/` un Python 3.12 pour Windows 64 bits (build
@@ -176,7 +231,9 @@ fichier.
 
 ### Dépendance
 
-Flask (qui amène Jinja2). `serveur.bat` propose de l'installer s'il manque.
+Flask (qui amène Jinja2), et Pillow pour les vignettes. Le lanceur Mac installe
+`app/requirements.txt` dans son environnement local ; `serveur.bat` propose
+l'installation si Flask manque.
 `ingest.py` reste en bibliothèque standard seule et continue de fonctionner
 sans serveur : le mode hors ligne n'est jamais perdu.
 

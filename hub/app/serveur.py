@@ -3,7 +3,8 @@
 """
 Serveur local du hub — gestion des cas et ingestion pilotée.
 
-    python app/serveur.py             http://127.0.0.1:5005   (ou hub/serveur.bat)
+    python app/serveur.py             http://127.0.0.1:5006
+    python app/serveur.py --ouvrir-navigateur
     python app/serveur.py --port 5010
     python app/serveur.py --base D:\\hub
 
@@ -1081,11 +1082,15 @@ def main():
     ap.add_argument("--base", type=Path, default=HUB, help="racine du hub (données)")
     ap.add_argument("--depot", type=Path, default=DEPOT,
                     help="dépôt des modules HTML (défaut : le dossier parent du hub)")
-    ap.add_argument("--port", type=int, default=5005)
+    ap.add_argument("--port", type=int, default=5006)
     ap.add_argument("--host", default="127.0.0.1",
                     help="ne changer qu'en connaissance de cause : il n'y a pas d'authentification")
     ap.add_argument("--debug", action="store_true")
+    ap.add_argument("--ouvrir-navigateur", action="store_true",
+                    help="ouvrir la page une fois le serveur prêt (lanceur macOS)")
     args = ap.parse_args()
+    if args.ouvrir_navigateur and (args.debug or args.host != "127.0.0.1"):
+        ap.error("--ouvrir-navigateur demande 127.0.0.1 et le mode sans --debug")
 
     racine = args.base.resolve()
     depot = args.depot.resolve()
@@ -1118,8 +1123,24 @@ def main():
         print("ATTENTION: écoute hors boucle locale, sans authentification.")
     print(f"\n  http://{args.host}:{args.port}\n")
 
-    creer_app(racine, depot, hotes=[args.host]).run(
-        host=args.host, port=args.port, debug=args.debug, threaded=False)
+    app = creer_app(racine, depot, hotes=[args.host])
+    if args.ouvrir_navigateur:
+        import webbrowser
+        from werkzeug.serving import make_server
+
+        # make_server réserve le port et écoute avant d'ouvrir le navigateur.
+        # Si le port est occupé, il échoue sans ouvrir une autre application.
+        with make_server(args.host, args.port, app, threaded=False) as serveur:
+            url = f"http://127.0.0.1:{serveur.server_port}/"
+            if not webbrowser.open(url):
+                print(f"Navigateur non ouvert automatiquement : ouvrir {url}")
+            print("Pour arrêter le hub : Ctrl+C dans cette fenêtre.")
+            try:
+                serveur.serve_forever()
+            except KeyboardInterrupt:
+                pass
+    else:
+        app.run(host=args.host, port=args.port, debug=args.debug, threaded=False)
 
 
 if __name__ == "__main__":
