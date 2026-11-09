@@ -137,7 +137,7 @@ ATTENDU = {
                  "Rein — glomérules · zone néphrogène amincie",
                  "Hypoplasie rénale [FOETO:0042]",
                  "Éléments retenus pour la conclusion",
-                 "<table", "−5,7 DS", "Attendu (moy. ± ET)"],
+                 "<table", "−5,73 DS", "Percentile GC", "Attendu (moy. ± ET)"],
                 ["Axe non regardé"]),
     "placenta": (["COMPTE RENDU D'EXAMEN PLACENTAIRE",
                   "Galette ovale de 17 × 14 cm, épaisse de 2.5 cm, masse parée 300 g",
