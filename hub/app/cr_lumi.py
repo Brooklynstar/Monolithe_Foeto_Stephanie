@@ -13,10 +13,15 @@ Là où les deux hubs utilisent le même nom avec deux formes (atcd_mat, atcd_ob
 grossesse, radio), on sert un sur-ensemble : les clés du Monolithe restent, celles
 de Lumi s'ajoutent. Ce qui n'existe pas dans Lumi garde son nom Monolithe.
 
-Les aides ci-dessous (_ds_text … _split_fixe) sont recopiées telles quelles de
-Lumi (cr_templates.py) ; ne pas les « améliorer » ici, sinon un même gabarit
-rendrait deux textes différents selon le hub.
+Les aides ci-dessous (_ds_text … _split_fixe) proviennent de Lumi
+(cr_templates.py). Le tableau des biométries externes est adapté pour inclure
+les références et percentiles du Monolithe ; les aides des autres examens
+gardent leur fonctionnement.
 """
+
+from html import escape
+
+import biometrie
 
 
 # ── Aides recopiées de Lumi (cr_templates.py) ─────────────────────────────────
@@ -26,6 +31,11 @@ def _ds_text(calc_dict, key):
     if not calc_dict or key not in calc_dict:
         return "#"
     m = calc_dict[key]
+    if "cle" in m:
+        detail = biometrie.ds_externes(m)
+        return f"{m['valeur']} {m.get('unite', '')}" + (f" ({detail})" if detail else "")
+    if m.get("ds") is None:
+        return "#"
     return f"{m['valeur']:.1f} {m.get('unite', 'g')} ({m['ds']:+.2f} DS)"
 
 
@@ -97,16 +107,33 @@ _BIO_HDR = "<tr><th>Mesure</th><th>Valeur</th><th>Moyenne</th><th>DS</th></tr>"
 
 
 def _table_bio_ext(calc_bio):
-    """Biométries examen externe (masse, VT, VC, PC, pied) — Guihard-Costa."""
+    """Biométries externes, toutes références ; partagé avec le CR complet."""
     if not calc_bio:
         return ""
-    rows = ""
-    for key in ("masse", "VT", "VC", "PC", "pied"):
-        if key in calc_bio and isinstance(calc_bio[key], dict):
-            rows += _bio_row(_BIO_LABELS.get(key, key), calc_bio[key])
+    titres = ["Mesure", "Valeur", "Moyenne GC"]
+    for src in ("GC", "MA", "MB"):
+        titres += [f"Z-score {src}", f"Percentile {src}"]
+    hdr = "<tr>" + "".join(f"<th>{t}</th>" for t in titres) + "</tr>"
+    rows = []
+    for key, m in calc_bio.items():
+        if not isinstance(m, dict):
+            continue
+        cellules = [m.get("label") or _BIO_LABELS.get(key, key),
+                    f"{m['valeur']} {m.get('unite', '')}",
+                    m.get("moyenne") if m.get("moyenne") is not None else "—"]
+        for src in ("gc", "ma", "mb"):
+            zz = m.get("z_brut_" + src)
+            if zz is None:
+                zz = m.get("z_" + src, m.get("ds") if src == "gc" else None)
+            cellules += [biometrie.zt_externe(zz),
+                         biometrie.pt(m.get("percentile_" + src))]
+        alerte = ' style="font-weight:bold;background:#fff1e0"' if m.get("alerte") else ""
+        rows.append(f'<tr data-mesure="{escape(key, quote=True)}"{alerte}>' +
+                    "".join(f"<td>{escape(str(c))}</td>" for c in cellules) + "</tr>")
     if not rows:
         return ""
-    return f"<table border='1' cellpadding='4' cellspacing='0' style='{_BIO_TABLE_STYLE}'>\n{_BIO_HDR}\n{rows}</table>"
+    return (f"<table border='1' cellpadding='4' cellspacing='0' style='{_BIO_TABLE_STYLE}'>\n"
+            + hdr + "\n" + "\n".join(rows) + "</table>")
 
 
 def _table_bio_int(calc_org):
@@ -879,17 +906,18 @@ def contexte_lumi(ctx, clin, aut, neu, plac=None):
                                    "text": i.get("precisions") or ""}
 
     # calculs : z de Guihard-Costa, comme calc_bio / calc_org de Lumi
-    calc_bio, bio = {}, {}
+    calc_bio, calc_bio_externe, bio = {}, {}, {}
     for l in ctx["biometrie"]["lignes"]:
         bio[l["cle"]] = l["valeur"]                  # bip, dici, pa… : même clé des deux côtés
-        k = BIO_LUMI.get(l["cle"])
-        if not k:
-            continue
+        k = BIO_LUMI.get(l["cle"], l["cle"])
         bio[k] = l["valeur"]
-        if l.get("z_gc") is not None:
-            att = (ctx["z"].get(l["cle"]) or {}).get("attendu_gc") or {}
-            calc_bio[k] = {"label": l["label"], "valeur": l["valeur"], "unite": l.get("unite") or "", "ds": l["z_gc"],
-                           "moyenne": att.get("moy")}
+        att = (ctx["z"].get("bio_" + l["cle"]) or {}).get("attendu_gc") or {}
+        resultat = {**l, "ds": l["z_gc"], "moyenne": att.get("moy")}
+        calc_bio_externe[k] = resultat
+        # Les anciens gabarits qui parcourent calc_bio attendent les cinq
+        # mesures GC avec un DS numérique. Garder ce contrat historique.
+        if l["cle"] in BIO_LUMI and l.get("z_gc") is not None:
+            calc_bio[k] = resultat
     calc_org = {m["id"].removesuffix("_masse"): {"label": m["label"], "valeur": m["valeur"], "unite": "g", "ds": m["z_gc"],
                                                  "moyenne": (m.get("attendu_gc") or {}).get("moy")}
                 for m in ctx["autopsie"]["masses"] if m.get("z_gc") is not None}
@@ -938,7 +966,8 @@ def contexte_lumi(ctx, clin, aut, neu, plac=None):
         # grade de l'examen clinique, sinon celui de l'autopsie (ctx autopsie.maceration)
         "maceration": {"maroun_score": ctx["autopsie"]["maceration"], "genest": GENEST_LUMI.get(ret.get("genest"), [])},
         "bio": bio, "morpho": morpho, "commentaire_frais": "", "anomalies_frais": [],
-        "calc_bio": calc_bio, "calc_org": calc_org, "calc_ind": {}, "calc_ratios": {"_lbwr": lbwr},
+        "calc_bio": calc_bio, "calc_bio_externe": calc_bio_externe,
+        "calc_org": calc_org, "calc_ind": {}, "calc_ratios": {"_lbwr": lbwr},
         "alertes": alertes, "lbwr": lbwr, "trophicite": trophicite, "all_anomalies": all_anomalies,
         "macro_fixe": {}, "photos_frais": [], "photos_autopsie": [],
         "radio": rad, "rad_terme_sa": (rad.get("terme") or {}).get("sa"),
@@ -971,13 +1000,14 @@ def contexte_lumi(ctx, clin, aut, neu, plac=None):
 
 def aides(context):
     """Les aides Jinja de Lumi (cr_helpers), liées au contexte."""
+    externes = context.get("calc_bio_externe", context.get("calc_bio", {}))
     return {
-        "_ds": lambda key: _ds_text(context.get("calc_bio", {}), key),
+        "_ds": lambda key: _ds_text(externes, key),
         "_morpho": lambda key: _morpho_text(context.get("morpho", {}), key),
         "_table_atcd_obs": lambda: _table_atcd_obs(context.get("atcd_obs", [])),
-        "table_biometries_externes": lambda: _table_bio_ext(context.get("calc_bio", {})),
+        "table_biometries_externes": lambda: _table_bio_ext(externes),
         "table_biometries_internes": lambda: _table_bio_int(context.get("calc_org", {})),
-        "_table_biometries": lambda: _table_biometries(context.get("calc_bio", {}), context.get("calc_org", {})),
+        "_table_biometries": lambda: _table_biometries(externes, context.get("calc_org", {})),
         "table_os_longs": lambda: _table_os_longs(context.get("rad_os_longs", {})),
         "table_maturation": lambda: _table_maturation(context.get("rad_maturation", [])),
         "split_morpho": lambda: _split_morpho(context.get("morpho", {})),

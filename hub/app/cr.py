@@ -112,8 +112,10 @@ def zt(v, signe=True):
     return t.replace(".", ",").replace("-", "\u2212") + (" DS" if signe else "")
 
 
-def ds3(r):
+def ds3(r, externes=False):
     """« GC +0,3 DS ; MA −0,1 DS » — les sources qui couvrent le terme, nommées."""
+    if externes:
+        return biometrie.ds_externes(r)
     return " ; ".join(f"{src} {zt(r.get('z_' + src.lower()))}" for src in ("GC", "MA", "MB")
                       if r.get("z_" + src.lower()) is not None)
 
@@ -401,12 +403,17 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
                 masses[c["id"]] = c["total"]
                 z_module[c["id"]] = c.get("zscores") or {}
     mesures = {k: v for k, v in (bio.get("mesures") or {}).items() if v is not None}
+    # Sans administratif, le terme de la saisie permet encore de calculer ses
+    # biométries. Ce repli ne s'applique pas aux masses d'organes.
+    sa_bio = sa if sa is not None else (bio.get("terme") or {}).get("sa")
     # Le grade de Maroun de l'examen clinique fait foi ; celui de l'autopsie,
     # informatif, ne sert aux DS que si l'examen n'a pas de grade.
     maceration = (clin.get("retention") or {}).get("maroun")
     if maceration is None:
         maceration = aut.get("maceration_maroun")
     z = biometrie.calculer(refs, sa, maceration, masses, mesures)
+    if sa is None and sa_bio is not None:
+        z.update(biometrie.calculer(refs, sa_bio, None, {}, mesures))
     divergences = biometrie.comparer(z, z_module)
     # Quand le terme d'ici n'est pas celui qu'avait le module, tous les z
     # diffèrent et la liste ne dit plus rien. On nomme la cause une fois.
@@ -438,10 +445,21 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         if not r:
             em = (bio.get("ecarts") or {}).get(cle) or {}
             r = {"z_" + k.lower(): em.get(k) for k in ("GC", "MA", "MB")}
+            # Sans tables, ne pas fabriquer un percentile depuis un ancien Z
+            # arrondi. Les nouveaux exports portent aussi le Z exact.
+            meme_terme = sa_bio is not None and sa_bio == (bio.get("terme") or {}).get("sa")
+            for src in ("GC", "MA", "MB"):
+                brut = ((bio.get("ecarts_non_arrondis") or {}).get(cle) or {}).get(src)
+                domaine = meme_terme and float(sa_bio).is_integer() and (
+                    (13 <= sa_bio <= 42) if src == "GC" else (12 <= sa_bio <= (20 if src == "MB" else 43)))
+                r["z_brut_" + src.lower()] = brut if domaine else None
+                r["percentile_" + src.lower()] = biometrie.percentile(brut) if domaine else None
         lignes_bio.append({
             "cle": cle, "label": (bio.get("libelles") or {}).get(cle) or (ref_mes.get(cle) or {}).get("libelle") or cle, "valeur": v,
             "unite": (bio.get("unites") or {}).get(cle) or (ref_mes.get(cle) or {}).get("unite") or "",
             "z_gc": r.get("z_gc"), "z_ma": r.get("z_ma"), "z_mb": r.get("z_mb"),
+            **{k: r.get(k) for src in ("gc", "ma", "mb")
+               for k in ("z_brut_" + src, "percentile_" + src)},
             "alerte": any(x is not None and abs(x) >= biometrie.SEUIL_ALERTE
                           for x in (r.get("z_gc"), r.get("z_ma"), r.get("z_mb"))),
         })
@@ -493,7 +511,8 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
                      "faits": sum(1 for e in clin.get("etages") or []
                                   for i in e.get("items") or [] if i.get("etat")),
                      "total": sum(len(e.get("items") or []) for e in clin.get("etages") or [])},
-        "biometrie": {"mesures": mesures, "lignes": lignes_bio, "sexe": bio.get("sexe")},
+        "biometrie": {"mesures": mesures, "lignes": lignes_bio, "sexe": bio.get("sexe"),
+                      "terme_sa": sa_bio, "terme_source": "administratif" if sa is not None else "saisie"},
         "radio": rad,
         "autopsie": {"etapes": _trame(aut), "masses": lignes_masses,
                      "maceration": maceration,
@@ -545,7 +564,7 @@ def propositions(ctx):
     for l in ctx["biometrie"]["lignes"]:
         if l["alerte"]:
             p(f"bio:{l['cle']}", "Biométrie externe", l["label"],
-              f"{fr(l['valeur'])} {l['unite']} ({ds3(l)})")
+              f"{fr(l['valeur'])} {l['unite']} ({ds3(l, externes=True)})")
     for m in ctx["autopsie"]["masses"]:
         if m["alerte"]:
             p(f"masse:{m['id']}", "Masses d'organes", m["label"], f"{m['detail']} ({ds3(m)})")

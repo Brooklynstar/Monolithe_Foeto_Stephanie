@@ -18,6 +18,8 @@ ces fichiers, le hub reprend le z des modules et le dit.
 """
 
 import json
+import math
+from decimal import Decimal, ROUND_HALF_UP, localcontext
 from pathlib import Path
 
 SEUIL_ALERTE = 2.0        # au-delà, on le signale
@@ -84,6 +86,67 @@ def z(valeur, moy, sd):
         return None
 
 
+def ecart_exact(valeur, moy, sd):
+    """Z non arrondi des biométries externes, sans référence invalide."""
+    try:
+        valeur, moy, sd = float(valeur), float(moy), float(sd)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not all(math.isfinite(v) for v in (valeur, moy, sd)) or sd <= 0:
+        return None
+    resultat = (valeur - moy) / sd
+    return resultat if math.isfinite(resultat) else None
+
+
+def percentile(z_brut):
+    """100 × Φ(Z), exclusivement à partir du Z non arrondi."""
+    if not isinstance(z_brut, (int, float)) or not math.isfinite(z_brut):
+        return None
+    return 50 * math.erfc(-z_brut / math.sqrt(2))
+
+
+def _deux_decimales(v):
+    d = Decimal.from_float(float(v) if v else 0.0)
+    with localcontext() as contexte:
+        contexte.prec = max(28, d.adjusted() + 4)
+        return format(d.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), "f")
+
+
+def pt(p):
+    """Affichage commun aux comptes rendus ; le nombre exporté reste exact."""
+    if p is None or not math.isfinite(p):
+        return "—"
+    if p < 0.01:
+        return "P < 0,01"
+    if p > 99.99:
+        return "P > 99,99"
+    return "P" + _deux_decimales(p).replace(".", ",")
+
+
+def zt_externe(v):
+    """Deux décimales comme JS toFixed(2), y compris aux demi-centièmes."""
+    if v is None or not math.isfinite(v):
+        return "—"
+    texte = _deux_decimales(v)
+    if v >= 0:
+        texte = "+" + texte
+    return texte.replace(".", ",").replace("-", "−") + " DS"
+
+
+def ds_externes(ligne):
+    bouts = []
+    for src in ("GC", "MA", "MB"):
+        cle = src.lower()
+        brut = ligne.get("z_brut_" + cle)
+        zz = ligne.get("z_" + cle) if brut is None else brut
+        if zz is not None:
+            texte = src + " " + zt_externe(zz)
+            if ligne.get("percentile_" + cle) is not None:
+                texte += " · " + pt(ligne["percentile_" + cle])
+            bouts.append(texte)
+    return " ; ".join(bouts)
+
+
 def interpreter(v):
     if v is None:
         return None
@@ -127,7 +190,7 @@ def _ref(t, cle):
     return r if r and r.get("m") is not None else None
 
 
-def _z3(tables, sa, cles, valeur, maceration=None):
+def _z3(tables, sa, cles, valeur, maceration=None, exact=False):
     """{GC, MA, MB} → (z, attendu) pour une valeur, comme le module."""
     gc, ma, mb = tables.get("GC"), tables.get("MA"), tables.get("MB")
     k = cle_gc(gc, sa)
@@ -140,7 +203,8 @@ def _z3(tables, sa, cles, valeur, maceration=None):
     for src, (t, cle, div) in lignes.items():
         r = _ref(t, cle)
         if r:
-            out[src] = (z(valeur / div, r["m"], r["sd"]), {"moy": r["m"], "sd": r["sd"], "cle": cle})
+            calcul = ecart_exact if exact else z
+            out[src] = (calcul(valeur / div, r["m"], r["sd"]), {"moy": r["m"], "sd": r["sd"], "cle": cle})
     return k, out
 
 
@@ -168,6 +232,7 @@ def calculer(refs: References, sa, maceration, masses, biometries=None):
     out = {}
     if sa is None:
         return out
+    sa_externe = float(sa)
     sa = int(round(float(sa)))
     a, b = refs.autopsie, refs.biometrie_clinique
     for champ, grammes in (masses or {}).items():
@@ -178,11 +243,20 @@ def calculer(refs: References, sa, maceration, masses, biometries=None):
         out[champ] = _ligne(champ, k, res)
     for cle, valeur in (biometries or {}).items():
         cles = (b.get("mesures") or {}).get(cle)
-        if not cles or valeur is None:
+        if cles is None or valeur is None:
             continue
-        k, res = _z3(b, sa, cles, float(valeur))
-        if res:
-            out["bio_" + cle] = _ligne(cle, k, res)
+        # Les tables sont à semaines entières : pas d'arrondi/extrapolation.
+        k, res = _z3(b, int(sa_externe), cles, float(valeur), exact=True) if sa_externe.is_integer() else (None, {})
+        # Conserver les anciens champs Z à deux décimales, en ajoutant les
+        # résultats exacts. La voie des masses d'organes reste inchangée.
+        arrondis = {src: (round(zz, 2) if zz is not None else None, att)
+                    for src, (zz, att) in res.items()}
+        ligne = _ligne(cle, k, arrondis)
+        for src in ("gc", "ma", "mb"):
+            brut = res.get(src.upper(), (None, None))[0]
+            ligne["z_brut_" + src] = brut
+            ligne["percentile_" + src] = percentile(brut)
+        out["bio_" + cle] = ligne
     return out
 
 
