@@ -407,6 +407,17 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
             return erreur(str(e),404)
         finally:
             cx.close()
+    @app.get('/api/dossiers/<numero>/percentiles-placenta')
+    def api_percentiles_placenta(numero):
+        import percentiles_placenta
+        if not DOSSIER_OK.fullmatch(numero):return erreur('numéro de dossier invalide')
+        cx=base()
+        try:
+            ctx=compte_rendu.contexte(cx,numero,refs,ORDRE_MODULES)
+            r=ctx['placenta']['percentiles']
+            return jsonify({'resultats':r,'html':percentiles_placenta.tableau(r)})
+        except ValueError as e:return erreur(str(e),404)
+        finally:cx.close()
 
     # ── Saisies ────────────────────────────────────────────────────────────
     @app.get("/api/saisie/<numero>/<module>")

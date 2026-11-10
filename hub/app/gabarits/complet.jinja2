@@ -251,6 +251,7 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
 {% if placenta.present %}
 {% set p = placenta.champs %}
 {{ titre("Placenta — examen macroscopique") }}
+{{ table_percentiles_placenta() | safe }}
 {% if p.grand_axe or p.masse %}
   Galette{% if p.forme %} {{ p.forme | lower }}{% endif %}{% if p.grand_axe and p.petit_axe %} de {{ p.grand_axe }} × {{ p.petit_axe }} cm{% endif %}{% if p.epaisseur %}, épaisse de {{ p.epaisseur }} cm{% endif %}{% if p.masse %}, masse parée {{ p.masse }} g{% endif %}{% if p.completude %} — {{ p.completude | fr | lower }}{% endif %}.
 

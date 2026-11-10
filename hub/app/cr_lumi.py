@@ -865,7 +865,11 @@ def _placenta_lumi(ctx, plac):
         "lesions": ctx["placenta"].get("lesions") or [],
         "tranches_commentaire": (ch.get("remarques_tranches") or "").strip(),
         "photos_tranches": [], "micro_lecture": {},
-        "zscore": compute_zscore(sa, ch.get("masse"), ch.get("masse_foetale")),
+        "zscore": {**compute_zscore(sa, ch.get("masse"), ch.get("masse_foetale")),
+                   "percentile":ctx['placenta']['percentiles']['position_percentile'],
+                   "position_percentile":ctx['placenta']['percentiles']['position_percentile'],
+                   "percentile_exact":None,
+                   "limite_percentile":ctx['placenta']['percentiles']['motif']},
         # la composition par section de la grille placenta = le composite de Lumi
         "composite_micro_text": "\n".join(x["texte"] for x in comp.get("sections") or [] if x.get("texte")),
         "composite_conclusion_items": [f["label"] for f in gp.get("foeto") or []],

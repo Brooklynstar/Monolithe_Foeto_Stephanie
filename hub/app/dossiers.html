@@ -857,6 +857,13 @@ function rendreModule(s){
     Object.keys(d).forEach(function(k){ if (["mesures","ecarts","ecarts_non_arrondis","percentiles","libelles","unites"].indexOf(k) < 0) reste[k] = d[k]; });
     corps = rendreMesures(d) + rendreArbre(reste);
   } else corps = rendreArbre(d);
+  if(SERVI && d.module==='macro_placenta'){
+    corps='<div id="percentilesPlacentaHub">Calcul des percentiles…</div>'+corps;
+    var numero=COURANT;
+    setTimeout(function(){api('/api/dossiers/'+encodeURIComponent(numero)+'/percentiles-placenta').then(function(o){
+      var el=document.getElementById('percentilesPlacentaHub');if(el&&COURANT===numero)el.innerHTML=o.html;
+    }).catch(function(e){var el=document.getElementById('percentilesPlacentaHub');if(el)el.textContent=e.message;});},0);
+  }
   return '<div class="grille" style="margin-bottom:6px">' +
       tuile("version du document", s.module_version) +
       tuile("schéma", s.schema_version) +

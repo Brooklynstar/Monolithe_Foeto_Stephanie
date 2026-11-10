@@ -78,6 +78,7 @@ CHIFFRES
   Grilles de lecture : {{ grilles | map(attribute='organe') | join(', ') }}.
 {% endif %}
 {% if placenta.present %}
+  {{ texte_percentiles_placenta }}
   Placenta : macroscopie saisie{% if placenta.lesions %}, {{ placenta.lesions | length }} lésion(s) prélevée(s){% endif %}{% if grille_placenta %}, grille histologique parvenue{% endif %}.
 
 {% endif %}

@@ -32,6 +32,7 @@ from pathlib import Path
 
 import biometrie
 import percentiles_organes
+import percentiles_placenta
 import cr_lumi
 
 ICI = Path(__file__).resolve().parent
@@ -526,7 +527,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "autopsie": {"etapes": _trame(aut), "masses": lignes_masses, "terme_percentiles":sa_organes,
                      "maceration": maceration,
                      "ouverture_at": aut.get("ouverture_at")},
-        "placenta": _placenta(plac),
+        "placenta": {**_placenta(plac), "percentiles":percentiles_placenta.document(plac,sa)},
         "micro": _micro(mic),
         "grilles": grilles,
         "grille_placenta": next((g for g in grilles
@@ -549,6 +550,8 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     ctx['detail_masse'] = percentiles_organes.detail
     ctx['percentile_texte'] = __import__('percentiles').pt
     ctx['z_masse_texte'] = __import__('percentiles').zt
+    ctx['table_percentiles_placenta'] = lambda: percentiles_placenta.tableau(ctx['placenta']['percentiles'])
+    ctx['texte_percentiles_placenta'] = percentiles_placenta.texte(ctx['placenta']['percentiles'])
     ctx["propositions"] = propositions(ctx)
     ctx["retenues"], ctx["ecartees"] = ctx["propositions"], []
     return ctx
