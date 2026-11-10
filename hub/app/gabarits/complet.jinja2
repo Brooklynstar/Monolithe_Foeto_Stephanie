@@ -1,5 +1,5 @@
 {# titre: Compte rendu complet #}
-{# version: 2.0.0 #}
+{# version: 2.1.0 #}
 {# format: html #}
 {#
    Ce gabarit parcourt les trames plutôt que de nommer les champs : un champ
@@ -161,9 +161,12 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
 
 {% if biometrie.mesures %}
 {{ titre("Biométrie externe") }}
-{{ tableau(biometrie.lignes) }}
+{% if biometrie.terme_sa is not none %}
+  Terme biométrique : {{ biometrie.terme_sa }} SA{% if biometrie.terme_source == 'saisie' %} (saisie de biométrie){% endif %}.
+{% endif %}
+{{ table_biometries_externes() | safe }}
 {% if references.sources %}
-  Écarts-types : {% for k, v in references.sources.items() %}{{ k }} {{ v }}{% if not loop.last %} ; {% endif %}{% endfor %}.
+  Références biométriques : {% for k, v in references.sources.items() %}{{ k }} {{ v }}{% if not loop.last %} ; {% endif %}{% endfor %}.
 {% endif %}
 {% endif %}
 

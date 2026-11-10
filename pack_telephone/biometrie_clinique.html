@@ -80,6 +80,13 @@ input[type=number]{font-family:var(--mono);letter-spacing:.03em}
         font-family:var(--mono);font-size:11px;color:var(--ink-soft);pointer-events:none}
 .mes input{padding-right:34px}
 .zs{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;min-height:1px}
+.zs table{width:100%;border-collapse:collapse;font:11pt Cambria,"Times New Roman",serif;table-layout:auto}
+.zs th,.zs td{white-space:nowrap;word-break:normal;overflow-wrap:normal;text-decoration:none}
+.zs th{font-weight:bold}
+.zs tr.z{font:inherit;letter-spacing:normal;border:0;background:transparent}
+.zs td{border-bottom-color:var(--rule)}
+.zs th,.zs td{padding:3px;text-align:right;border-bottom:1px solid var(--rule)}
+.zs th:first-child,.zs td:first-child{text-align:left}
 .z{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:2px 5px;
    border:1px solid var(--rule);border-radius:2px;color:var(--ink-soft);background:var(--paper)}
 .z.out{border-color:var(--amber);color:var(--amber);font-weight:600}
@@ -194,6 +201,46 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 <input type="file" id="pick" accept="image/*" capture="environment">
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
+<!-- BEGIN percentiles.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Source commune, intégrée aux deux HTML autonomes par integrer_percentiles.py.
+var Percentiles = (function(){
+  "use strict";
+  function calculer(z){
+    if (typeof z !== "number" || !isFinite(z)) return null;
+    var x = Math.abs(z), queue;
+    if (x < 2){
+      // Série convergente de l'intégrale normale autour de zéro.
+      var terme = x, somme = x;
+      for (var n = 1; n < 100; n++){
+        terme *= x * x / (2 * n + 1);
+        somme += terme;
+        if (Math.abs(terme) < 1e-16 * Math.abs(somme)) break;
+      }
+      queue = 0.5 - Math.exp(-x * x / 2) * somme / Math.sqrt(2 * Math.PI);
+    } else {
+      // Fraction continue du rapport de Mills : conserve les petites queues.
+      var fraction = 0;
+      for (var k = 200; k >= 1; k--) fraction = k / (x + fraction);
+      queue = Math.exp(-x * x / 2) / (Math.sqrt(2 * Math.PI) * (x + fraction));
+    }
+    return 100 * (z < 0 ? queue : 1 - queue);
+  }
+  function formater(p){
+    if (typeof p !== "number" || !isFinite(p)) return "—";
+    if (p < 0.01) return "P < 0,01";
+    if (p > 99.99) return "P > 99,99";
+    return "P" + p.toFixed(2).replace(".", ",");
+  }
+  function formaterZ(z){
+    if (typeof z !== "number" || !isFinite(z)) return "—";
+    return (z >= 0 ? "+" : "") + z.toFixed(2);
+  }
+  return {calculer: calculer, formater: formater, formaterZ: formaterZ};
+})();
+</script>
+<!-- END percentiles.js -->
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -210,7 +257,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 var MODULE = "biometrie_clinique";
 var SCHEMA = "0.1.0";
-var VERSION = "1.3.1";   /* version du document ; à incrémenter à chaque diffusion */
+var VERSION = "1.4.0";   /* version du document ; à incrémenter à chaque diffusion */
 var DB_NAME = "foeto-biometrie-clinique", DB_VER = 2, db = null;
 
 /* ── Guihard-Costa 2002 — biométries, bi-hebdomadaire (masse g, reste mm) ─── */
@@ -343,12 +390,13 @@ function gcKey(sa){
 function maRow(sa){ for (var i=0;i<MA.length;i++) if (MA[i].s === sa) return MA[i]; return null; }
 function mbRow(sa){ return (sa >= 12 && sa <= 20) ? MB[sa] : null; }
 function zscore(v, m, sd){
-  if (!isFinite(v) || m == null || sd == null || !sd) return null;
+  if (!isFinite(v) || m == null || !isFinite(m) || sd == null || !isFinite(sd) || sd <= 0) return null;
   return (v - m) / sd;
 }
 /* Tous les écarts-types disponibles pour une mesure, à une valeur donnée. */
 function ecarts(mes, v, sa){
   var out = [], gk = gcKey(sa), ma = maRow(sa), mb = mbRow(sa), z;
+  if (!isFinite(sa) || Math.floor(sa) !== sa) return out;
   if (mes.gc && gk && GC[gk][mes.gc]){
     z = zscore(v, GC[gk][mes.gc].m, GC[gk][mes.gc].sd);
     if (z !== null) out.push({ src:"GC", z:z });
@@ -361,6 +409,7 @@ function ecarts(mes, v, sa){
     z = zscore(v / (mes.mbd || 1), mb[mes.mb].m, mb[mes.mb].sd);
     if (z !== null) out.push({ src:"MB", z:z });
   }
+  out.forEach(function(e){ e.percentile = Percentiles.calculer(e.z); });
   return out;
 }
 function pire(list){
@@ -595,11 +644,13 @@ function recalculer(){
       var zEl = $("z_" + m.k), fEl = $("fix_" + m.k);
       if (!isFinite(v)){ zEl.innerHTML = ""; fEl.innerHTML = ""; return; }
       var list = ecarts(m, v, sa);
-      zEl.innerHTML = list.map(function(e){
+      zEl.innerHTML = list.length ? '<table><thead><tr><th>Réf.</th><th>Z-score</th><th>Percentile</th></tr></thead><tbody>' + list.map(function(e){
         var a = Math.abs(e.z);
         var cls = a > SEUIL_UNITE ? "z far" : a > 2 ? "z out" : "z";
-        return '<span class="' + cls + '">' + e.src + ' ' + (e.z >= 0 ? "+" : "") + e.z.toFixed(2) + '</span>';
-      }).join("");
+        return '<tr class="' + cls + '" data-reference="' + e.src + '"><td>' + e.src + ' </td><td data-valeur="z">' +
+          Percentiles.formaterZ(e.z) + '</td><td data-valeur="percentile">' +
+          esc(Percentiles.formater(e.percentile)) + '</td></tr>';
+      }).join("") + '</tbody></table>' : "";
       var s = suspicionUnite(m, v, sa, g.unite);
       fEl.innerHTML = s
         ? '<div class="fix"><b>' + s.valeur + ' ' + g.unite + ' ?</b> — ' + esc(s.cause) +
@@ -628,12 +679,16 @@ function verrouiller(ouvert){
 
 /* ── Collecte / restitution ───────────────────────────────────────────────── */
 function collecter(){
-  var mesures = {}, ecarts_ = {}, libelles = {};
+  var mesures = {}, ecarts_ = {}, ecarts_bruts = {}, percentiles = {}, libelles = {};
   var sa = num("terme_sa"), j = num("terme_j");
   TOUTES.forEach(function(m){
     var v = num("v_" + m.k); mesures[m.k] = isFinite(v) ? v : null; libelles[m.k] = m.l;
-    /* Les DS partent avec la mesure : le hub n'a pas les tables, le module si. */
-    if (isFinite(v)) ecarts(m, v, sa).forEach(function(e){ (ecarts_[m.k] = ecarts_[m.k] || {})[e.src] = +e.z.toFixed(2); });
+    /* Ajouts compatibles : les anciens champs et DS arrondis restent présents. */
+    if (isFinite(v)) ecarts(m, v, sa).forEach(function(e){
+      (ecarts_[m.k] = ecarts_[m.k] || {})[e.src] = +e.z.toFixed(2);
+      (ecarts_bruts[m.k] = ecarts_bruts[m.k] || {})[e.src] = e.z;
+      (percentiles[m.k] = percentiles[m.k] || {})[e.src] = e.percentile;
+    });
   });
   return {
     schema_version: SCHEMA,
@@ -647,7 +702,9 @@ function collecter(){
     mesures: mesures,
     libelles: libelles,
     unites: UNITE,           /* {mesure: "g" | "mm"} — le CR écrit la valeur avec son unité */
-    ecarts: ecarts_          /* {mesure: {GC: z, MA: z, MB: z}}, calculés ici */
+    ecarts: ecarts_,         /* {mesure: {GC: z, MA: z, MB: z}}, champs historiques */
+    ecarts_non_arrondis: ecarts_bruts,
+    percentiles: percentiles /* mêmes clés, calculés avant tout arrondi */
   };
 }
 function appliquer(o){
