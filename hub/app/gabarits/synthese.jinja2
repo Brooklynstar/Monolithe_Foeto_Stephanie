@@ -1,5 +1,5 @@
 {# titre: Synthèse — une page #}
-{# version: 1.2.0 #}
+{# version: 1.3.0 #}
 {#
    De quoi parler d'un dossier en réunion : ce qui a été fait, ce qui manque,
    ce qui sort de la norme. Rien de rédigé, tout en listes.
@@ -61,6 +61,12 @@ CHIFFRES
   Masses pesées : {{ autopsie.masses | length }}{% if not references.dispo %} (z du module, pas de tables installées){% endif %}.
 
 {% endif %}
+{% for m in autopsie.masses %}
+  · {{ m.label }} : {{ m.detail }} — {{ detail_masse(m) }}
+{% endfor %}
+{% for m in neuropath.masses %}
+  · {{ m.label }} : {{ m.valeur }} {{ m.unite }}{% if m.percentile is not none %} — {{ z_masse_texte(m.z_brut) }} · {{ percentile_texte(m.percentile) }}{% endif %}
+{% endfor %}
 {% if micro.present %}
   Microscopie : {{ micro.sections | length }} organe(s), {{ micro.sections | map(attribute='faits') | sum }} champ(s) renseigné(s).
 {% endif %}

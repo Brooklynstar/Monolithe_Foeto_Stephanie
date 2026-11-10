@@ -348,6 +348,22 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
         finally:
             cx.close()
 
+    @app.get('/api/dossiers/<numero>/percentiles-organes')
+    def api_percentiles_organes(numero):
+        import percentiles_organes
+        if not DOSSIER_OK.fullmatch(numero):
+            return erreur('numéro de dossier invalide')
+        cx = base()
+        try:
+            ctx = compte_rendu.contexte(cx, numero, refs, ORDRE_MODULES)
+            masses, neuro = ctx['autopsie']['masses'], ctx['neuropath']['masses']
+            return jsonify({'autopsie':{'lignes':masses,'html':percentiles_organes.table_organes(masses),'terme_sa':ctx['autopsie']['terme_percentiles'],'maroun':ctx['autopsie']['maceration']},
+                            'neuropath':{'lignes':neuro,'html':percentiles_organes.table_neuro(neuro),'terme_sa':ctx['neuropath']['terme_percentiles']}})
+        except ValueError as e:
+            return erreur(str(e),404)
+        finally:
+            cx.close()
+
     # ── Saisies ────────────────────────────────────────────────────────────
     @app.get("/api/saisie/<numero>/<module>")
     def api_saisie(numero, module):

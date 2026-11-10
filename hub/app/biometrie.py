@@ -18,6 +18,7 @@ ces fichiers, le hub reprend le z des modules et le dit.
 """
 
 import json
+from percentiles import ecart_exact, percentile
 from pathlib import Path
 
 SEUIL_ALERTE = 2.0        # au-delà, on le signale
@@ -168,6 +169,7 @@ def calculer(refs: References, sa, maceration, masses, biometries=None):
     out = {}
     if sa is None:
         return out
+    terme_exact = float(sa).is_integer()
     sa = int(round(float(sa)))
     a, b = refs.autopsie, refs.biometrie_clinique
     for champ, grammes in (masses or {}).items():
@@ -175,7 +177,13 @@ def calculer(refs: References, sa, maceration, masses, biometries=None):
         if cles is None or grammes is None:
             continue
         k, res = _z3(a, sa, cles, float(grammes), maceration)
-        out[champ] = _ligne(champ, k, res)
+        ligne = _ligne(champ, k, res)
+        for src in ('gc', 'ma', 'mb'):
+            att = ligne.get('attendu_' + src) or {}
+            brut = ecart_exact(grammes, att.get('moy'), att.get('sd')) if terme_exact and not (src == 'ma' and cles.get('mg') and maceration is None) else None
+            ligne['z_brut_' + src] = brut
+            ligne['percentile_' + src] = percentile(brut)
+        out[champ] = ligne
     for cle, valeur in (biometries or {}).items():
         cles = (b.get("mesures") or {}).get(cle)
         if not cles or valeur is None:

@@ -110,18 +110,8 @@ def _table_bio_ext(calc_bio):
 
 
 def _table_bio_int(calc_org):
-    """Masses d'organes examen interne — Guihard-Costa."""
-    if not calc_org:
-        return ""
-    rows = ""
-    for key in ("cerveau", "coeur", "thymus", "poumons", "poumon_d", "poumon_g",
-                 "foie", "rate", "pancreas", "surrenales", "surrenale_d", "surrenale_g",
-                 "reins", "rein_d", "rein_g"):
-        if key in calc_org and isinstance(calc_org[key], dict):
-            rows += _bio_row(_ORGAN_LABELS.get(key, key), calc_org[key])
-    if not rows:
-        return ""
-    return f"<table border='1' cellpadding='4' cellspacing='0' style='{_BIO_TABLE_STYLE}'>\n{_BIO_HDR}\n{rows}</table>"
+    import percentiles_organes
+    return percentiles_organes.table_organes([{**m,'id':m.get('id') or k} for k,m in calc_org.items()])
 
 
 def _table_biometries(calc_bio, calc_org):
@@ -893,6 +883,7 @@ def contexte_lumi(ctx, clin, aut, neu, plac=None):
     calc_org = {m["id"].removesuffix("_masse"): {"label": m["label"], "valeur": m["valeur"], "unite": "g", "ds": m["z_gc"],
                                                  "moyenne": (m.get("attendu_gc") or {}).get("moy")}
                 for m in ctx["autopsie"]["masses"] if m.get("z_gc") is not None}
+    calc_org_percentiles = {m['id'].removesuffix('_masse'):m for m in ctx['autopsie']['masses']}
     alertes = [f"{l['label']} : {l['z_gc']:+.1f} DS" for l in ctx["biometrie"]["lignes"] + ctx["autopsie"]["masses"]
                if l.get("alerte") and l.get("z_gc") is not None]
     lbwr = {"label": "LBWR (De Paepe)", "valeur": None, "alerte": None}
@@ -938,7 +929,7 @@ def contexte_lumi(ctx, clin, aut, neu, plac=None):
         # grade de l'examen clinique, sinon celui de l'autopsie (ctx autopsie.maceration)
         "maceration": {"maroun_score": ctx["autopsie"]["maceration"], "genest": GENEST_LUMI.get(ret.get("genest"), [])},
         "bio": bio, "morpho": morpho, "commentaire_frais": "", "anomalies_frais": [],
-        "calc_bio": calc_bio, "calc_org": calc_org, "calc_ind": {}, "calc_ratios": {"_lbwr": lbwr},
+        "calc_bio": calc_bio, "calc_org": calc_org, "calc_org_percentiles": calc_org_percentiles, "calc_ind": {}, "calc_ratios": {"_lbwr": lbwr},
         "alertes": alertes, "lbwr": lbwr, "trophicite": trophicite, "all_anomalies": all_anomalies,
         "macro_fixe": {}, "photos_frais": [], "photos_autopsie": [],
         "radio": rad, "rad_terme_sa": (rad.get("terme") or {}).get("sa"),
@@ -976,8 +967,8 @@ def aides(context):
         "_morpho": lambda key: _morpho_text(context.get("morpho", {}), key),
         "_table_atcd_obs": lambda: _table_atcd_obs(context.get("atcd_obs", [])),
         "table_biometries_externes": lambda: _table_bio_ext(context.get("calc_bio", {})),
-        "table_biometries_internes": lambda: _table_bio_int(context.get("calc_org", {})),
-        "_table_biometries": lambda: _table_biometries(context.get("calc_bio", {}), context.get("calc_org", {})),
+        "table_biometries_internes": lambda: _table_bio_int(context.get("calc_org_percentiles", context.get("calc_org", {}))),
+        "_table_biometries": lambda: _table_biometries(context.get("calc_bio", {}), context.get("calc_org_percentiles", context.get("calc_org", {}))),
         "table_os_longs": lambda: _table_os_longs(context.get("rad_os_longs", {})),
         "table_maturation": lambda: _table_maturation(context.get("rad_maturation", [])),
         "split_morpho": lambda: _split_morpho(context.get("morpho", {})),

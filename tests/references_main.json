@@ -1,0 +1,40 @@
+{
+  "tables": {
+    "Macro/autopsie.html": {
+      "GC_ORG": "284b9a3bcd89584d31bf409b07956819c034008371fc31c248d740aa43b7b8cb",
+      "MA_ORG": "2464b5f5ff99ce4ed5edb2553957739aeba636ef64aca7ef7a3e0b56881aa6a2",
+      "MB_ORG": "2c6a3defacb71b302e0c121173d6e30bd2b1e0bc0aa2ca6268a97b38c346c0d3"
+    },
+    "Macro/neuropath.html": {
+      "REF_ME": "ddcb086fd0aa64112077850390cccdd28559bcac2516258136cc6a1e290701bf",
+      "REF_MI": "d79ca39e26d2356473bd40b72162c780ae13d2fead1f2ed018da249a7b4bc7d5",
+      "REF_RI": "aa42f386e7d60930384405f6565af1e8d9827f5a6630e95051678b855d30fde9",
+      "REF_BC": "0c0d8b0ee9495ecd9d589b637014edcdd4f7c4b4fbd18945cce150a3884276c3",
+      "REG_BC": "1208ce3cb888939d387356cf171e3bffec4ab1a738c0b9e8315e5f7a5b766656"
+    },
+    "hub/calculateur-unifie.html": {
+      "GC_M": "6603b7c7bce9320bff8030cae60df4c55898796bd5ba2f498a9e6dc57d72c002",
+      "GC_O": "3fd763c032a0c6feb6a370d1981ce6af6b43e9a628b2304c82ce2414517cc9c7",
+      "MAR_M": "46bbf85f6f05e332d8f9ac28c22a4e468e0cfecc6eb6d3a05948a76a7b7f6998",
+      "MAR_S": "f98d3a1e65af01d882de4d95e2a74d3617509e22f7b850533eceb726ab173e92",
+      "MB_B": "a796b7f98c010e0bbb5cc5857e79128c1738a4f154e4a07a80edf107d7e96edc",
+      "MB_O": "ea7832e8f49da56abb410bdd2dc1961784c3a2c94705fa0ba25a3ad6c5162294",
+      "RED": "e3083feacaebde149eb78a14c6a6279d932be40f28533677958ccd9dbf5c7d60"
+    }
+  },
+  "fichiers": {
+    "hub/references/autopsie.json": "b6992903a19a0429b23f40cfb18019a063c2b8ac283f7898620a94cc6b56db24",
+    "hub/references/biometrie_clinique.json": "3bdd91ef5c223fecc4050de8855b829565f8f447fb59dcf362d6a43a5579af47",
+    "hub/app/serveur.bat": "1138e563ced26b5bc347c3bfd1a8e78c4cf45fbca4b0434342df7bff48c0aa07",
+    "serveur.bat": "9e0ad708ee64ddde80bab8ee524b73dd3ce3eeaf75803ef8b36220b15649b797",
+    "Macro/biometrie_clinique.html": "4ea55ed2e4e75bb2d8a6b07968d4d24ca602a207977ea3e744b00ef89f3da3f1",
+    "Macro/examen_clinique.html": "76fe67ca3cb5bd51f425a6156c4d4f82e6c416d1f6e2bdedcc7a1ef926e80b48"
+  },
+  "python_data": {
+    "DONNEES_PLACENTA": "eaf9203c17a42d85f8621fd2c5b194d1b696c1afa0b8652dfd618871e4b2a64e",
+    "RATIO_FP": "54b073f9042ffd0462095e92cd536a8a5ce1d90f12d35562ac311a8cc1ee1896"
+  },
+  "python_fonctions": {
+    "main": "0ebf43cfa83bdc34b4c25bc8bd2e145f526d4b21be3433b45becf6f9fee097d2"
+  }
+}

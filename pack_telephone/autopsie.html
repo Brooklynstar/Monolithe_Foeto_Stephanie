@@ -156,6 +156,9 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 .legende{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;color:#9FB5B1}
 .legende b{color:var(--paper);font-weight:600}
 .legende .sw{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:1px}
+.resultatsMasses{font:11pt Cambria,"Times New Roman",serif;width:100%;border-collapse:collapse}
+.resultatsMasses th,.resultatsMasses td{font:inherit;white-space:nowrap;word-break:normal;overflow-wrap:normal;padding:4px;text-decoration:none;border-bottom:1px solid #bbb}
+.resultatsMasses th{font-weight:bold}
 </style>
 </head>
 <body>
@@ -249,6 +252,46 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 <input type="file" id="jsonPick" accept="application/json,.json">
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
+<!-- BEGIN percentiles.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Noyau commun, intégré aux HTML autonomes par les outils de génération.
+var Percentiles = (function(){
+  "use strict";
+  function calculer(z){
+    if (typeof z !== "number" || !isFinite(z)) return null;
+    var x = Math.abs(z), queue;
+    if (x < 2){
+      // Série convergente de l'intégrale normale autour de zéro.
+      var terme = x, somme = x;
+      for (var n = 1; n < 100; n++){
+        terme *= x * x / (2 * n + 1);
+        somme += terme;
+        if (Math.abs(terme) < 1e-16 * Math.abs(somme)) break;
+      }
+      queue = 0.5 - Math.exp(-x * x / 2) * somme / Math.sqrt(2 * Math.PI);
+    } else {
+      // Fraction continue du rapport de Mills : conserve les petites queues.
+      var fraction = 0;
+      for (var k = 200; k >= 1; k--) fraction = k / (x + fraction);
+      queue = Math.exp(-x * x / 2) / (Math.sqrt(2 * Math.PI) * (x + fraction));
+    }
+    return 100 * (z < 0 ? queue : 1 - queue);
+  }
+  function formater(p){
+    if (typeof p !== "number" || !isFinite(p)) return "—";
+    if (p < 0.01) return "P < 0,01";
+    if (p > 99.99) return "P > 99,99";
+    return "P" + p.toFixed(2).replace(".", ",");
+  }
+  function formaterZ(z){
+    if (typeof z !== "number" || !isFinite(z)) return "—";
+    return (z >= 0 ? "+" : "") + z.toFixed(2);
+  }
+  return {calculer: calculer, formater: formater, formaterZ: formaterZ};
+})();
+</script>
+<!-- END percentiles.js -->
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -263,7 +306,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 var MODULE = "autopsie";
 var SCHEMA = "0.2.0";   /* 0.2.0 : chips codées HPO (hpo), vu_normal par champ */
-var VERSION = "2.1.1";   /* version du document ; à incrémenter à chaque diffusion */
+var VERSION = "2.2.0";   /* version du document ; à incrémenter à chaque diffusion */
 var DB_NAME = "foeto-autopsie", DB_VER = 1, db = null;
 
 /* ── Référentiels de masses (recopiés de references.js) ─────────────────── */
@@ -820,11 +863,11 @@ function majZ(c){
     el.innerHTML = '<span class="z">' + (terme() == null ? "terme non saisi" : "hors référentiel") + '</span>';
     return;
   }
-  el.innerHTML = l.map(function(x){
-    var a = Math.abs(x.z);
-    return '<span class="z' + (a > 4 ? " far" : a > 2 ? " out" : "") + '">' +
-           x.s + " z " + (x.z >= 0 ? "+" : "") + x.z.toFixed(2) + '</span>';
-  }).join("");
+  var avecP=Number.isInteger(terme()) && l.some(function(x){return Percentiles.calculer(x.z)!==null;});
+  el.innerHTML = '<table class="resultatsMasses"><thead><tr><th>Réf.</th><th>Z-score</th>'+(avecP?'<th>Percentile</th>':'')+'</tr></thead><tbody>' + l.map(function(x){
+    var p = Number.isInteger(terme()) ? Percentiles.calculer(x.z) : null;
+    return '<tr><td>'+x.s+'</td><td>'+Percentiles.formaterZ(x.z)+'</td>'+(avecP?'<td>'+esc(Percentiles.formater(p))+'</td>':'')+'</tr>';
+  }).join('') + '</tbody></table>';
 }
 function majTousZ(){
   ETAPES.forEach(function(e){
@@ -1085,14 +1128,21 @@ function exportChamp(c){
     o.droite = v.d; o.gauche = v.g;
     o.total = masseDe(c);
     o.zscores = zsObjet(c, o.total);
+    Object.assign(o, percentilesObjet(c, o.total));
   } else if (c.t === "masse"){
     o.grammes = v;
     o.zscores = zsObjet(c, v);
+    Object.assign(o, percentilesObjet(c, v));
   } else {
     o.valeur = v;
     if (c.t === "num") o.unite = c.u || null;
   }
   return o;
+}
+function percentilesObjet(c,v){
+  var brut={gc:null,ma:null,mb:null},p={gc:null,ma:null,mb:null};
+  if(Number.isInteger(terme())) zs(c,v).forEach(function(x){brut[x.s.toLowerCase()]=x.z;p[x.s.toLowerCase()]=Percentiles.calculer(x.z);});
+  return {zscores_non_arrondis:brut,percentiles:p};
 }
 function zsObjet(c, v){
   var o = { gc: null, ma: null, mb: null };
@@ -1500,7 +1550,7 @@ async function autotest(){
   var zf = zDe("foie_masse");
   chk("trois référentiels à 20 SA", Object.keys(zf).length === 3);
   chk("z Guihard-Costa exact",      Math.abs(zf.GC) < 0.005);
-  chk("z affiché",                  $("zs_foie_masse").children.length === 3);
+  chk("z affiché",                  $("zs_foie_masse").querySelectorAll("tbody tr").length === 3);
   var maAvant = zf.MA;
   sel("maroun", "3");
   chk("la macération change la strate", zDe("foie_masse").MA !== maAvant);
@@ -1603,7 +1653,7 @@ async function autotest(){
   chk("IndexedDB restitue photo",  !!shots["p_ouverture"]);
   chk("IndexedDB restitue l'étiquette", !!shots[K_ETIQUETTE] &&
                                         $("ph_etiquette").children[0].classList.contains("done"));
-  chk("IndexedDB restitue le z",   $("zs_foie_masse").children.length === 3);
+  chk("IndexedDB restitue le z",   $("zs_foie_masse").querySelectorAll("tbody tr").length === 3);
 
   await retirer("p_ouverture");
   chk("retrait du cliché",        !shots["p_ouverture"] && $("tPhotos").textContent === "0/" + N_TRAME);
@@ -1629,7 +1679,7 @@ async function autotest(){
   chk("relecture : masse",        lire(champDef("foie_masse")) === 14.33);
   chk("relecture : masse appariée", masseDe(champDef("poumons_masse")) === 7.5);
   chk("relecture : terme",        terme() === 20 && macGrade() === 0);
-  chk("relecture : z recalculé",  $("zs_foie_masse").children.length === 3);
+  chk("relecture : z recalculé",  $("zs_foie_masse").querySelectorAll("tbody tr").length === 3);
   chk("relecture : cliché trame", !!shots["p_ouverture"] && $("tPhotos").textContent === "1/" + N_TRAME);
   chk("relecture : horodatage",   collecter().ouverture_at === pack.ouverture_at);
   chk("relecture : cliché libre", $("ph_coeur").children.length === 10);

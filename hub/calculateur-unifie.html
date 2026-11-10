@@ -55,6 +55,9 @@ table.res td:first-child{text-align:left;font-weight:600;white-space:normal}
   .stempfle-grid{grid-template-columns:1fr}
   .sect-body{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 }
+table.res{font:11pt Cambria,"Times New Roman",serif}
+table.res th{font:inherit;font-weight:bold;word-break:normal;overflow-wrap:normal}
+#resWrap{overflow-x:auto}
 </style>
 </head>
 <body>
@@ -189,6 +192,46 @@ table.res td:first-child{text-align:left;font-weight:600;white-space:normal}
 </div>
 </div>
 
+<!-- BEGIN percentiles.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Noyau commun, intégré aux HTML autonomes par les outils de génération.
+var Percentiles = (function(){
+  "use strict";
+  function calculer(z){
+    if (typeof z !== "number" || !isFinite(z)) return null;
+    var x = Math.abs(z), queue;
+    if (x < 2){
+      // Série convergente de l'intégrale normale autour de zéro.
+      var terme = x, somme = x;
+      for (var n = 1; n < 100; n++){
+        terme *= x * x / (2 * n + 1);
+        somme += terme;
+        if (Math.abs(terme) < 1e-16 * Math.abs(somme)) break;
+      }
+      queue = 0.5 - Math.exp(-x * x / 2) * somme / Math.sqrt(2 * Math.PI);
+    } else {
+      // Fraction continue du rapport de Mills : conserve les petites queues.
+      var fraction = 0;
+      for (var k = 200; k >= 1; k--) fraction = k / (x + fraction);
+      queue = Math.exp(-x * x / 2) / (Math.sqrt(2 * Math.PI) * (x + fraction));
+    }
+    return 100 * (z < 0 ? queue : 1 - queue);
+  }
+  function formater(p){
+    if (typeof p !== "number" || !isFinite(p)) return "—";
+    if (p < 0.01) return "P < 0,01";
+    if (p > 99.99) return "P > 99,99";
+    return "P" + p.toFixed(2).replace(".", ",");
+  }
+  function formaterZ(z){
+    if (typeof z !== "number" || !isFinite(z)) return "—";
+    return (z >= 0 ? "+" : "") + z.toFixed(2);
+  }
+  return {calculer: calculer, formater: formater, formaterZ: formaterZ};
+})();
+</script>
+<!-- END percentiles.js -->
 <script>
 // ============================================================
 //  REFERENCE DATA
@@ -564,6 +607,10 @@ function lookupZ(item,sa,rawVal,grade){
 // ============================================================
 //  RENDER
 // ============================================================
+// Écarts de transcription préexistants : aucune table corrigée dans cette branche.
+const ECARTS_MB_ORGANES={thymus:[12,13,14,15,16,19,20],reins:[12,13,14,15,16,17,18,19],rate:[13,14,15,16,17,18,19,20],surrenales:[13,15,16,17]};
+function masseOrgane(item){return item.sec==="MASSES D'ORGANES";}
+function percentileOrgane(item,z){return masseOrgane(item)?Percentiles.calculer(z):null;}
 function recompute(){
   const sa=parseInt(gaSelect.value);
   const grade=document.getElementById('grade').value;
@@ -593,8 +640,8 @@ function recompute(){
     // merge mbb+mbo into single "MB 2018" column: prefer mbo for organs, mbb for biom
     let mbZ=z.mbb!=null?z.mbb:z.mbo;
 
-    function cell(v){return v!=null?`<td class="${zClass(v)}">${zFmt(v)}</td>`:'<td>—</td>';}
-    function cellTxt(v){return v!=null?zFmt(v):'—';}
+    function cell(v){return v!=null?`<td class="${zClass(v)}">${cellTxt(v).replace(/</g,'&lt;')}</td>`:'<td>—</td>';}
+    function cellTxt(v){return v==null?'—':masseOrgane(item)?zFmt(v)+' DS · '+Percentiles.formater(percentileOrgane(item,v)):zFmt(v);}
 
     html+=`<tr><td>${item.label}</td><td>${raw} ${item.u}</td>${cell(z.gc)}${cell(z.mar)}${cell(mbZ)}${cell(z.chi)}${cell(z.red)}</tr>`;
     copyRows.push(`${item.label}\t${raw} ${item.u}\t${cellTxt(z.gc)}\t${cellTxt(z.mar)}\t${cellTxt(mbZ)}\t${cellTxt(z.chi)}\t${cellTxt(z.red)}`);
@@ -602,7 +649,15 @@ function recompute(){
 
   html+='</tbody></table>';
   if(!hasRows)html='<p style="color:#6b7280;font-size:13px">Entrez des mesures ci-dessus pour voir les resultats.</p>';
+  const ecarts=Object.keys(ECARTS_MB_ORGANES).filter(id=>ECARTS_MB_ORGANES[id].includes(sa)&&document.getElementById('in_'+id).value.trim()!=='');
+  if(ecarts.length)html+='<p class="note">Transcriptions MB différentes de l’autopsie à ce terme : '+ecarts.join(', ')+'. Les valeurs de main sont conservées ; voir le bilan de validation avant comparaison.</p>';
   document.getElementById('resWrap').innerHTML=html;
+  const t=document.querySelector('#resWrap table');
+  if(t){
+    const rows=[...t.querySelectorAll('tr')].filter(r=>r.cells.length===7&&!r.querySelector('th'));
+    const keep=[...t.rows[0].cells].map((_,i)=>rows.some(r=>!['','—'].includes(r.cells[i].textContent.trim())));
+    for(const r of t.rows){if(r.cells.length===7)[...r.cells].forEach((c,i)=>c.hidden=!keep[i]);else if(r.cells[0])r.cells[0].colSpan=keep.filter(Boolean).length;}
+  }
 
   // Age statural
   let ageHtml='';
