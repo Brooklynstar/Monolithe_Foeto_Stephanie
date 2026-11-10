@@ -235,7 +235,8 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
 {% if autopsie.masses %}
 
 {{ sous("Masses d'organes") }}
-{{ tableau(autopsie.masses, masses=true) }}
+  Terme des masses : {{ autopsie.terme_percentiles | fr }} SA ; grade Maroun : {{ autopsie.maceration | fr }} (clinique prioritaire, sinon autopsie).
+{{ table_masses_organes() | safe }}
 {% if references.sources %}
   Écarts-types : {% for k, v in references.sources.items() %}{{ k }} {{ v }}{% if not loop.last %} ; {% endif %}{% endfor %}.
 {% endif %}
@@ -339,15 +340,17 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
 
 {% if neuropath.etapes %}
 {{ titre("Neuropathologie") }}
+  Terme neuropathologique : {{ neuropath.terme_percentiles | fr }} SA.
+{{ table_masses_neuro() | safe }}
 {% for e in neuropath.etapes %}
 {% if e.champs %}
 
 {{ sous(e.titre) }}
-{% for c in e.champs if not (c.zscore and c.zscore.z is not none) %}
+{% for c in e.champs if c.id not in ['masse_enc','masse_cerv'] and not (c.zscore and c.zscore.z is not none) %}
   {{ c.label }} : {{ c | valeur }}
 
 {% endfor %}
-{% set mesures_z = e.champs | selectattr('zscore') | selectattr('zscore.z', 'number') | list %}
+{% set mesures_z = e.champs | rejectattr('id', 'in', ['masse_enc','masse_cerv']) | selectattr('zscore') | selectattr('zscore.z', 'number') | list %}
 {% if mesures_z %}
 <table style="border-collapse:collapse;white-space:normal;margin:4px 0 4px 16px;font-size:13px">
 <tr>{% for h in ["Mesure", "Valeur", "Attendu (moy. ± ET)", "z", "Référence"] %}<th style="border:1px solid #999;padding:2px 8px;text-align:left;background:#f2f2f2">{{ h }}</th>{% endfor %}</tr>

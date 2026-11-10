@@ -65,6 +65,12 @@ CHIFFRES
   Masses pesées : {{ autopsie.masses | length }}{% if not references.dispo %} (z du module, pas de tables installées){% endif %}.
 
 {% endif %}
+{% for m in autopsie.masses %}
+  · {{ m.label }} : {{ m.detail }} — {{ detail_masse(m) }}
+{% endfor %}
+{% for m in neuropath.masses %}
+  · {{ m.label }} : {{ m.valeur }} {{ m.unite }}{% if m.percentile is not none %} — {{ z_masse_texte(m.z_brut) }} · {{ percentile_texte(m.percentile) }}{% endif %}
+{% endfor %}
 {% if micro.present %}
   Microscopie : {{ micro.sections | length }} organe(s), {{ micro.sections | map(attribute='faits') | sum }} champ(s) renseigné(s).
 {% endif %}

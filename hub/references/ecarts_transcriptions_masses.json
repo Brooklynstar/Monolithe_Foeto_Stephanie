@@ -1,0 +1,329 @@
+{
+  "origine": "Tables déjà différentes dans main ; valeurs conservées sans correction",
+  "ecarts": [
+    {
+      "sa": 12,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.07,
+        "sd": 0.05
+      },
+      "unifie": {
+        "m": 0.1,
+        "s": 0.06
+      }
+    },
+    {
+      "sa": 12,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 0.2,
+        "sd": 0.13
+      },
+      "unifie": {
+        "m": 0.24,
+        "s": 0.13
+      }
+    },
+    {
+      "sa": 13,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.03,
+        "sd": 0.01
+      },
+      "unifie": {
+        "m": 0.14,
+        "s": 0.06
+      }
+    },
+    {
+      "sa": 13,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.03,
+        "sd": 0.03
+      },
+      "unifie": {
+        "m": 0.34,
+        "s": 0.07
+      }
+    },
+    {
+      "sa": 13,
+      "organe": "Adrenals",
+      "autopsie": {
+        "m": 0.14,
+        "sd": 0.06
+      },
+      "unifie": {
+        "m": 0.12,
+        "s": 0.05
+      }
+    },
+    {
+      "sa": 13,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 0.21,
+        "sd": 0.07
+      },
+      "unifie": {
+        "m": 0.61,
+        "s": 0.21
+      }
+    },
+    {
+      "sa": 14,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.08,
+        "sd": 0.11
+      },
+      "unifie": {
+        "m": 0.11,
+        "s": 0.05
+      }
+    },
+    {
+      "sa": 14,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.05,
+        "sd": 0.04
+      },
+      "unifie": {
+        "m": 0.55,
+        "s": 0.04
+      }
+    },
+    {
+      "sa": 14,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 0.36,
+        "sd": 0.13
+      },
+      "unifie": {
+        "m": 0.63,
+        "s": 0.13
+      }
+    },
+    {
+      "sa": 15,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.09,
+        "sd": 0.06
+      },
+      "unifie": {
+        "m": 0.17,
+        "s": 0.06
+      }
+    },
+    {
+      "sa": 15,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.07,
+        "sd": 0.06
+      },
+      "unifie": {
+        "m": 0.65,
+        "s": 0.15
+      }
+    },
+    {
+      "sa": 15,
+      "organe": "Adrenals",
+      "autopsie": {
+        "m": 0.35,
+        "sd": 0.12
+      },
+      "unifie": {
+        "m": 0.41,
+        "s": 0.33
+      }
+    },
+    {
+      "sa": 15,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 0.53,
+        "sd": 0.15
+      },
+      "unifie": {
+        "m": 1.05,
+        "s": 0.25
+      }
+    },
+    {
+      "sa": 16,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.12,
+        "sd": 0.04
+      },
+      "unifie": {
+        "m": 0.19,
+        "s": 0.05
+      }
+    },
+    {
+      "sa": 16,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.09,
+        "sd": 0.06
+      },
+      "unifie": {
+        "m": 0.79,
+        "s": 0.06
+      }
+    },
+    {
+      "sa": 16,
+      "organe": "Adrenals",
+      "autopsie": {
+        "m": 0.44,
+        "sd": 0.09
+      },
+      "unifie": {
+        "m": 0.47,
+        "s": 0.36
+      }
+    },
+    {
+      "sa": 16,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 0.71,
+        "sd": 0.19
+      },
+      "unifie": {
+        "m": 1.17,
+        "s": 0.33
+      }
+    },
+    {
+      "sa": 17,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.1,
+        "sd": 0.04
+      },
+      "unifie": {
+        "m": 0.96,
+        "s": 0.14
+      }
+    },
+    {
+      "sa": 17,
+      "organe": "Adrenals",
+      "autopsie": {
+        "m": 0.61,
+        "sd": 0.17
+      },
+      "unifie": {
+        "m": 0.61,
+        "s": 0.28
+      }
+    },
+    {
+      "sa": 17,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 1.11,
+        "sd": 0.33
+      },
+      "unifie": {
+        "m": 1.5,
+        "s": 0.35
+      }
+    },
+    {
+      "sa": 18,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.15,
+        "sd": 0.04
+      },
+      "unifie": {
+        "m": 1.21,
+        "s": 0.15
+      }
+    },
+    {
+      "sa": 18,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 1.43,
+        "sd": 0.2
+      },
+      "unifie": {
+        "m": 1.76,
+        "s": 0.51
+      }
+    },
+    {
+      "sa": 19,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.35,
+        "sd": 0.04
+      },
+      "unifie": {
+        "m": 0.29,
+        "s": 0.09
+      }
+    },
+    {
+      "sa": 19,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.2,
+        "sd": 0.08
+      },
+      "unifie": {
+        "m": 0.9,
+        "s": 0.24
+      }
+    },
+    {
+      "sa": 19,
+      "organe": "Kidneys",
+      "autopsie": {
+        "m": 1.76,
+        "sd": 0.51
+      },
+      "unifie": {
+        "m": 2.13,
+        "s": 0.41
+      }
+    },
+    {
+      "sa": 20,
+      "organe": "Thymus",
+      "autopsie": {
+        "m": 0.45,
+        "sd": 0.14
+      },
+      "unifie": {
+        "m": 0.26,
+        "s": 0.14
+      }
+    },
+    {
+      "sa": 20,
+      "organe": "Spleen",
+      "autopsie": {
+        "m": 0.35,
+        "sd": 0.05
+      },
+      "unifie": {
+        "m": 0.55,
+        "s": 0.26
+      }
+    }
+  ]
+}

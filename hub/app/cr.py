@@ -31,6 +31,7 @@ import re
 from pathlib import Path
 
 import biometrie
+import percentiles_organes
 import cr_lumi
 
 ICI = Path(__file__).resolve().parent
@@ -391,6 +392,10 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
             termes_vus[nom] = t["sa"]
     discordance_terme = sorted({v for v in termes_vus.values()} | ({sa} if sa is not None else set()))
 
+    sa_organes = sa if sa is not None else aut.get('terme_sa')
+    sa_neuro = sa if sa is not None else neu.get('terme_sa')
+    neu, masses_neuro = percentiles_organes.neuropath(neu, sa_neuro, refs.racine)
+
     # Masses et z. Le module a mis les siens dans le JSON ; on les garde pour
     # comparaison et on calcule les nôtres.
     masses, z_module = {}, {}
@@ -414,6 +419,8 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     z = biometrie.calculer(refs, sa, maceration, masses, mesures)
     if sa is None and sa_bio is not None:
         z.update(biometrie.calculer(refs, sa_bio, None, {}, mesures))
+    if sa is None and sa_organes is not None:
+        z.update(biometrie.calculer(refs, sa_organes, maceration, masses))
     divergences = biometrie.comparer(z, z_module)
     # Quand le terme d'ici n'est pas celui qu'avait le module, tous les z
     # diffèrent et la liste ne dit plus rien. On nomme la cause une fois.
@@ -433,6 +440,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
                     "attendu_gc": r.get("attendu_gc"), "attendu_ma": r.get("attendu_ma"),
                     "alerte": r.get("alerte", False),
                     "z_module": z_module.get(c["id"]) or {},
+                    **{k:r.get(k) for src in ('gc','ma','mb') for k in ('z_brut_'+src,'percentile_'+src)},
                 })
 
     # Biométrie externe : libellé, valeur, unité, DS. L'unité et le libellé
@@ -515,7 +523,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "biometrie": {"mesures": mesures, "lignes": lignes_bio, "sexe": bio.get("sexe"),
                       "terme_sa": sa_bio, "terme_source": "administratif" if sa is not None else "saisie"},
         "radio": rad,
-        "autopsie": {"etapes": _trame(aut), "masses": lignes_masses,
+        "autopsie": {"etapes": _trame(aut), "masses": lignes_masses, "terme_percentiles":sa_organes,
                      "maceration": maceration,
                      "ouverture_at": aut.get("ouverture_at")},
         "placenta": _placenta(plac),
@@ -524,7 +532,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "grille_placenta": next((g for g in grilles
                                  if g["module"] == "grille_placenta"), None),
         "grilles_foetales": [g for g in grilles if g["module"] != "grille_placenta"],
-        "neuropath": {"etapes": _trame(neu)},
+        "neuropath": {"etapes": _trame(neu), "masses": masses_neuro, "terme_percentiles":sa_neuro},
         "z": z,
         "z_divergences": divergences,
         "z_cause_terme": cause_terme,
@@ -536,6 +544,11 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     # Les noms de Lumi, pour que ses gabarits tournent ici tels quels (cr_lumi.py).
     ctx.update(cr_lumi.contexte_lumi(ctx, clin, aut, neu, plac))
     # Sans validation (aperçu, appel direct), tout ce qui est proposé est retenu.
+    ctx['table_masses_organes'] = lambda: percentiles_organes.table_organes(lignes_masses)
+    ctx['table_masses_neuro'] = lambda: percentiles_organes.table_neuro(masses_neuro)
+    ctx['detail_masse'] = percentiles_organes.detail
+    ctx['percentile_texte'] = __import__('percentiles').pt
+    ctx['z_masse_texte'] = __import__('percentiles').zt
     ctx["propositions"] = propositions(ctx)
     ctx["retenues"], ctx["ecartees"] = ctx["propositions"], []
     return ctx
@@ -568,7 +581,7 @@ def propositions(ctx):
               f"{fr(l['valeur'])} {l['unite']} ({ds3(l, externes=True)})")
     for m in ctx["autopsie"]["masses"]:
         if m["alerte"]:
-            p(f"masse:{m['id']}", "Masses d'organes", m["label"], f"{m['detail']} ({ds3(m)})")
+            p(f"masse:{m['id']}", "Masses d'organes", m["label"], f"{m['detail']} ({percentiles_organes.detail(m)})")
     for e in ctx["autopsie"]["etapes"]:
         for c in e["champs"]:
             for h in c.get("hpo") or [] if c.get("type") == "chips" else []:
@@ -599,7 +612,7 @@ def propositions(ctx):
             z = (c.get("zscore") or {}).get("z")
             if z is not None and abs(z) >= biometrie.SEUIL_ALERTE:
                 p(f"neuro:{c.get('id')}", "Neuropathologie", c.get("label"),
-                  f"{valeur_champ(c)} ({zt(z)} contre {c['zscore'].get('reference')})")
+                  f"{valeur_champ(c)} ({zt(z)} contre {c['zscore'].get('reference')}" + ((" · " + __import__("percentiles").pt(c["zscore"]["percentile"])) if c["zscore"].get("percentile") is not None else "") + ")")
     return out
 
 

@@ -58,6 +58,9 @@ table.res td:first-child{text-align:left;font-weight:600;white-space:normal}
   .stempfle-grid{grid-template-columns:1fr}
   .sect-body{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 }
+table.res{font:11pt Cambria,"Times New Roman",serif}
+table.res th{font:inherit;font-weight:bold;word-break:normal;overflow-wrap:normal}
+#resWrap{overflow-x:auto}
 </style>
 </head>
 <body>
@@ -560,7 +563,7 @@ function externe(item){
 }
 function lookupPercentiles(item,z){
   const res={};
-  if(externe(item))Object.keys(z).forEach(src=>res[src]=Percentiles.calculer(z[src]));
+  if(externe(item)||masseOrgane(item))Object.keys(z).forEach(src=>res[src]=Percentiles.calculer(z[src]));
   return res;
 }
 
@@ -617,6 +620,10 @@ function lookupZ(item,sa,rawVal,grade){
 // ============================================================
 //  RENDER
 // ============================================================
+// Écarts de transcription préexistants : aucune table corrigée dans cette branche.
+const ECARTS_MB_ORGANES={thymus:[12,13,14,15,16,19,20],reins:[12,13,14,15,16,17,18,19],rate:[13,14,15,16,17,18,19,20],surrenales:[13,15,16,17]};
+function masseOrgane(item){return item.sec==="MASSES D'ORGANES";}
+function percentileOrgane(item,z){return masseOrgane(item)?Percentiles.calculer(z):null;}
 function recompute(){
   const sa=parseInt(gaSelect.value);
   const grade=document.getElementById('grade').value;
@@ -649,7 +656,7 @@ function recompute(){
     const p=lookupPercentiles(item,z);
     function cellTxt(v,src){
       if(v==null)return '—';
-      return externe(item)?Percentiles.formaterZ(v)+' DS · '+Percentiles.formater(p[src]):zFmt(v);
+      return (externe(item)||masseOrgane(item))?Percentiles.formaterZ(v)+' DS · '+Percentiles.formater(p[src]):zFmt(v);
     }
     function cell(v,src){return v!=null?`<td class="${zClass(v)}">${cellTxt(v,src).replace(/</g,'&lt;')}</td>`:'<td>—</td>';}
 
@@ -659,6 +666,8 @@ function recompute(){
 
   html+='</tbody></table>';
   if(!hasRows)html='<p style="color:#6b7280;font-size:13px">Entrez des mesures ci-dessus pour voir les resultats.</p>';
+  const ecarts=Object.keys(ECARTS_MB_ORGANES).filter(id=>ECARTS_MB_ORGANES[id].includes(sa)&&document.getElementById('in_'+id).value.trim()!=='');
+  if(ecarts.length)html+='<p class="note">Transcriptions MB différentes de l’autopsie à ce terme : '+ecarts.join(', ')+'. Les valeurs de main sont conservées ; voir le bilan de validation avant comparaison.</p>';
   document.getElementById('resWrap').innerHTML=html;
   // Presentation only: placeholders are empty, a numerical zero is a value.
   const table=document.querySelector('#resWrap table.res');

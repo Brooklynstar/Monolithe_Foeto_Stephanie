@@ -699,9 +699,27 @@ function zSpan(v, seuil){
 
 /* Trames en étapes et champs typés : autopsie, neuropathologie. */
 function rendreEtapes(d){
+  var prefixe='';
+  if(SERVI && (d.module==='autopsie'||d.module==='neuropath')){
+    var id='percentiles_'+d.module,numero=COURANT;
+    prefixe='<div id="'+id+'">Calcul des percentiles…</div>';
+    setTimeout(function(){api('/api/dossiers/'+encodeURIComponent(numero)+'/percentiles-organes').then(function(o){
+      var el=document.getElementById(id);if(el && COURANT===numero){
+        el.innerHTML=o[d.module].html;
+        var contexte=document.createElement('p');contexte.className='note';
+        contexte.textContent='Résultats recalculés : '+(o[d.module].terme_sa==null?'terme non renseigné':o[d.module].terme_sa+' SA')+
+          (d.module==='autopsie'?' ; grade Maroun '+(o.autopsie.maroun==null?'non renseigné':o.autopsie.maroun)+' (clinique prioritaire, sinon autopsie)':'');
+        el.prepend(contexte);
+      }
+    }).catch(function(e){var el=document.getElementById(id);if(el)el.textContent=e.message;});},0);
+  }
   var zTete = d.module === "neuropath" ? "z (référence)" : "z GC / MA / MB";
-  return (d.etapes || []).map(function(e){
-    var champs = e.champs || [];
+  return prefixe + (d.etapes || []).map(function(e){
+    var champs = (e.champs || []).filter(function(c){
+      if(!prefixe)return true;
+      return !((c.type==='masse'&&c.grammes!=null)||(c.type==='masse2'&&c.total!=null)||
+        ((c.id==='masse_enc'||c.id==='masse_cerv')&&c.valeur!=null));
+    });
     var faits = champs.filter(function(c){
       return (c.valeurs && c.valeurs.length) || c.valeur != null ||
              c.grammes != null || c.total != null;

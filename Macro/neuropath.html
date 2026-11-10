@@ -144,6 +144,9 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 .legende{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;color:#9FB5B1}
 .legende b{color:var(--paper);font-weight:600}
 .legende .sw{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:1px}
+.resultatsMasses{font:11pt Cambria,"Times New Roman",serif;width:100%;border-collapse:collapse}
+.resultatsMasses th,.resultatsMasses td{font:inherit;white-space:nowrap;word-break:normal;overflow-wrap:normal;padding:4px;text-decoration:none;border-bottom:1px solid #bbb}
+.resultatsMasses th{font-weight:bold}
 </style>
 </head>
 <body>
@@ -228,6 +231,46 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 <input type="file" id="jsonPick" accept="application/json,.json">
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
 
+<!-- BEGIN percentiles.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Source commune, intégrée aux deux HTML autonomes par integrer_percentiles.py.
+var Percentiles = (function(){
+  "use strict";
+  function calculer(z){
+    if (typeof z !== "number" || !isFinite(z)) return null;
+    var x = Math.abs(z), queue;
+    if (x < 2){
+      // Série convergente de l'intégrale normale autour de zéro.
+      var terme = x, somme = x;
+      for (var n = 1; n < 100; n++){
+        terme *= x * x / (2 * n + 1);
+        somme += terme;
+        if (Math.abs(terme) < 1e-16 * Math.abs(somme)) break;
+      }
+      queue = 0.5 - Math.exp(-x * x / 2) * somme / Math.sqrt(2 * Math.PI);
+    } else {
+      // Fraction continue du rapport de Mills : conserve les petites queues.
+      var fraction = 0;
+      for (var k = 200; k >= 1; k--) fraction = k / (x + fraction);
+      queue = Math.exp(-x * x / 2) / (Math.sqrt(2 * Math.PI) * (x + fraction));
+    }
+    return 100 * (z < 0 ? queue : 1 - queue);
+  }
+  function formater(p){
+    if (typeof p !== "number" || !isFinite(p)) return "—";
+    if (p < 0.01) return "P < 0,01";
+    if (p > 99.99) return "P > 99,99";
+    return "P" + p.toFixed(2).replace(".", ",");
+  }
+  function formaterZ(z){
+    if (typeof z !== "number" || !isFinite(z)) return "—";
+    return (z >= 0 ? "+" : "") + z.toFixed(2);
+  }
+  return {calculer: calculer, formater: formater, formaterZ: formaterZ};
+})();
+</script>
+<!-- END percentiles.js -->
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -242,7 +285,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 var MODULE = "neuropath";
 var SCHEMA = "0.1.0";
-var VERSION = "1.1.1";   /* version du document ; à incrémenter à chaque diffusion */
+var VERSION = "1.2.0";   /* version du document ; à incrémenter à chaque diffusion */
 var DB_NAME = "foeto-neuropath", DB_VER = 1, db = null;
 
 /* ── Référentiels (recopiés des tables de la PWA, Biometry_tables/) ───────────
@@ -647,6 +690,14 @@ function majZ(c){
     el.innerHTML = '<span class="z">' + (terme() == null ? "terme non saisi" : "hors référentiel") + '</span>';
     return;
   }
+  if(c.id === 'masse_enc' || c.id === 'masse_cerv'){
+    var avecP=Number.isInteger(terme()) && l.some(function(x){return Percentiles.calculer(x.z)!==null;});
+    el.innerHTML='<table class="resultatsMasses"><thead><tr><th>Réf.</th><th>Z-score</th>'+(avecP?'<th>Percentile</th>':'')+'<th>Attendu</th></tr></thead><tbody>'+l.map(function(x){
+      var p=Number.isInteger(terme())?Percentiles.calculer(x.z):null;
+      return '<tr><td>'+esc(x.s)+'</td><td>'+Percentiles.formaterZ(x.z)+'</td>'+(avecP?'<td>'+esc(Percentiles.formater(p))+'</td>':'')+'<td>attendu '+x.m+' ± '+x.sd.toFixed(2)+'</td></tr>';
+    }).join('')+'</tbody></table>';
+    return;
+  }
   el.innerHTML = l.map(function(x){
     var a = Math.abs(x.z);
     return '<span class="z' + (a > 4 ? " far" : a > 2 ? " out" : "") + '">' +
@@ -902,8 +953,13 @@ function zsObjet(c, v){
   var l = zs(c, v);
   if (!l.length) return { reference: c.ref || null, source: SRC_REF[c.ref] || SRC_REF.BC || null,
                           z: null, attendu_m: null, attendu_sd: null };
-  return { reference: c.ref, source: SRC_REF[c.ref] || SRC_REF.BC || null,
+  var o={ reference: c.ref, source: SRC_REF[c.ref] || SRC_REF.BC || null,
            z: +l[0].z.toFixed(2), attendu_m: l[0].m, attendu_sd: l[0].sd };
+  if(c.id==='masse_enc' || c.id==='masse_cerv'){
+    o.z_brut=Number.isInteger(terme())?l[0].z:null;
+    o.percentile=Percentiles.calculer(o.z_brut);
+  }
+  return o;
 }
 function collecter(){
   return {
