@@ -115,9 +115,10 @@ app\serveur.bat
 ```
 
 ou `serveur.bat` à la racine du dépôt (il appelle celui-ci), ou
-`python app/serveur.py` (depuis `hub/`), puis <http://127.0.0.1:5005>. Le
-navigateur s'ouvre après 4 s, le temps que le serveur écoute ; second argument
-du `.bat` pour changer ce délai (`serveur.bat 5005 8`).
+`python app/serveur.py` (depuis `hub/`), puis <http://127.0.0.1:5006> dans cette
+branche de test. Sur Mac, double-cliquer `serveur.command` à la racine.
+Les lanceurs ouvrent le navigateur après réservation du port ; aucun délai
+manuel n'est nécessaire. [Guide Mac de la version intégrée](../docs/ESSAIS_MAC_TEST_INTEGRATION.md).
 
 Pour partager le hub, on donne le dossier `app/` complet. Il embarque dans
 `app/python/` un Python 3.12 pour Windows 64 bits (build

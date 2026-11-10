@@ -77,21 +77,21 @@ class Lancement(unittest.TestCase):
         log.seek(0)
         self.fail(f"Serveur indisponible : {url}\n{log.read()}")
 
-    def test_port_5005_par_defaut_et_port_occupe(self):
+    def test_port_5006_par_defaut_et_port_occupe(self):
         with socket.socket() as sonde:
             try:
-                sonde.bind(("127.0.0.1", 5005))
+                sonde.bind(("127.0.0.1", 5006))
             except OSError:
-                self.skipTest("port 5005 occupé par un service extérieur")
+                self.skipTest("port 5006 occupé par un service extérieur")
         proc, trace, base, log = self.lancer("Stéphanie avec espaces", "--ouvrir-navigateur")
-        self.attendre(proc, "http://127.0.0.1:5005/", log)
-        self.assertEqual(trace.read_text(), "http://127.0.0.1:5005/")
-        etat = json.loads(self.attendre(proc, "http://127.0.0.1:5005/api/etat", log))
+        self.attendre(proc, "http://127.0.0.1:5006/", log)
+        self.assertEqual(trace.read_text(), "http://127.0.0.1:5006/")
+        etat = json.loads(self.attendre(proc, "http://127.0.0.1:5006/api/etat", log))
         self.assertEqual(etat["racine"], str(base))
         autre, trace_autre, _, _ = self.lancer("double lancement", "--ouvrir-navigateur")
         self.assertNotEqual(autre.wait(timeout=15), 0)
         self.assertFalse(trace_autre.exists())
-        self.attendre(proc, "http://127.0.0.1:5005/api/etat", log)
+        self.attendre(proc, "http://127.0.0.1:5006/api/etat", log)
 
     @unittest.skipUnless(os.name == "posix", "Bash nécessaire")
     def test_lanceur_command_chemin_avec_espaces_et_erreur(self):
@@ -111,6 +111,21 @@ class Lancement(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual((app / "arguments.txt").read_text().splitlines(),
                          [str(app / "serveur.py"), "--base", str(app / ".."), "--ouvrir-navigateur"])
+        # Le fichier local peut désigner la même base habituelle, sans copie.
+        existante = self.racine / "Base habituelle avec espaces"
+        existante.mkdir()
+        (existante / "hub.sqlite").write_bytes(b"temoin fictif non modifie")
+        config = app.parents[1] / "base_locale.txt"
+        config.write_text(str(existante) + "\n")
+        r = subprocess.run(commande, cwd="/tmp", capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn(str(existante), (app / "arguments.txt").read_text().splitlines())
+        self.assertEqual((existante / "hub.sqlite").read_bytes(), b"temoin fictif non modifie")
+        config.write_text(str(existante / "introuvable") + "\n")
+        r = subprocess.run(commande, cwd="/tmp", capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)
+        self.assertFalse((existante / "introuvable").exists())
+        config.unlink()
         r = subprocess.run(commande, cwd="/tmp", capture_output=True, text=True,
                            env={**os.environ, "TEST_LANCEMENT_CODE": "9"})
         self.assertEqual(r.returncode, 9)

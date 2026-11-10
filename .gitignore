@@ -34,3 +34,6 @@ graphify-out/
 
 # Environnement Python local du lanceur macOS
 hub/app/.venv/
+
+# Chemin local facultatif de la base ordinaire (jamais de données dans Git)
+/base_locale.txt

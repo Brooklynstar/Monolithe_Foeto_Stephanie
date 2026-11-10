@@ -3,7 +3,7 @@
 """
 Serveur local du hub — gestion des cas et ingestion pilotée.
 
-    python app/serveur.py             http://127.0.0.1:5005
+    python app/serveur.py             http://127.0.0.1:5006
     python app/serveur.py --ouvrir-navigateur
     python app/serveur.py --port 5010
     python app/serveur.py --base D:\\hub
@@ -163,7 +163,7 @@ HOTES_LOCAUX = {"127.0.0.1", "localhost", "::1", "[::1]"}
 
 
 def _nom_hote(host):
-    """« 127.0.0.1:5005 » → « 127.0.0.1 », « [::1]:5005 » → « [::1] »."""
+    """« 127.0.0.1:5006 » → « 127.0.0.1 », « [::1]:5006 » → « [::1] »."""
     h = (host or "").strip().lower()
     if h.startswith("["):
         return h.split("]", 1)[0] + "]"
@@ -1151,7 +1151,7 @@ def main():
     ap.add_argument("--base", type=Path, default=HUB, help="racine du hub (données)")
     ap.add_argument("--depot", type=Path, default=DEPOT,
                     help="dépôt des modules HTML (défaut : le dossier parent du hub)")
-    ap.add_argument("--port", type=int, default=5005)
+    ap.add_argument("--port", type=int, default=5006)
     ap.add_argument("--host", default="127.0.0.1",
                     help="ne changer qu'en connaissance de cause : il n'y a pas d'authentification")
     ap.add_argument("--debug", action="store_true")

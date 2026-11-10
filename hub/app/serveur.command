@@ -55,6 +55,22 @@ if ! cmp -s "$ICI/requirements.txt" "$ICI/.venv/requirements-installes.txt" ||
     cp "$ICI/requirements.txt" "$ICI/.venv/requirements-installes.txt"
 fi
 
-echo "Monolithe Fœto — Stéphanie (port 5005 par défaut)"
+# Facultatif : réutiliser la base ordinaire d'une installation existante.
+BASE="$ICI/.."
+CONFIG="$ICI/../../base_locale.txt"
+if [ -f "$CONFIG" ]; then
+    IFS= read -r BASE < "$CONFIG" || [ -n "$BASE" ]
+    BASE="${BASE%$'\r'}"
+    case "$BASE" in
+        /*) ;;
+        *) echo "base_locale.txt doit contenir le chemin absolu du dossier hub existant."; exit 2 ;;
+    esac
+    if [ ! -f "$BASE/hub.sqlite" ]; then
+        echo "Base existante introuvable : $BASE/hub.sqlite. Aucune base de remplacement créée."
+        exit 2
+    fi
+fi
+
+echo "Monolithe Fœto — Stéphanie (port 5006 par défaut)"
 echo "Garder cette fenêtre ouverte ; Ctrl+C arrête uniquement cette version."
-"$PYTHON" "$ICI/serveur.py" --base "$ICI/.." --ouvrir-navigateur "$@"
+"$PYTHON" "$ICI/serveur.py" --base "$BASE" --ouvrir-navigateur "$@"

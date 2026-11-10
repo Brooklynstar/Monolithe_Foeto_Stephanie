@@ -6,7 +6,7 @@ rem (python\python.exe ou WPy64-*\python-*\python.exe), sinon celui du PATH.
 setlocal
 cd /d "%~dp0"
 
-set PORT=5005
+set PORT=5006
 if not "%~1"=="" set PORT=%~1
 
 set PY=
@@ -53,9 +53,18 @@ if errorlevel 1 (
   )
 )
 
+rem Choix facultatif de la base habituelle, sans recopier les dossiers.
+set "BASE=%~dp0.."
+if exist "%~dp0..\..\base_locale.txt" set /p BASE=<"%~dp0..\..\base_locale.txt"
+if exist "%~dp0..\..\base_locale.txt" if not exist "%BASE%\hub.sqlite" (
+  echo Base existante introuvable. Verifier base_locale.txt.
+  pause
+  exit /b 2
+)
+
 rem Ce dossier (app\) contient tout le code et, s'il est la, le python
 rem portable. Les donnees vivent un cran au-dessus, dans le dossier parent.
-%PY% "%~dp0serveur.py" --port %PORT% --base "%~dp0.." --ouvrir-navigateur
+%PY% "%~dp0serveur.py" --port %PORT% --base "%BASE%" --ouvrir-navigateur
 set "CODE_SORTIE=%ERRORLEVEL%"
 if not "%CODE_SORTIE%"=="0" echo Lancement interrompu. Voir les erreurs ci-dessus.
 pause
