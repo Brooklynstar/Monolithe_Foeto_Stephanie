@@ -1,7 +1,8 @@
 # Monolithe Stéphanie — version test-integration sur Mac
 
 Cette branche réunit `dossier_demonstration`, `percentiles_biometries_externes`
-et `raccourcis_lancement`. Elle utilise **le serveur ordinaire**, exclusivement
+, `raccourcis_lancement`, `percentiles_masses_organes` et
+`percentiles_placenta`. Elle utilise **le serveur ordinaire**, exclusivement
 sur `127.0.0.1`, avec **5005** comme port par défaut. Aucun hébergement distant,
 aucun serveur ou écran réservé au dossier fictif, aucune base de démonstration.
 Le port 5005 reste le défaut de la branche indépendante `raccourcis_lancement`.
@@ -88,6 +89,9 @@ propre `hub` comme base habituelle.
 
 ## Import initial du dossier SLO : un geste, une seule fois
 
+**Si votre dossier SLO est déjà présent dans la base choisie, ouvrez-le
+directement depuis la liste habituelle : aucun nouvel import nécessaire.**
+
 Dans **Ingestion → Déposer des JSON**, choisir dans le nouveau code :
 
 **hub/exemples/DEMO_SLO_001.json**
@@ -117,16 +121,36 @@ Le scénario et la conclusion sont entièrement fictifs. Le dossier permet de
 tester les fonctions générales, les nouvelles rubriques pouvant être ajoutées
 progressivement comme sur tout autre dossier. [Détails du dossier et des sources](DOSSIER_TEST_SLO.md).
 
+## Essais des organes et du placenta dans le même dossier
+
+Les percentiles des masses d'organes et les positions placentaires sont réunis
+avec les biométries externes. Ouvrir les modules habituels, enregistrer au Hub,
+puis générer un nouveau compte rendu complet ou une synthèse. Les anciens
+comptes rendus enregistrés restent des versions historiques.
+
+Le SLO source reste à **19 SA**, sans modification automatique des données.
+À ce terme, l'absence de percentile placentaire Redline est attendue : les
+seuils publiés exploités couvrent **22–42 SA**. Pour un essai placentaire positif,
+utiliser un autre dossier fictif à **28 SA**, avec un placenta **frais émondé de
+214 g** : position publiée **P50**. Ce résultat ne vient pas de la loi normale ;
+aucun percentile exact n'est inventé entre les seuils publiés.
+
+Réserve persistante pour les organes : **27 écarts de transcription historiques
+Müller-Brochut** existent entre les tables de l'autopsie et du calculateur unifié.
+Ils sont documentés et signalés ; aucune valeur de référence n'a été corrigée
+sans validation médicale. Voir les bilans [organes](VALIDATION_PERCENTILES_MASSES_ORGANES.md)
+et [placenta](VALIDATION_PERCENTILES_PLACENTA.md).
+
 ## Vérifications techniques réalisées
 
 - `dossier_demonstration` créée directement depuis `main` ; sources initiales
   et deux comptes rendus récupérés avant retrait de l'ancien dispositif.
 - Ancien serveur de démonstration, lanceurs dédiés, base séparée et conditions
   spécifiques au numéro SLO retirés de `percentiles_biometries_externes`.
-- Intégration des trois branches par des commits de fusion dans `test-integration`
+- Intégration des cinq branches par des commits de fusion dans `test-integration`
   uniquement. `main`, `raccourcis_lancement`, les branches de référence et les
   versions stables ne sont pas modifiées.
-- **25 tests réussis** dans la version intégrée : dossier ordinaire, calculs,
+- **37 tests réussis** dans la version intégrée : dossier ordinaire, calculs,
   Python/JavaScript, tableaux/JSON/comptes rendus, lanceurs et test de redémarrage.
 - Vrai processus du serveur ordinaire sur **127.0.0.1:5005** : base habituelle de
   test initialement vide, import par l'API normale de dépôt/reprise, correction
@@ -137,7 +161,12 @@ progressivement comme sur tout autre dossier. [Détails du dossier et des source
   rechargement, génération complet/synthèse, export téléchargé, suppression
   confirmée par l'interface et maintien du dossier témoin fictif.
 - **76 contrôles de comptes rendus réussis**, 2 001 points Python/JavaScript,
-  128 calculs de masses d'organes inchangés et autotests des modules réussis.
+  128 calculs protégeant les anciens Z-scores/alertes et autotests des modules réussis.
+- Organes : 136 cas autopsie et 222 cas neuropathologie Python/JavaScript ;
+  placenta : 918 cas Python/JavaScript/calculateur unifié.
+- Parcours SLO combiné dans une base temporaire : huit rubriques, masses à P50,
+  placenta hors limites à 19 SA, essai placenta à 28 SA, trois comptes rendus,
+  export JSON et conservation après réouverture. La source SLO reste inchangée.
 - Lanceurs macOS : syntaxe Bash, exécution dans un chemin avec espaces/accents,
   erreurs propagées, base existante sélectionnée par `base_locale.txt`, fichier
   témoin inchangé, chemin inexistant refusé sans création de répertoire.

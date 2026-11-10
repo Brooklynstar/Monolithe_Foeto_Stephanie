@@ -274,7 +274,10 @@ class NonRegression(unittest.TestCase):
         refs = biometrie.References()
         cas = [biometrie.calculer(refs, sa, g, {c: 20 + i * 7.5 for i, c in enumerate(refs.autopsie["champs"])})
                for sa in range(12, 44) for g in range(4)]
-        empreinte = hashlib.sha256(json.dumps(cas, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        # Les champs historiques restent identiques ; les nouveaux P sont vérifiés séparément.
+        historiques = [{champ:{k:v for k,v in ligne.items() if not k.startswith(('z_brut_','percentile_'))}
+                        for champ,ligne in dossier.items()} for dossier in cas]
+        empreinte = hashlib.sha256(json.dumps(historiques, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         self.assertEqual(empreinte, "e24e322170e243cf3fe1afa30fecd78e5ac022c489f000c8719a373606589627")
 
     def test_html_autonomes_et_pack_synchronises(self):

@@ -27,7 +27,7 @@
     "hub/references/biometrie_clinique.json": "3bdd91ef5c223fecc4050de8855b829565f8f447fb59dcf362d6a43a5579af47",
     "hub/app/serveur.bat": "d83e7a593d9b835f293181133538ea1b99638e32631564d37375ae5be8112549",
     "serveur.bat": "3cc4cd3aacfbf46251a0555199147be68cc84d39dcff68ba79abfd10ec3a0205",
-    "Macro/biometrie_clinique.html": "4ea55ed2e4e75bb2d8a6b07968d4d24ca602a207977ea3e744b00ef89f3da3f1",
+    "Macro/biometrie_clinique.html": "0f39ce21d9daa5fdd0e5f9c3ea0dcd540179e2d017d023dc6c22c520c6d2c305",
     "Macro/examen_clinique.html": "76fe67ca3cb5bd51f425a6156c4d4f82e6c416d1f6e2bdedcc7a1ef926e80b48"
   },
   "python_data": {
@@ -37,5 +37,6 @@
   "python_fonctions": {
     "main": "687f34f26f9423716c157421572cf79ab31df0013b13be804561b818106dfd61"
   },
-  "base_verification_lancement": "Lanceurs repris sélectivement de test-integration sur 5005 ; main() de raccourcis_lancement."
+  "base_verification_lancement": "Lanceurs repris sélectivement de test-integration sur 5005 ; main() de raccourcis_lancement.",
+  "base_verification_biometrie_externe": "Branche percentiles_biometries_externes : code approuvé intégré, valeurs de tables toujours protégées contre main."
 }

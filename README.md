@@ -1,6 +1,8 @@
 # Hub Light — modules de saisie fœtopathologique
 
 Version d'essai **test-integration**, port local **5005**.
+Réunit le dossier SLO, les biométries externes, les masses d’organes, le placenta
+et les raccourcis de lancement.
 [Installation Mac sans écraser les données, import unique du dossier fictif et bilan](docs/ESSAIS_MAC_TEST_INTEGRATION.md).
 
 Des formulaires HTML autonomes : un fichier, aucune installation, aucun compte,

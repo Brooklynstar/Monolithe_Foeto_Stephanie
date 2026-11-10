@@ -2,7 +2,9 @@
 
 Branche indépendante `percentiles_placenta`, créée directement depuis
 `main` a3cc4b914e6b95549ef5939d0fe8b4645dae357e.
-Aucune fusion dans main, une version stable ou test-integration.
+Bilan de la branche indépendante avant intégration. Sur demande explicite, ce
+développement est désormais réuni dans `test-integration` ; main et les versions
+stables restent inchangées.
 
 ## Résultat et limites à connaître avant les essais
 

@@ -1,34 +1,22 @@
-# Lancer la branche Masses d’organes sur Mac
+# Lancer test-integration sur Mac
 
-1. Arrêter le Monolithe déjà ouvert : Ctrl+C dans sa fenêtre Terminal.
-2. Télécharger le ZIP de cette branche et le décompresser dans son propre dossier,
-   sans remplacer le dossier de votre installation habituelle.
-3. Pour retrouver votre base habituelle, copier votre `base_locale.txt` à côté
-   de `serveur.command`. Il doit contenir le chemin absolu du dossier `hub`
-   existant, celui qui contient `hub.sqlite`. Ne pas déplacer ni écraser la base.
-4. Double-cliquer **serveur.command**. L'interface s'ouvre sur
-   **http://127.0.0.1:5005/**.
+Cette version réunit le dossier fictif SLO, les biométries externes, les masses
+d'organes, le placenta et les raccourcis de lancement.
 
-Python 3.10 minimum est nécessaire ; les dépendances sont installées au premier
-lancement si besoin. Le serveur reste local. Sans `base_locale.txt`, il utilise
-le dossier `hub` de la copie lancée et peut donc afficher une base vide.
-Si votre base est vide de manière inattendue, arrêter et vérifier ce fichier.
+1. Sauvegarder les données depuis Monolithe, puis arrêter le serveur avec Ctrl+C.
+2. Télécharger le ZIP de **test-integration**, puis le décompresser dans un nouveau
+   dossier sans remplacer votre installation actuelle.
+3. Copier votre `base_locale.txt` à côté du nouveau `serveur.command` : il doit
+   désigner le dossier `hub` habituel qui contient `hub.sqlite`.
+4. Double-cliquer **serveur.command** : ouverture sur **http://127.0.0.1:5005/**.
+5. Ouvrir **DEMO_SLO_001** depuis la liste habituelle. S'il est déjà présent,
+   ne pas le réimporter. Sinon, l'import initial ordinaire est décrit dans le guide.
 
-Pour passer à l'autre branche : Ctrl+C, puis ouvrir son propre `serveur.command`.
-Ne pas lancer les deux à la fois : toutes deux utilisent 5005. Un port occupé
-est signalé sans ouvrir une autre application dans le navigateur.
+Sans `base_locale.txt`, le lanceur utilise le `hub` de la nouvelle installation,
+qui peut être vide. Arrêter le serveur et corriger ce réglage si les dossiers
+habituels n'apparaissent pas. Ne pas lancer deux versions sur la même base.
 
-Les fonctionnalités du dossier fictif et des raccourcis de test-integration
-ne sont pas fusionnées ici : seule la partie lancement nécessaire est reprise.
-Les dossiers déjà enregistrés dans la base choisie restent accessibles selon
-les fonctions de main et de cette branche.
+[Guide détaillé : téléchargement, sauvegarde, import initial et limites des essais](ESSAIS_MAC_TEST_INTEGRATION.md).
 
-Si macOS signale une absence de permission d'exécution après extraction, depuis
-le dossier décompressé :
-
-```sh
-chmod +x serveur.command hub/app/serveur.command
-```
-
-Les essais automatisés sont réalisés sous Linux/Bash ; le véritable double-clic
-Finder et les autorisations macOS restent à confirmer sur votre Mac.
+Python 3.10 minimum est nécessaire. Le double-clic Finder, les autorisations
+macOS, Cambria et l'impression restent à vérifier sur un vrai Mac.

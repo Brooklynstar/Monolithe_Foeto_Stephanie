@@ -181,11 +181,12 @@ function verifierExport(doc, d){
         assert.ok(Math.abs(parseFloat(presentation.size)-44/3)<.1);
         for(const col of presentation.columns) assert.equal(col.hidden,!col.nonempty);
       }
-      // Aucune colonne de percentile ajoutée aux masses d'organes.
+      // Dans la version intégrée, les masses ont désormais leurs propres P.
       await calc.locator('#ga').selectOption('16');
       await calc.locator('#in_foie').fill('100');
-      assert.ok(!(await calc.locator('[data-mesure="foie"]').textContent()).includes('P'));
-      assert.deepEqual(await calc.evaluate(()=>lookupPercentiles(ITEMS.find(i=>i.id === 'foie'), {gc:1})), {});
+      assert.ok((await calc.locator('[data-mesure="foie"]').textContent()).includes('P'));
+      const pOrgane=await calc.evaluate(()=>lookupPercentiles(ITEMS.find(i=>i.id === 'foie'), {gc:1}));
+      assert.ok(Math.abs(pOrgane.gc-84.1344746068543)<2e-12);
       assert.deepEqual(erreurs, []);
       await page.screenshot({path:path.join(sortie, `${d.dossier}_saisie.png`), fullPage:true});
       await context.close();
