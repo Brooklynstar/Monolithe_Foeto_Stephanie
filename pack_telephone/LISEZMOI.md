@@ -6,7 +6,7 @@ ouvrir chaque .html par double-clic. Aucune installation, aucun réseau.
 Dans l'ordre de l'examen :
 
 - `examen_clinique.html` — Examen clinique externe (v2.2.1)
-- `biometrie_clinique.html` — Biométrie clinique (v1.3.1)
+- `biometrie_clinique.html` — Biométrie clinique (v1.4.0)
 - `radio.html` — Imagerie radiologique (v1.0.1)
 - `autopsie.html` — Autopsie — examen interne (v2.1.1)
 - `neuropath.html` — Neuropathologie — examen de l'encéphale fixé (v1.1.1)

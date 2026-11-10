@@ -198,6 +198,10 @@ table.perinatal td:first-child,table.perinatal th:first-child{text-align:left}
 .rendu{white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;line-height:1.5;
        background:var(--paper);border:1px solid var(--rule);border-radius:3px;
        padding:12px;max-height:58vh;overflow:auto}
+.bioExterne{font:11pt Cambria,"Times New Roman",serif;table-layout:auto}
+.bioExterne th,.bioExterne td{font:inherit;letter-spacing:normal;text-transform:none;
+  white-space:nowrap;word-break:normal;overflow-wrap:normal;text-decoration:none;border-bottom-color:var(--rule)}
+.bioExterne th{font-weight:bold}
 /* Compte rendu au format html : le texte garde ses retraits (pre-wrap), les
    titres et tableaux du gabarit échappent aux styles d'interface de la page. */
 .crDoc{white-space:pre-wrap;font-family:var(--sans);font-size:13.5px;line-height:1.5;
@@ -318,6 +322,46 @@ body.theme-cli figure img{opacity:.9}
 </style>
 </head>
 <body>
+<!-- BEGIN percentiles.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Source commune, intégrée aux deux HTML autonomes par integrer_percentiles.py.
+var Percentiles = (function(){
+  "use strict";
+  function calculer(z){
+    if (typeof z !== "number" || !isFinite(z)) return null;
+    var x = Math.abs(z), queue;
+    if (x < 2){
+      // Série convergente de l'intégrale normale autour de zéro.
+      var terme = x, somme = x;
+      for (var n = 1; n < 100; n++){
+        terme *= x * x / (2 * n + 1);
+        somme += terme;
+        if (Math.abs(terme) < 1e-16 * Math.abs(somme)) break;
+      }
+      queue = 0.5 - Math.exp(-x * x / 2) * somme / Math.sqrt(2 * Math.PI);
+    } else {
+      // Fraction continue du rapport de Mills : conserve les petites queues.
+      var fraction = 0;
+      for (var k = 200; k >= 1; k--) fraction = k / (x + fraction);
+      queue = Math.exp(-x * x / 2) / (Math.sqrt(2 * Math.PI) * (x + fraction));
+    }
+    return 100 * (z < 0 ? queue : 1 - queue);
+  }
+  function formater(p){
+    if (typeof p !== "number" || !isFinite(p)) return "—";
+    if (p < 0.01) return "P < 0,01";
+    if (p > 99.99) return "P > 99,99";
+    return "P" + p.toFixed(2).replace(".", ",");
+  }
+  function formaterZ(z){
+    if (typeof z !== "number" || !isFinite(z)) return "—";
+    return (z >= 0 ? "+" : "") + z.toFixed(2);
+  }
+  return {calculer: calculer, formater: formater, formaterZ: formaterZ};
+})();
+</script>
+<!-- END percentiles.js -->
 <script>
 /* Le thème est posé ici, avant tout affichage : appliqué plus bas avec le
    reste du script, la page se dessinerait une fois en clair puis basculerait. */
@@ -710,15 +754,33 @@ function rendreEtages(d){
 
 /* Un dictionnaire de mesures : biométrie clinique. */
 function rendreMesures(d){
-  var cles = Object.keys(d.mesures || {}), ec = d.ecarts || {}, lib = d.libelles || {};
-  var faites = cles.filter(function(k){ return d.mesures[k] != null; });
-  return "<h3>Mesures — " + faites.length + "/" + cles.length + "</h3>" +
-    '<div class="grille">' + cles.map(function(k){
-      /* DS exportés par le module (v1.3.0+) : GC / MA / MB selon les tables qui couvrent le terme. */
-      var z = Object.keys(ec[k] || {}).map(function(src){ return esc(src) + " " + zSpan(ec[k][src]); }).join(" · ");
-      return '<div class="tuile"><span class="k">' + esc(lib[k] || k) + '</span>' +
-        '<span class="v">' + esc(lisible(d.mesures[k])) + (z ? ' <span class="note" style="margin:0 0 0 6px;display:inline">' + z + "</span>" : "") + "</span></div>";
-    }).join("") + "</div>";
+  var cles=Object.keys(d.mesures || {}), lib=d.libelles || {}, unites=d.unites || {};
+  var titres=['Mesure','Valeur'], colonnes=[{type:'label'},{type:'mesure'}];
+  ['GC','MA','MB'].forEach(function(src){
+    titres.push('Z-score ' + src, 'Percentile ' + src);
+    colonnes.push({type:'z',src:src},{type:'p',src:src});
+  });
+  var lignes=cles.map(function(k){
+    var valeurs=[lib[k] || k, d.mesures[k] == null ? null : String(d.mesures[k]) + ' ' + (unites[k] || '')];
+    ['GC','MA','MB'].forEach(function(src){
+      var exact=(d.ecarts_non_arrondis || {})[k] || {}, ancien=(d.ecarts || {})[k] || {};
+      valeurs.push(exact[src] == null ? ancien[src] : exact[src], ((d.percentiles || {})[k] || {})[src]);
+    });
+    return valeurs;
+  });
+  var gardees=titres.map(function(_,i){return lignes.some(function(l){return l[i] != null && l[i] !== '';});});
+  var cellules=function(l,entete){return l.map(function(v,i){
+    if(!gardees[i]) return '';
+    var texte=v == null ? '—' : String(v);
+    if(!entete && v != null){
+      if(colonnes[i].type === 'z') texte=Percentiles.formaterZ(v).replace('.',',').replace('-', '−') + ' DS';
+      if(colonnes[i].type === 'p') texte=Percentiles.formater(v);
+    }
+    return '<' + (entete?'th':'td') + '>' + esc(texte) + '</' + (entete?'th':'td') + '>';
+  }).join('');};
+  return '<h3>Mesures — ' + cles.filter(function(k){return d.mesures[k] != null;}).length + '/' + cles.length + '</h3>' +
+    '<div class="scroll"><table class="bioExterne"><thead><tr>' + cellules(titres,true) + '</tr></thead><tbody>' +
+    lignes.map(function(l){return '<tr>' + cellules(l,false) + '</tr>';}).join('') + '</tbody></table></div>';
 }
 
 /* Tout le reste : administratif, radiologie. On descend l'arbre du JSON, les
@@ -774,7 +836,7 @@ function rendreModule(s){
   else if (d.etages) corps = rendreEtages(d);
   else if (d.mesures){
     var reste = {};
-    Object.keys(d).forEach(function(k){ if (k !== "mesures") reste[k] = d[k]; });
+    Object.keys(d).forEach(function(k){ if (["mesures","ecarts","ecarts_non_arrondis","percentiles","libelles","unites"].indexOf(k) < 0) reste[k] = d[k]; });
     corps = rendreMesures(d) + rendreArbre(reste);
   } else corps = rendreArbre(d);
   return '<div class="grille" style="margin-bottom:6px">' +

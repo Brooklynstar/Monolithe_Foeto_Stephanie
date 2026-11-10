@@ -1,5 +1,5 @@
 {# titre: Synthèse — une page #}
-{# version: 1.2.0 #}
+{# version: 1.3.0 #}
 {#
    De quoi parler d'un dossier en réunion : ce qui a été fait, ce qui manque,
    ce qui sort de la norme. Rien de rédigé, tout en listes.
@@ -56,6 +56,10 @@ CHIFFRES
   Examen externe : {{ clinique.faits }}/{{ clinique.total }} item(s) renseigné(s), {{ clinique.anormaux | length }} anormal(aux).
 {% if biometrie.mesures %}
   Biométrie : {{ biometrie.mesures | length }} mesure(s).
+{% for l in biometrie.lignes %}
+  · {{ l.label }} : {{ l.valeur | fr }} {{ l.unite }}{% if l | ds3(true) %} — {{ l | ds3(true) }}{% endif %}
+
+{% endfor %}
 {% endif %}
 {% if autopsie.masses %}
   Masses pesées : {{ autopsie.masses | length }}{% if not references.dispo %} (z du module, pas de tables installées){% endif %}.
@@ -74,6 +78,8 @@ CHIFFRES
 {% if cliches %}
   Clichés : {{ cliches | length }}.
 {% endif %}
+
+
 
 --
 Produit le {{ genere_at | dtc }}. Brouillon, à relire.
