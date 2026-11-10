@@ -31,6 +31,7 @@ import re
 from pathlib import Path
 
 import biometrie
+import percentiles_placenta
 import cr_lumi
 
 ICI = Path(__file__).resolve().parent
@@ -498,7 +499,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "autopsie": {"etapes": _trame(aut), "masses": lignes_masses,
                      "maceration": maceration,
                      "ouverture_at": aut.get("ouverture_at")},
-        "placenta": _placenta(plac),
+        "placenta": {**_placenta(plac), "percentiles":percentiles_placenta.document(plac,sa)},
         "micro": _micro(mic),
         "grilles": grilles,
         "grille_placenta": next((g for g in grilles
@@ -516,6 +517,8 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     # Les noms de Lumi, pour que ses gabarits tournent ici tels quels (cr_lumi.py).
     ctx.update(cr_lumi.contexte_lumi(ctx, clin, aut, neu, plac))
     # Sans validation (aperçu, appel direct), tout ce qui est proposé est retenu.
+    ctx['table_percentiles_placenta'] = lambda: percentiles_placenta.tableau(ctx['placenta']['percentiles'])
+    ctx['texte_percentiles_placenta'] = percentiles_placenta.texte(ctx['placenta']['percentiles'])
     ctx["propositions"] = propositions(ctx)
     ctx["retenues"], ctx["ecartees"] = ctx["propositions"], []
     return ctx

@@ -1,5 +1,5 @@
 {# titre: Synthèse — une page #}
-{# version: 1.2.0 #}
+{# version: 1.3.0 #}
 {#
    De quoi parler d'un dossier en réunion : ce qui a été fait, ce qui manque,
    ce qui sort de la norme. Rien de rédigé, tout en listes.
@@ -68,6 +68,7 @@ CHIFFRES
   Grilles de lecture : {{ grilles | map(attribute='organe') | join(', ') }}.
 {% endif %}
 {% if placenta.present %}
+  {{ texte_percentiles_placenta }}
   Placenta : macroscopie saisie{% if placenta.lesions %}, {{ placenta.lesions | length }} lésion(s) prélevée(s){% endif %}{% if grille_placenta %}, grille histologique parvenue{% endif %}.
 
 {% endif %}

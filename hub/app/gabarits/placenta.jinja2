@@ -1,5 +1,6 @@
 {# titre: Compte rendu placentaire #}
-{# version: 1.1.0 #}
+{# version: 1.2.0 #}
+{# format: html #}
 {#
    Le placenta est le gros de l'activité et se lit seul : macro parée, tranches,
    grille histologique. Ce gabarit ne réclame donc rien du fœtus — s'il y a un
@@ -54,6 +55,7 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% elif p.terme_sa %
   porte donc que ce qui a été saisi ailleurs.
 {% else %}
 {{ titre("Macroscopie") }}
+{{ table_percentiles_placenta() | safe }}
 {% if p.grand_axe or p.masse or p.forme %}
   Galette{% if p.forme %} {{ p.forme | lower }}{% endif %}{% if p.grand_axe and p.petit_axe %} de {{ p.grand_axe }} × {{ p.petit_axe }} cm{% endif %}{% if p.epaisseur %}, épaisse de {{ p.epaisseur }} cm{% endif %}{% if p.masse %}, masse parée {{ p.masse }} g{% endif %}{% if p.completude %} — {{ p.completude | fr | lower }}{% endif %}.
 
