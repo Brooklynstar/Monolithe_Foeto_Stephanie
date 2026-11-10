@@ -108,7 +108,7 @@ bordures neutres sans soulignement rouge. Le pack téléphone est synchronisé.
 - Autotests : autopsie 131/131, neuropathologie 119/119, placenta 95/95,
   clinique 96/96, biométrie externe 61/61, radio 47/47.
 - Empreintes des tables JS, références JSON existantes, DONNEES_PLACENTA,
-  RATIO_FP, autres modules médicaux concernés et démarrage du serveur identiques à main.
+  RATIO_FP, autres modules médicaux concernés identiques à main pour les données médicales (le démarrage est désormais adapté aux lanceurs, voir mise à jour).
 
 `python hub/outils/verifier_cr.py` : **75 contrôles réussis**.
 Inspection visuelle et génération PDF A4 d'un tableau : en-têtes lisibles,
@@ -133,7 +133,7 @@ modifier la masse saisie. Tester 140 g (P10) et 321 g (P90) à ce même terme.
 à 19 SA n'est donc pas un cas positif pour cet abaque.
 Vérifier le complet, la synthèse, le CR placentaire et le JSON.
 
-Aucun réglage de serveur ou de raccourci n'est modifié ; port par défaut 5005.
+Initialement, aucun réglage de serveur ou de raccourci n'était modifié ; port par défaut 5005.
 La branche ne reprend ni les percentiles d'organes ni les biométries externes.
 Aucune branche supprimée. Les limites statistiques ci-dessus ne doivent pas être
 confondues avec une validation clinique humaine ou un modèle normal démontré.
@@ -163,3 +163,30 @@ confondues avec une validation clinique humaine ou un modèle normal démontré.
 - `tests/references_main.json`
 - `tests/test_percentiles_placenta.py`
 - `tests/test_references_inchangees.py`
+
+## Mise à jour : lancement autonome par double-clic
+
+Les raccourcis ont été ajoutés à cette branche sans fusion dans test-integration.
+Sur Mac, ouvrir `serveur.command` à la racine ; sur Windows, `serveur.bat`.
+Port 5005 dans les deux cas. Le navigateur ne s'ouvre qu'après réservation
+du port. Les dépendances sont préparées par les lanceurs existants repris
+sélectivement. Aucun calcul, abaque ou dossier médical n'est modifié par cet ajout.
+
+Le fichier local facultatif `base_locale.txt` permet de reprendre le même dossier
+`hub` habituel, sans copier ni réinitialiser sa base. Il contient son chemin
+absolu sur une seule ligne. Un chemin ne contenant pas `hub.sqlite` est refusé.
+Arrêter le serveur précédent avec Ctrl+C avant de lancer l'autre branche :
+les deux utilisent volontairement le même port 5005.
+
+Les tests de lancement vérifient le serveur sur 5005, l'URL du navigateur,
+le port occupé, les chemins avec espaces/accents, le choix de base locale et
+les erreurs. Les essais réels Finder et Windows restent à réaliser.
+
+Fichiers concernés par cette mise à jour : `.gitignore`, `serveur.command`,
+`serveur.bat`, `hub/app/serveur.command`, `hub/app/serveur.bat`,
+`hub/app/serveur.py`, `hub/app/requirements.txt`, `tests/test_lancement.py`,
+`tests/references_main.json`, ce bilan et `docs/LANCER_BRANCHE_MAC.md`, ainsi que le lien de lancement dans `README.md`.
+Les protections des tables numériques restent fondées sur main ; la protection
+du démarrage a été mise à jour pour le lancement désormais demandé.
+
+Validation après ajout des lanceurs : **9 tests réussis**, dont **4 tests de lancement**, sans changement des résultats médicaux précédents.

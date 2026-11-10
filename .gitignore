@@ -31,3 +31,7 @@ micro/microscopie.html
 hub/biblio/
 signes_*.js
 graphify-out/
+
+# Environnement et choix local de la base pour les essais
+hub/app/.venv/
+/base_locale.txt

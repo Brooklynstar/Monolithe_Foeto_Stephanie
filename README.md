@@ -1,5 +1,8 @@
 # Hub Light — modules de saisie fœtopathologique
 
+Branche **percentiles_placenta** : double-cliquer `serveur.command` sur Mac, port **5005**.
+[Guide de lancement indépendant](docs/LANCER_BRANCHE_MAC.md).
+
 Des formulaires HTML autonomes : un fichier, aucune installation, aucun compte,
 aucune connexion. On le télécharge, on l'ouvre par double-clic, on saisit.
 La saisie et les clichés restent sur l'appareil ; l'export produit un JSON
