@@ -138,7 +138,7 @@ Les tableaux du pack téléphone sont synchronisés avec les sources autonomes.
   Trois assertions d'affichage de l'autopsie ont été adaptées : trois lignes
   de référence dans le tableau remplacent trois anciens badges ; calculs inchangés.
 - Empreintes des tables JS, des références JSON existantes, des tables placentaires
-  Python et de la fonction de démarrage du serveur identiques à main.
+  Python identiques à main pour les données médicales (la fonction de démarrage est désormais adaptée aux lanceurs, voir mise à jour).
 
 `python hub/outils/verifier_cr.py` : **75 contrôles réussis**.
 Inspection visuelle de tableaux et génération PDF A4 avec Chromium : en-têtes
@@ -149,7 +149,7 @@ Finder, Safari, Word et impression sur Mac restent à vérifier.
 ## Essai manuel indépendant
 
 Utiliser le serveur ordinaire de main et le Python disposant de Flask/Pillow.
-Cette branche n'hérite pas des nouveaux raccourcis de lancement.
+Les raccourcis de lancement sont maintenant disponibles par reprise sélective.
 
 ```sh
 python3 hub/app/serveur.py --base /chemin/vers/une/base_de_test --port 5005
@@ -162,7 +162,7 @@ grade. En neuropathologie, à 28 SA, encéphale fixé 184,62 g et étage infrate
 Relire les résultats dans le Hub, le complet et la synthèse ; réexporter le JSON.
 Ne pas conclure à la validation des entrées MB divergentes avant arbitrage.
 
-Aucune table, aucun dossier médical existant, aucun port ni lanceur n'a été
+Aucune table, aucun dossier médical existant, aucun port n'a été
 modifié. Le serveur reste par défaut sur 5005. Aucune branche supprimée.
 
 ## Fichiers modifiés ou ajoutés
@@ -193,3 +193,30 @@ modifié. Le serveur reste par défaut sur 5005. Aucune branche supprimée.
 - `tests/references_main.json`
 - `tests/test_percentiles_organes.py`
 - `tests/test_references_inchangees.py`
+
+## Mise à jour : lancement autonome par double-clic
+
+Les raccourcis ont été ajoutés à cette branche sans fusion dans test-integration.
+Sur Mac, ouvrir `serveur.command` à la racine ; sur Windows, `serveur.bat`.
+Port 5005 dans les deux cas. Le navigateur ne s'ouvre qu'après réservation
+du port. Les dépendances sont préparées par les lanceurs existants repris
+sélectivement. Aucun calcul, abaque ou dossier médical n'est modifié par cet ajout.
+
+Le fichier local facultatif `base_locale.txt` permet de reprendre le même dossier
+`hub` habituel, sans copier ni réinitialiser sa base. Il contient son chemin
+absolu sur une seule ligne. Un chemin ne contenant pas `hub.sqlite` est refusé.
+Arrêter le serveur précédent avec Ctrl+C avant de lancer l'autre branche :
+les deux utilisent volontairement le même port 5005.
+
+Les tests de lancement vérifient le serveur sur 5005, l'URL du navigateur,
+le port occupé, les chemins avec espaces/accents, le choix de base locale et
+les erreurs. Les essais réels Finder et Windows restent à réaliser.
+
+Fichiers concernés par cette mise à jour : `.gitignore`, `serveur.command`,
+`serveur.bat`, `hub/app/serveur.command`, `hub/app/serveur.bat`,
+`hub/app/serveur.py`, `hub/app/requirements.txt`, `tests/test_lancement.py`,
+`tests/references_main.json`, ce bilan et `docs/LANCER_BRANCHE_MAC.md`, ainsi que le lien de lancement dans `README.md`.
+Les protections des tables numériques restent fondées sur main ; la protection
+du démarrage a été mise à jour pour le lancement désormais demandé.
+
+Validation après ajout des lanceurs : **11 tests réussis**, dont **4 tests de lancement**, sans changement des résultats médicaux précédents.
