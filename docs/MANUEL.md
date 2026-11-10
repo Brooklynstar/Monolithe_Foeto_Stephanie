@@ -121,7 +121,7 @@ place : exporter sans attendre.
 
 Double-clic sur `serveur.command` (Mac) ou `serveur.bat` (Windows), à la racine :
 le serveur local démarre et la page de gestion s'ouvre lorsqu'il est prêt sur
-<http://127.0.0.1:5006> dans `test-integration`. Il n'écoute que sur ce poste, sans compte : la
+<http://127.0.0.1:5005> dans `test-integration`. Il n'écoute que sur ce poste, sans compte : la
 protection est celle de la session Windows. Saisir ses initiales en haut à
 droite, elles sont recopiées dans chaque saisie faite depuis le hub.
 

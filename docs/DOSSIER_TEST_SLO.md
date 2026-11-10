@@ -67,7 +67,7 @@ manuelle complète des anciennes archives peut en revanche le restaurer.
   `python3 hub/outils/preparer_dossier_slo.py`, qui ne lit ni ne modifie aucune base.
 
 Cette branche ne reprend ni le moteur de percentiles, ni les scripts de
-lancement de l'autre développement, ni le port 5006. Ces fonctions sont réunies
+lancement de l'autre développement. Ces fonctions sont réunies
 uniquement dans `test-integration`. Les données de référence sont inchangées.
 
 ## Adaptations minimales du fonctionnement ordinaire

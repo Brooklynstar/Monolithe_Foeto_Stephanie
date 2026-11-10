@@ -71,6 +71,6 @@ if [ -f "$CONFIG" ]; then
     fi
 fi
 
-echo "Monolithe Fœto — Stéphanie (port 5006 par défaut)"
+echo "Monolithe Fœto — Stéphanie (port 5005 par défaut)"
 echo "Garder cette fenêtre ouverte ; Ctrl+C arrête uniquement cette version."
 "$PYTHON" "$ICI/serveur.py" --base "$BASE" --ouvrir-navigateur "$@"

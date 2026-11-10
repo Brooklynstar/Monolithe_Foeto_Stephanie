@@ -1,6 +1,6 @@
 # Hub Light — modules de saisie fœtopathologique
 
-Version d'essai **test-integration**, port local **5006**.
+Version d'essai **test-integration**, port local **5005**.
 [Installation Mac sans écraser les données, import unique du dossier fictif et bilan](docs/ESSAIS_MAC_TEST_INTEGRATION.md).
 
 Des formulaires HTML autonomes : un fichier, aucune installation, aucun compte,
@@ -40,7 +40,7 @@ dévie de sa source.
 horodatée, base SQLite (`hub/hub.sqlite`), clichés reconstitués en JPEG,
 page de gestion des cas, comptes rendus Jinja et préparation du document
 BaMaRa. **`serveur.command` sur Mac** ou **`serveur.bat` sur Windows**, à la racine,
-lance le serveur local (<http://127.0.0.1:5006>) et ouvre la page une fois le serveur prêt ;
+lance le serveur local (<http://127.0.0.1:5005>) et ouvre la page une fois le serveur prêt ;
 `hub/app/ingest.py` fait la reprise seule, en bibliothèque standard.
 L'onglet **Biblio** du hub reprend le paquet `data_hub_vN.zip` publié par
 [data.pazuzu.uk](https://data.pazuzu.uk/browse/scripts) — Foekinator

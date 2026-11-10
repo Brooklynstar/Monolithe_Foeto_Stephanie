@@ -43,8 +43,7 @@ aucune réécriture de dossier médical n'a été ajoutée par ces lanceurs.
 
 Le lanceur macOS, les dépendances et l'option d'ouverture du navigateur sont
 repris sélectivement de `percentiles_biometries` 447ab7314df29b536bdbc9708a16af3f78078378.
-Le port demeure celui de main, 5005. Aucune adaptation spécifique à 5006 n'est
-reprise. Le lanceur Windows historique est adapté pour détecter aussi Pillow,
+Le port demeure celui de main, 5005, également dans la version de test intégrée. Le lanceur Windows historique est adapté pour détecter aussi Pillow,
 contrôler Python et ouvrir le navigateur seulement après réservation du port.
 
 ## Tests exécutés sous Linux

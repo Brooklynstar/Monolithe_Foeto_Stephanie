@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
-"""Vrai serveur ordinaire sur 5006, import et redémarrage sur la même base."""
+"""Vrai serveur ordinaire sur 5005, import et redémarrage sur la même base."""
 import json
 from pathlib import Path
 import socket
@@ -11,16 +11,16 @@ import unittest
 from urllib.request import Request, urlopen
 
 DEPOT=Path(__file__).resolve().parents[1]
-URL='http://127.0.0.1:5006'
+URL='http://127.0.0.1:5005'
 
 
 class IntegrationSLO(unittest.TestCase):
-    def test_serveur_5006_import_percentiles_et_persistance_apres_redemarrage(self):
+    def test_serveur_5005_import_percentiles_et_persistance_apres_redemarrage(self):
         with socket.socket() as s:
             try:
-                s.bind(('127.0.0.1',5006))
+                s.bind(('127.0.0.1',5005))
             except OSError:
-                self.skipTest('port 5006 occupé par un service extérieur')
+                self.skipTest('port 5005 occupé par un service extérieur')
         with tempfile.TemporaryDirectory(prefix='integration-slo-') as tmp:
             base=Path(tmp)/'hub'
             log=open(Path(tmp)/'serveur.log','w+')

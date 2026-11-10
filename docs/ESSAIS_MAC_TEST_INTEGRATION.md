@@ -2,7 +2,7 @@
 
 Cette branche réunit `dossier_demonstration`, `percentiles_biometries_externes`
 et `raccourcis_lancement`. Elle utilise **le serveur ordinaire**, exclusivement
-sur `127.0.0.1`, avec **5006** comme port par défaut. Aucun hébergement distant,
+sur `127.0.0.1`, avec **5005** comme port par défaut. Aucun hébergement distant,
 aucun serveur ou écran réservé au dossier fictif, aucune base de démonstration.
 Le port 5005 reste le défaut de la branche indépendante `raccourcis_lancement`.
 
@@ -44,7 +44,7 @@ Ne pas effacer `hub.sqlite`, `archive`, `photos`, `arrivee`, `rejets` ou `biblio
    **même base ordinaire existante**, sans la déplacer ni la copier.
    Si le chemin indiqué ne contient pas `hub.sqlite`, le lanceur refuse de
    continuer et ne crée pas une base vide de remplacement.
-5. Le navigateur s'ouvre sur **http://127.0.0.1:5006/**. Vérifier dans **Ingestion**
+5. Le navigateur s'ouvre sur **http://127.0.0.1:5005/**. Vérifier dans **Ingestion**
    le chemin de base affiché et la présence de vos dossiers avant l'import du SLO.
 
 `base_locale.txt` est un réglage local du lanceur ordinaire ; il est ignoré par
@@ -64,7 +64,7 @@ chmod +x serveur.command hub/app/serveur.command
 ```
 
 En cas de blocage macOS, utiliser les options d'ouverture autorisées par le
-système. Un port 5006 occupé est signalé sans ouvrir le navigateur sur un autre
+système. Un port 5005 occupé est signalé sans ouvrir le navigateur sur un autre
 service. Laisser la fenêtre ouverte pendant l'utilisation, Ctrl+C pour arrêter.
 
 ### Si votre installation actuelle est déjà un clone Git
@@ -128,7 +128,7 @@ progressivement comme sur tout autre dossier. [Détails du dossier et des source
   versions stables ne sont pas modifiées.
 - **25 tests réussis** dans la version intégrée : dossier ordinaire, calculs,
   Python/JavaScript, tableaux/JSON/comptes rendus, lanceurs et test de redémarrage.
-- Vrai processus du serveur ordinaire sur **127.0.0.1:5006** : base habituelle de
+- Vrai processus du serveur ordinaire sur **127.0.0.1:5005** : base habituelle de
   test initialement vide, import par l'API normale de dépôt/reprise, correction
   administrative, génération d'un CR avec percentiles, arrêt puis relance sur
   la même base. Dossier, correction et CR conservés ; nouvel import ignoré.

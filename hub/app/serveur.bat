@@ -6,7 +6,7 @@ rem (python\python.exe ou WPy64-*\python-*\python.exe), sinon celui du PATH.
 setlocal
 cd /d "%~dp0"
 
-set PORT=5006
+set PORT=5005
 if not "%~1"=="" set PORT=%~1
 
 set PY=
