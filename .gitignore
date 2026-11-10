@@ -31,3 +31,6 @@ micro/microscopie.html
 hub/biblio/
 signes_*.js
 graphify-out/
+
+# Environnement Python local du lanceur macOS
+hub/app/.venv/
