@@ -1,0 +1,32 @@
+{
+  "module_version": "1.4.0",
+  "terme": {
+    "sa": 19,
+    "jours": 0
+  },
+  "sexe": "M",
+  "mesures": {
+    "masse": 150,
+    "pied": 29.5,
+    "bip": 35,
+    "fo": 45,
+    "dici": null,
+    "dice": null,
+    "fpg": null,
+    "fpd": null,
+    "dim": null,
+    "sternum": null,
+    "main": 25.4,
+    "vt": 220,
+    "vc": 145,
+    "pc": 130,
+    "pt": 126.4,
+    "pa": 95
+  },
+  "module": "biometrie_clinique",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "fictif": true,
+  "schema_version": "0.1.0"
+}

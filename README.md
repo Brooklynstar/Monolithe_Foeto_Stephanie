@@ -168,3 +168,10 @@ Creative Commons n'accorde **pas de licence de brevet** et n'a pas de notion de
 l'identique s'applique aussi aux dérivés des scripts. Si un usage logiciel plus
 strict devient nécessaire, PolyForm Noncommercial 1.0.0 dit la même chose en
 termes faits pour du code.
+
+### Dossier fictif prêt à tester
+
+Sur cette branche, double-cliquer **ouvrir_demonstration.command** pour ouvrir
+une base locale séparée contenant **DEMO_SLO_001 — Syndrome de Smith-Lemli-Opitz**.
+Aucune importation manuelle n'est nécessaire. Ce scénario est entièrement fictif.
+[Guide Mac, sources et bilan des tests](hub/demonstrations/README.md).

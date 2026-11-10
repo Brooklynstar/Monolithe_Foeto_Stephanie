@@ -141,9 +141,9 @@ def _table_bio_ext(calc_bio):
         rows.append(f'<tr data-mesure="{escape(key, quote=True)}"{alerte}>' +
                     "".join(f'<td style="{style_cellule}text-align:{"left" if i == 0 else "right"}">{escape(str(cellules[i])) if cellules[i] is not None else "—"}</td>'
                             for i in colonnes) + "</tr>")
-    style = "border-collapse:collapse;font-family:Cambria,'Times New Roman',serif;font-size:11pt;table-layout:auto;width:100%;white-space:normal"
+    style = "border-collapse:collapse;font-family:Cambria,'Times New Roman',serif;font-size:11pt;table-layout:auto;width:100%;white-space:normal;break-inside:avoid;page-break-inside:avoid"
     return (f'<table cellpadding="4" cellspacing="0" style="{style}">\n'
-            + hdr + "\n" + "\n".join(rows) + "</table>")
+            + '<thead style="display:table-header-group">' + hdr + "</thead><tbody>\n" + "\n".join(rows) + "</tbody></table>")
 
 
 def _table_bio_int(calc_org):

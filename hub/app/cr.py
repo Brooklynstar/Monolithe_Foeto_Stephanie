@@ -492,7 +492,8 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "modules": {k: {x: v[x] for x in ("module_version", "schema_version", "operateur",
                                           "exported_at", "ingere_at", "provenance")}
                     for k, v in s.items()},
-        "manquants": [m for m in modules_attendus if m not in s],
+        "manquants": [m for m in modules_attendus if m not in s
+                      and not (m == "microscopie" and "micro" in s)],
         "terme": {"sa": sa, "j": j,
                   "texte": (f"{sa} SA" + (f" + {j} j" if j else "")) if sa is not None else "—",
                   "vu_par": termes_vus,

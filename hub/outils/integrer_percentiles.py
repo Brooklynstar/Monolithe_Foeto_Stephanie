@@ -10,7 +10,7 @@ import sys
 
 DEPOT = Path(__file__).resolve().parents[2]
 SOURCE = DEPOT / "hub/app/web/percentiles.js"
-CIBLES = (DEPOT / "Macro/biometrie_clinique.html", DEPOT / "hub/calculateur-unifie.html")
+CIBLES = (DEPOT / "Macro/biometrie_clinique.html", DEPOT / "hub/calculateur-unifie.html", DEPOT / "hub/app/dossiers.html")
 DEBUT = "<!-- BEGIN percentiles.js -->"
 FIN = "<!-- END percentiles.js -->"
 
