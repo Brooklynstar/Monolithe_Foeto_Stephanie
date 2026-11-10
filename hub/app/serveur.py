@@ -348,6 +348,49 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
         finally:
             cx.close()
 
+    @app.get("/api/dossiers/<numero>/export.json")
+    def api_exporter_dossier(numero):
+        if not DOSSIER_OK.fullmatch(numero):
+            return erreur("numéro de dossier invalide")
+        cx = base()
+        try:
+            d = cx.execute('SELECT * FROM dossiers WHERE numero=?', (numero,)).fetchone()
+            if not d:
+                return erreur("dossier inconnu", 404)
+            docs = []
+            for r in cx.execute('SELECT donnees_json, archive FROM saisies WHERE dossier=? AND courant=1 ORDER BY module', (numero,)):
+                archive = racine / r['archive']
+                # L'archive contient aussi les clichés base64 éventuels.
+                docs.append(json.loads(archive.read_text(encoding='utf-8')) if archive.is_file()
+                            else json.loads(r['donnees_json']))
+            rapports = [dict(r) for r in cx.execute(
+                'SELECT gabarit,gabarit_version,texte,operateur,format FROM comptes_rendus WHERE dossier=? ORDER BY id', (numero,))]
+            paquet = {'type': 'monolithe_dossier', 'version': 1, 'dossier': numero,
+                      'nom': d['remarques'], 'operateur': d['assigne_a'],
+                      'saisies': docs, 'comptes_rendus': rapports}
+            reponse = jsonify(paquet)
+            reponse.headers['Content-Disposition'] = f'attachment; filename="{numero}.json"'
+            return reponse
+        finally:
+            cx.close()
+
+    @app.delete("/api/dossiers/<numero>")
+    def api_supprimer_dossier(numero):
+        corps = request.get_json(silent=True) or {}
+        if not isinstance(corps, dict) or not DOSSIER_OK.fullmatch(numero) or corps.get('confirmation') != numero:
+            return erreur("confirmer la suppression en saisissant le numéro exact")
+        cx = base()
+        try:
+            cur = cx.execute('DELETE FROM dossiers WHERE numero=?', (numero,))
+            if not cur.rowcount:
+                return erreur("dossier inconnu", 404)
+            journal(cx, 'info', 'dossier supprimé de la base ; archives conservées', dossier=numero)
+            cx.commit()
+            ecrire_index(cx, racine)
+            return jsonify({'supprime': numero})
+        finally:
+            cx.close()
+
     # ── Saisies ────────────────────────────────────────────────────────────
     @app.get("/api/saisie/<numero>/<module>")
     def api_saisie(numero, module):
@@ -1024,6 +1067,32 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
             if not r:
                 return erreur("compte rendu inconnu", 404)
             return jsonify(dict(r))
+        finally:
+            cx.close()
+
+    @app.put("/api/cr/<int:cr_id>")
+    def api_cr_corriger(cr_id):
+        from dossiers_portables import rapport_sur
+        corps = request.get_json(silent=True) or {}
+        if not isinstance(corps, dict):
+            return erreur('objet JSON attendu')
+        cx = base()
+        try:
+            ancien = cx.execute('SELECT * FROM comptes_rendus WHERE id=?', (cr_id,)).fetchone()
+            if not ancien:
+                return erreur('compte rendu inconnu', 404)
+            fmt = ancien['format']
+            try:
+                texte = rapport_sur(corps.get('texte'), fmt)
+            except ValueError as e:
+                return erreur(str(e))
+            cur = cx.execute('INSERT INTO comptes_rendus(dossier,gabarit,gabarit_version,texte,operateur,format,ecartees)\n                                VALUES (?,?,?,?,?,?,?)',
+                             (ancien['dossier'], ancien['gabarit'], ancien['gabarit_version'], texte,
+                              (corps.get('operateur') or ancien['operateur']), fmt, ancien['ecartees']))
+            journal(cx, 'info', f'compte rendu corrigé depuis la version {cr_id}', dossier=ancien['dossier'])
+            cx.commit()
+            ecrire_index(cx, racine)
+            return jsonify({'id': cur.lastrowid, 'texte': texte, 'format': fmt, 'gabarit': ancien['gabarit']})
         finally:
             cx.close()
 

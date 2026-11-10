@@ -846,6 +846,9 @@ function ouvrir(numero, garderOnglet){
           esc(LIB_STATUT[st]) + "</button>";
       }).join("")
     : "";
+  if(SERVI) $("ficheActions").insertAdjacentHTML('beforeend',
+    '<a class="btn ghost mini" href="/api/dossiers/' + encodeURIComponent(numero) + '/export.json">Exporter le dossier JSON</a> ' +
+    '<button class="btn ghost mini" onclick="supprimerDossier(' + js(numero) + ')">Supprimer</button>');
 
   rendreOnglets(d);
   var h = "";
@@ -1052,7 +1055,7 @@ function panneauCr(d){
     chargerCr(d.numero);
     chargerPropositions(d.numero);
     if (CR_AFFICHE.numero === d.numero && CR_AFFICHE.texte)
-      afficherCr(CR_AFFICHE.texte, CR_AFFICHE.entete, CR_AFFICHE.format);
+      afficherCr(CR_AFFICHE.texte, CR_AFFICHE.entete, CR_AFFICHE.format, CR_AFFICHE.id);
   }, 0);
   return h;
 }
@@ -1183,8 +1186,8 @@ function chargerCr(numero){
       : '<p class="note">Aucun brouillon produit pour ce dossier.</p>';
   }).catch(function(){});
 }
-function afficherCr(texte, entete, format){
-  CR_AFFICHE = {numero: COURANT, entete: entete, texte: texte, format: format};
+function afficherCr(texte, entete, format, id){
+  CR_AFFICHE = {numero: COURANT, entete: entete, texte: texte, format: format, id: id};
   if (!$("crTexte")) return;
   var cadre = "border:1px solid var(--rule);border-radius:3px;padding:14px;margin:0;" +
     "max-height:70vh;overflow:auto";
@@ -1192,13 +1195,45 @@ function afficherCr(texte, entete, format){
     '<div class="row noprint" style="margin-bottom:8px"><div class="field" style="flex:0 0 auto">' +
     '<button class="btn ghost mini" onclick="copierCr()">Copier</button></div>' +
     '<div class="field" style="flex:0 0 auto">' +
-    '<button class="btn ghost mini" onclick="window.print()">Imprimer</button></div></div>' +
+    '<button class="btn ghost mini" onclick="window.print()">Imprimer</button></div>' +
+    (id ? '<div class="field"><button class="btn ghost mini" onclick="modifierCr()">Modifier</button></div>' : '') +
+    '<div class="field" id="crEdition" hidden><button class="btn" onclick="enregistrerCr()">Enregistrer une version</button> ' +
+    '<button class="btn ghost" onclick="annulerCr()">Annuler</button></div></div>' +
     // html : produit par un gabarit à échappement automatique, les saisies y
     // arrivent échappées ; le reste (anciens brouillons, texte) passe par esc().
     (format === "html"
       ? '<div id="crPre" class="crDoc" style="' + cadre + '">' + texte + "</div>"
       : '<pre id="crPre" style="white-space:pre-wrap;font-family:var(--mono);font-size:13px;' +
         "line-height:1.5;background:#fff;" + cadre + '">' + esc(texte) + "</pre>");
+}
+function modifierCr(){
+  var zone=$("crPre");
+  if(!zone || !CR_AFFICHE.id) return;
+  zone.contentEditable='true'; zone.setAttribute('role','textbox');
+  zone.setAttribute('aria-label','Compte rendu modifiable'); zone.focus();
+  $("crEdition").hidden=false;
+}
+function annulerCr(){
+  afficherCr(CR_AFFICHE.texte,CR_AFFICHE.entete,CR_AFFICHE.format,CR_AFFICHE.id);
+}
+function enregistrerCr(){
+  var zone=$("crPre");
+  if(!zone || !CR_AFFICHE.id) return;
+  api('/api/cr/'+CR_AFFICHE.id,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({texte:CR_AFFICHE.format==='html'?zone.innerHTML:zone.textContent,
+      operateur:($("operateur")||{}).value || null})}).then(function(o){
+      afficherCr(o.texte,'Version corrigée — '+o.gabarit,o.format,o.id);
+      chargerCr(COURANT); flash('Version corrigée enregistrée ; version précédente conservée.');
+  }).catch(function(e){flash(e.message);});
+}
+function supprimerDossier(numero){
+  var confirmation=window.prompt('Supprimer ce dossier de la liste et de la base ? Les archives restent conservées. Saisir le numéro exact : '+numero);
+  if(confirmation!==numero) return;
+  api('/api/dossiers/'+encodeURIComponent(numero),{method:'DELETE',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({confirmation:confirmation})}).then(function(){
+      COURANT=null;CR_AFFICHE={numero:null};$("fiche").hidden=true;$("aucunCas").hidden=false;
+      return rafraichir();
+  }).then(function(){flash('Dossier supprimé.');}).catch(function(e){flash(e.message);});
 }
 function copierCr(){
   var el = $("crPre");
@@ -1224,7 +1259,7 @@ function genererCr(numero){
     body: JSON.stringify({gabarit:g, operateur: ($("operateur") || {}).value || null,
                           ecartees: ecarteesCr()})
   }).then(function(o){
-    afficherCr(o.texte, "Brouillon — " + o.gabarit, o.format);
+    afficherCr(o.texte, "Brouillon — " + o.gabarit, o.format, o.id);
     flash("Brouillon produit.");
     return rafraichir();
   }).then(function(){ ONGLET = "cr"; ouvrir(numero, true); })
@@ -1233,7 +1268,7 @@ function genererCr(numero){
 }
 function relireCr(id){
   api("/api/cr/" + id).then(function(o){
-    afficherCr(o.texte, o.gabarit + " — produit le " + dateCourte(o.genere_at), o.format);
+    afficherCr(o.texte, o.gabarit + " — produit le " + dateCourte(o.genere_at), o.format, o.id);
   }).catch(function(e){ flash("Illisible : " + e.message); });
 }
 
@@ -1443,7 +1478,7 @@ if (SERVI){
   }
   $("btnDepot").onclick = function(){ $("pickDepot").click(); };
   $("pickDepot").addEventListener("change", function(){
-    var l = this.files; this.value = "";
+    var l = Array.prototype.slice.call(this.files); this.value = "";
     deposer(l);
   });
   var zd = $("depot");
@@ -2130,7 +2165,7 @@ function deposerPaquet(files){
   }).catch(function(e){ flash("Paquet refusé : " + e.message); });
 }
 $("btnPaquet").onclick = function(){ $("pickPaquet").click(); };
-$("pickPaquet").addEventListener("change", function(){ var l = this.files; this.value = ""; deposerPaquet(l); });
+$("pickPaquet").addEventListener("change", function(){ var l = Array.prototype.slice.call(this.files); this.value = ""; deposerPaquet(l); });
 
 function pageModules(){
   $("panModules").innerHTML = vide("Lecture du dépôt…");

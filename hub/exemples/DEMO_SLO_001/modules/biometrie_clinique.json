@@ -1,0 +1,194 @@
+{
+  "schema_version": "0.1.0",
+  "module": "biometrie_clinique",
+  "module_version": "1.4.0",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "terme": {
+    "sa": 19,
+    "jours": 0
+  },
+  "sexe": "M",
+  "mesures": {
+    "masse": 150,
+    "pied": 29.5,
+    "bip": 35,
+    "fo": 45,
+    "dici": null,
+    "dice": null,
+    "fpg": null,
+    "fpd": null,
+    "dim": null,
+    "sternum": null,
+    "main": 25.4,
+    "vt": 220,
+    "vc": 145,
+    "pc": 130,
+    "pt": 126.4,
+    "pa": 95
+  },
+  "libelles": {
+    "masse": "Masse fœtale",
+    "pied": "Longueur pied",
+    "bip": "BIP",
+    "fo": "FO (fronto-occipital)",
+    "dici": "DICI",
+    "dice": "DICE",
+    "fpg": "FPG (fente palpébrale G)",
+    "fpd": "FPD (fente palpébrale D)",
+    "dim": "DIM (intermamelonnaire)",
+    "sternum": "Hauteur sternum",
+    "main": "Hauteur main",
+    "vt": "VT (vertex-talon)",
+    "vc": "VC (vertex-coccyx)",
+    "pc": "PC (périmètre crânien)",
+    "pt": "PT (périmètre thoracique)",
+    "pa": "PA (périmètre abdominal)"
+  },
+  "unites": {
+    "masse": "g",
+    "pied": "mm",
+    "bip": "mm",
+    "fo": "mm",
+    "dici": "mm",
+    "dice": "mm",
+    "fpg": "mm",
+    "fpd": "mm",
+    "dim": "mm",
+    "sternum": "mm",
+    "main": "mm",
+    "vt": "mm",
+    "vc": "mm",
+    "pc": "mm",
+    "pt": "mm",
+    "pa": "mm"
+  },
+  "ecarts": {
+    "masse": {
+      "GC": -2.06,
+      "MA": -1.27,
+      "MB": -1.81
+    },
+    "pied": {
+      "GC": -0.15,
+      "MA": -0.17,
+      "MB": 0
+    },
+    "bip": {
+      "MB": -2.86
+    },
+    "fo": {
+      "MB": -2.94
+    },
+    "main": {
+      "MB": 1.5
+    },
+    "vt": {
+      "GC": -1.29,
+      "MA": -0.47,
+      "MB": -0.56
+    },
+    "vc": {
+      "GC": -1.62,
+      "MA": -1.08,
+      "MB": -0.96
+    },
+    "pc": {
+      "GC": -2.91,
+      "MA": -2.31,
+      "MB": -2.09
+    },
+    "pt": {
+      "MB": 0
+    },
+    "pa": {
+      "MB": -0.65
+    }
+  },
+  "ecarts_non_arrondis": {
+    "masse": {
+      "GC": -2.061295971978984,
+      "MA": -1.2692307692307692,
+      "MB": -1.8093151948351396
+    },
+    "pied": {
+      "GC": -0.15151515151515152,
+      "MA": -0.16666666666666666,
+      "MB": 0
+    },
+    "bip": {
+      "MB": -2.8571428571428563
+    },
+    "fo": {
+      "MB": -2.9375000000000013
+    },
+    "main": {
+      "MB": 1.5000000000000013
+    },
+    "vt": {
+      "GC": -1.2865168539325846,
+      "MA": -0.47368421052631504,
+      "MB": -0.556962025316455
+    },
+    "vc": {
+      "GC": -1.618320610687022,
+      "MA": -1.076923076923077,
+      "MB": -0.957746478873239
+    },
+    "pc": {
+      "GC": -2.9069767441860463,
+      "MA": -2.3076923076923075,
+      "MB": -2.088888888888889
+    },
+    "pt": {
+      "MB": 0
+    },
+    "pa": {
+      "MB": -0.646153846153846
+    }
+  },
+  "percentiles": {
+    "masse": {
+      "GC": 1.9637406133394268,
+      "MA": 10.217938495690154,
+      "MB": 3.5201024850023908
+    },
+    "pied": {
+      "GC": 43.9784679817334,
+      "MA": 43.381616738909635,
+      "MB": 50
+    },
+    "bip": {
+      "MB": 0.21373669800862877
+    },
+    "fo": {
+      "MB": 0.1654350859547501
+    },
+    "main": {
+      "MB": 93.31927987311421
+    },
+    "vt": {
+      "GC": 9.913137034009845,
+      "MA": 31.786255725485933,
+      "MB": 28.87766875560147
+    },
+    "vc": {
+      "GC": 5.27967605739264,
+      "MA": 14.07573162550112,
+      "MB": 16.90953066789234
+    },
+    "pc": {
+      "GC": 0.18247016391052975,
+      "MA": 1.050812811375934,
+      "MB": 1.8358863134443797
+    },
+    "pt": {
+      "MB": 50
+    },
+    "pa": {
+      "MB": 25.90898631673329
+    }
+  },
+  "fictif": true
+}

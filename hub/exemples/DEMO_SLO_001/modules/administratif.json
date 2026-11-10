@@ -1,0 +1,88 @@
+{
+  "schema_version": "0.3.0",
+  "module": "administratif",
+  "module_version": "2.2.0",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "identite": {
+    "nom_mere": "DÉMONSTRATION",
+    "nom_naiss": null,
+    "prenom_mere": "CAS FICTIF",
+    "ddn_mere": null,
+    "prenom_foetus": "DEMO SLO",
+    "ipp": null,
+    "ipp_fetus": null,
+    "ins": null,
+    "id_ext": "DEMO_SLO_001",
+    "opposition": null
+  },
+  "circuit": {
+    "date_naissance": null,
+    "date_deces": null,
+    "date_reception": null,
+    "date_examen": null,
+    "medecin": null,
+    "medecin_rpps": null,
+    "service": "Démonstration — aucune donnée réelle",
+    "ville_maternite": null
+  },
+  "issue": {
+    "type_issue": "IMG",
+    "terme_sa": 19,
+    "terme_j": 0,
+    "sexe": "M",
+    "voie": null,
+    "multiple": null,
+    "indication": "FICTIF – TEST – Smith-Lemli-Opitz — Scénario entièrement fictif : anomalies échographiques et retard de croissance.",
+    "bamara": {
+      "birth": false,
+      "termination_type": "IMG",
+      "stp_type": null
+    }
+  },
+  "atcd_mat": {
+    "profession_mere": null,
+    "groupe_sanguin": null,
+    "rhesus": null,
+    "consanguinite": null,
+    "fdr": {
+      "hta": false,
+      "diabete": false,
+      "tabac": false,
+      "alcool": false
+    },
+    "atcd_medicaux": "Scénario fictif : antécédents sans particularité rapportée.",
+    "traitements": "Aucun traitement renseigné dans le scénario."
+  },
+  "atcd_obs": {
+    "gestite": 1,
+    "parite": 0,
+    "grossesses": []
+  },
+  "grossesse": {
+    "mode_conception": "SPONTANEE",
+    "amp_type": null,
+    "ddg": null,
+    "lieu_suivi": null,
+    "risque_t21": null,
+    "bhcg": null,
+    "pappa": null,
+    "lcc": null,
+    "cn": null,
+    "histoire_clinique": "CAS FICTIF : grossesse unique ; découverte à 19 SA d’un retard de croissance et d’anomalies génitales externes.",
+    "contexte_clinique": "FICTIF – TEST – Smith-Lemli-Opitz. CAS ENTIÈREMENT FICTIF — Démonstration pédagogique, sans valeur de diagnostic individuel. \n\nConstatations morphologiques simulées : fœtus masculin de 19 SA, de petit poids (150 g), avec réduction du périmètre crânien (130 mm), syndactylie cutanée bilatérale des deuxième et troisième orteils et sous-virilisation des organes génitaux externes (petit bourgeon génital, hypospadias proximal et scrotum bifide). \n\nHypothèse diagnostique : cet ensemble évoque un syndrome de Smith-Lemli-Opitz, sans permettre de l’affirmer morphologiquement. \n\nConfirmation à envisager : une confirmation reposerait sur l’étude biochimique des stérols, notamment du 7-déhydrocholestérol, et sur une analyse moléculaire de DHCR7, avec conseil génétique. Aucun de ces examens n’est réalisé dans ce scénario. Le sexe masculin du scénario est indiqué par un résultat prénatal fictif 46,XY. Le retard de croissance est suggéré par le contexte prénatal et les biométries ; leur interprétation tient compte du référentiel et du terme. Les examens histologiques simulés ne montrent pas de lésion spécifique. Les résultats chiffrés servent à éprouver le logiciel et ne constituent pas une nouvelle norme biométrique.",
+    "chronologie": []
+  },
+  "prenatal": {
+    "echo_t1": null,
+    "echo_t1_details": null,
+    "echo_t2": null,
+    "echo_t2_details": "Scénario simulé : petit gabarit fœtal, petit périmètre crânien et anomalie des organes génitaux externes.",
+    "echo_t3": null,
+    "echo_t3_details": null,
+    "autres_examens": "Résultat fictif 46,XY ; étude des stérols et de DHCR7 non réalisée."
+  },
+  "coherence": [],
+  "fictif": true
+}

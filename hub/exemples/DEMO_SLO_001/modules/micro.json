@@ -1,0 +1,293 @@
+{
+  "schema_version": "0.2.0",
+  "module": "micro",
+  "module_version": "1.0.1",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "terme_sa": 19,
+  "terme_jours": null,
+  "trame_attendue": 0,
+  "sections": [
+    {
+      "n": 1,
+      "rang": 1,
+      "organe": "cerveau",
+      "titre": "Système nerveux central",
+      "champs": [
+        {
+          "id": "s1_cerveau_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s1_cerveau_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s1_cerveau_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s1_cerveau_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "rang": 2,
+      "organe": "coeur",
+      "titre": "Cœur",
+      "champs": [
+        {
+          "id": "s2_coeur_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s2_coeur_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s2_coeur_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s2_coeur_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "rang": 3,
+      "organe": "poumon",
+      "titre": "Poumon",
+      "champs": [
+        {
+          "id": "s3_poumon_compte",
+          "label": "Compte radial alvéolaire",
+          "type": "num",
+          "valeur": null,
+          "unite": "alvéoles"
+        },
+        {
+          "id": "s3_poumon_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s3_poumon_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s3_poumon_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s3_poumon_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "rang": 4,
+      "organe": "foie",
+      "titre": "Foie",
+      "champs": [
+        {
+          "id": "s4_foie_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s4_foie_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s4_foie_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s4_foie_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "rang": 5,
+      "organe": "rein",
+      "titre": "Rein et voies urinaires",
+      "champs": [
+        {
+          "id": "s5_rein_compte",
+          "label": "Compte radial glomérulaire",
+          "type": "num",
+          "valeur": null,
+          "unite": "glomérules"
+        },
+        {
+          "id": "s5_rein_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s5_rein_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s5_rein_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s5_rein_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "rang": 6,
+      "organe": "genital",
+      "titre": "Appareil génital",
+      "champs": [
+        {
+          "id": "s6_genital_maturation",
+          "label": "Maturation",
+          "type": "axe",
+          "etat": "normal",
+          "termes": [],
+          "autre": null,
+          "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+        },
+        {
+          "id": "s6_genital_architecture",
+          "label": "Cytoarchitecture",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s6_genital_pathologie",
+          "label": "Lésions",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        },
+        {
+          "id": "s6_genital_retention",
+          "label": "Rétention",
+          "type": "axe",
+          "etat": null,
+          "termes": [],
+          "autre": null,
+          "note": null
+        }
+      ]
+    }
+  ],
+  "cliches_libres": [],
+  "fictif": true
+}

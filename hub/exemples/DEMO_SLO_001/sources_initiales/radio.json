@@ -1,0 +1,24 @@
+{
+  "terme": {
+    "sa": 19,
+    "jours": 0
+  },
+  "squelette": {
+    "aspect_general": "Examen simulé : minéralisation sans anomalie majeure ; pas de polydactylie ni de synostose identifiée. La syndactylie cutanée des orteils est une constatation clinique.",
+    "cotes": {
+      "droite": 12,
+      "gauche": 12
+    }
+  },
+  "biometries": {
+    "os_longs": {}
+  },
+  "maturation": [],
+  "module": "radio",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "fictif": true,
+  "schema_version": "0.1.0",
+  "module_version": "1.0.0"
+}

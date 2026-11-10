@@ -1,0 +1,233 @@
+{
+  "schema_version": "0.1.0",
+  "module": "examen_clinique",
+  "module_version": "1.0.1",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "trame_attendue": 15,
+  "etages": [
+    {
+      "id": "general",
+      "titre": "Général",
+      "items": [
+        {
+          "id": "aspect_general",
+          "label": "Aspect général",
+          "etat": "anormal",
+          "anomalies": [
+            "Petit gabarit"
+          ],
+          "precisions": "Petit poids pour le terme dans ce scénario fictif."
+        },
+        {
+          "id": "symetrie",
+          "label": "Symétrie",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "proportions",
+          "label": "Proportions",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "teguments",
+          "label": "Téguments",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "pilosite",
+          "label": "Pilosité",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "tete",
+      "titre": "Tête & face",
+      "items": [
+        {
+          "id": "crane",
+          "label": "Forme du crâne",
+          "etat": "anormal",
+          "anomalies": [
+            "Microcéphalie"
+          ],
+          "precisions": "Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées."
+        },
+        {
+          "id": "fontanelles",
+          "label": "Fontanelles / sutures",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "cheveux",
+          "label": "Implantation des cheveux",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "yeux",
+          "label": "Yeux & sourcils",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "nez",
+          "label": "Nez",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "bouche",
+          "label": "Bouche / palais",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "oreilles",
+          "label": "Oreilles",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "cou_thorax",
+      "titre": "Cou & thorax",
+      "items": [
+        {
+          "id": "cou",
+          "label": "Cou",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "thorax",
+          "label": "Thorax",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "abdomen",
+      "titre": "Abdomen, dos & cordon",
+      "items": [
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "dos",
+          "label": "Dos / rachis",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "cordon",
+          "label": "Cordon",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "perinee",
+      "titre": "Périnée",
+      "items": [
+        {
+          "id": "oge",
+          "label": "OGE",
+          "etat": "anormal",
+          "anomalies": [
+            "Sous-virilisation"
+          ],
+          "precisions": "Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY."
+        },
+        {
+          "id": "anus",
+          "label": "Anus",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "membres_sup",
+      "titre": "Membres supérieurs & mains",
+      "items": [
+        {
+          "id": "membres_sup",
+          "label": "Membres supérieurs",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "mains",
+          "label": "Mains",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "ongles",
+          "label": "Ongles",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        }
+      ]
+    },
+    {
+      "id": "membres_inf",
+      "titre": "Membres inférieurs & pieds",
+      "items": [
+        {
+          "id": "membres_inf",
+          "label": "Membres inférieurs",
+          "etat": "normal",
+          "anomalies": [],
+          "precisions": "Constatation simulée, sans particularité macroscopique."
+        },
+        {
+          "id": "pieds_morpho",
+          "label": "Pieds",
+          "etat": "anormal",
+          "anomalies": [
+            "Syndactylie 2–3 des pieds"
+          ],
+          "precisions": "Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie."
+        }
+      ]
+    }
+  ],
+  "retention": {
+    "maroun": 0
+  },
+  "fictif": true
+}

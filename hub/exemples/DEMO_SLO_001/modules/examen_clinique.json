@@ -1,0 +1,315 @@
+{
+  "schema_version": "0.3.0",
+  "module": "examen_clinique",
+  "module_version": "2.2.1",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "trame_attendue": 15,
+  "retention": {
+    "maroun": 0,
+    "genest": null,
+    "genest_h": null,
+    "genest_libelle": null
+  },
+  "etages": [
+    {
+      "id": "general",
+      "titre": "Général",
+      "items": [
+        {
+          "id": "aspect_general",
+          "label": "Aspect général",
+          "etat": "anormal",
+          "anomalies": [
+            {
+              "label": "Petit pour l’âge gestationnel",
+              "hpo_id": "HP:0001518"
+            }
+          ],
+          "vu_normal": [],
+          "precisions": "Petit poids pour le terme dans ce scénario fictif."
+        },
+        {
+          "id": "symetrie",
+          "label": "Symétrie",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001507"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "proportions",
+          "label": "Proportions",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001507"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "teguments",
+          "label": "Téguments",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001574"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "pilosite",
+          "label": "Pilosité",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0011362"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "tete",
+      "titre": "Tête & face",
+      "items": [
+        {
+          "id": "crane",
+          "label": "Forme du crâne",
+          "etat": "anormal",
+          "anomalies": [
+            {
+              "label": "Microcéphalie",
+              "hpo_id": "HP:0000252"
+            }
+          ],
+          "vu_normal": [],
+          "precisions": "Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées."
+        },
+        {
+          "id": "fontanelles",
+          "label": "Fontanelles / sutures",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0011328"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "cheveux",
+          "label": "Implantation des cheveux",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0011362"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "yeux",
+          "label": "Yeux & sourcils",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000478"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "nez",
+          "label": "Nez",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000366"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "bouche",
+          "label": "Bouche / palais",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000153"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "oreilles",
+          "label": "Oreilles",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000598"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "cou_thorax",
+      "titre": "Cou & thorax",
+      "items": [
+        {
+          "id": "cou",
+          "label": "Cou",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0025668"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "thorax",
+          "label": "Thorax",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000765"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "abdomen",
+      "titre": "Abdomen, dos & cordon",
+      "items": [
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001438",
+            "HP:0010866"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "dos",
+          "label": "Dos / rachis",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0000925",
+            "HP:0010301"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "cordon",
+          "label": "Cordon",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0010881"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "perinee",
+      "titre": "Périnée",
+      "items": [
+        {
+          "id": "oge",
+          "label": "OGE",
+          "etat": "anormal",
+          "anomalies": [
+            {
+              "label": "Hypospadias",
+              "hpo_id": "HP:0000047"
+            }
+          ],
+          "vu_normal": [],
+          "precisions": "Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY."
+        },
+        {
+          "id": "anus",
+          "label": "Anus",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0004378"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "membres_sup",
+      "titre": "Membres supérieurs & mains",
+      "items": [
+        {
+          "id": "membres_sup",
+          "label": "Membres supérieurs",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0002817"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "mains",
+          "label": "Mains",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001155"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "ongles",
+          "label": "Ongles",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0001597"
+          ],
+          "precisions": null
+        }
+      ]
+    },
+    {
+      "id": "membres_inf",
+      "titre": "Membres inférieurs & pieds",
+      "items": [
+        {
+          "id": "membres_inf",
+          "label": "Membres inférieurs",
+          "etat": "normal",
+          "anomalies": [],
+          "vu_normal": [
+            "HP:0002814"
+          ],
+          "precisions": null
+        },
+        {
+          "id": "pieds_morpho",
+          "label": "Pieds",
+          "etat": "anormal",
+          "anomalies": [
+            {
+              "label": "Syndactylie",
+              "hpo_id": "HP:0004691"
+            }
+          ],
+          "vu_normal": [],
+          "precisions": "Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie."
+        }
+      ]
+    }
+  ],
+  "cliches_libres": [],
+  "fictif": true
+}
