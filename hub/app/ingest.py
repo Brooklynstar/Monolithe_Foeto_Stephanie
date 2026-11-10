@@ -907,8 +907,11 @@ def rendre_courante(cx, sid):
 
 def ingerer_fichier(cx, racine: Path, chemin: Path, dry=False):
     """Ingère un JSON d'arrivee/ et retire le fichier une fois archivé."""
-    etat, msg, sid = ingerer(cx, racine, chemin.read_bytes(), chemin.name,
-                             provenance="telephone", dry=dry)
+    from dossiers_portables import importer
+    brut = chemin.read_bytes()
+    resultat = importer(cx, racine, brut, chemin.name, dry=dry)
+    etat, msg, sid = resultat if resultat is not None else ingerer(
+        cx, racine, brut, chemin.name, provenance="telephone", dry=dry)
     if not dry and etat == "info":
         chemin.unlink(missing_ok=True)
     return etat, msg

@@ -1,0 +1,390 @@
+{
+  "schema_version": "0.1.0",
+  "module_version": "1.0.0",
+  "etapes": [
+    {
+      "id": "prelevement",
+      "titre": "Prélèvement et fixation",
+      "champs": [
+        {
+          "id": "preleve",
+          "label": "Encéphale prélevé",
+          "type": "bool",
+          "valeur": null
+        },
+        {
+          "id": "fixation",
+          "label": "Fixation",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "duree_fixation",
+          "label": "Durée de fixation",
+          "type": "num",
+          "unite": "jours",
+          "valeur": null
+        },
+        {
+          "id": "etat_reception",
+          "label": "État à la réception",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "fosse_post",
+          "label": "Fosse postérieure",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "prelevement_detail",
+          "label": "Prélèvement — précisions",
+          "type": "txt",
+          "valeur": null
+        }
+      ]
+    },
+    {
+      "id": "aspect",
+      "titre": "Aspect général — les six faces",
+      "champs": [
+        {
+          "id": "symetrie",
+          "label": "Symétrie hémisphérique",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "consistance",
+          "label": "Consistance après fixation",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "aspect_detail",
+          "label": "Aspect général — précisions",
+          "type": "txt",
+          "valeur": "Scénario fictif : encéphale de petit volume, symétrique."
+        }
+      ]
+    },
+    {
+      "id": "macro",
+      "titre": "Description macroscopique",
+      "champs": [
+        {
+          "id": "meninges",
+          "label": "Méninges",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "meninges_detail",
+          "label": "Méninges — précisions",
+          "type": "txt",
+          "valeur": null
+        },
+        {
+          "id": "gyration",
+          "label": "Gyration",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "gyration_detail",
+          "label": "Gyration — précisions",
+          "type": "txt",
+          "valeur": "Aspect simulé compatible avec 19 SA, sans anomalie majeure identifiée."
+        },
+        {
+          "id": "willis",
+          "label": "Polygone de Willis",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "willis_detail",
+          "label": "Polygone de Willis — précisions",
+          "type": "txt",
+          "valeur": null
+        },
+        {
+          "id": "mamillaires",
+          "label": "Corps mamillaires",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "colliculi",
+          "label": "Colliculi",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "macro_detail",
+          "label": "Autres constatations macroscopiques",
+          "type": "txt",
+          "valeur": "Microcéphalie dans le contexte malformatif décrit ; absence de lésion macroscopique spécifique simulée."
+        }
+      ]
+    },
+    {
+      "id": "biometrie",
+      "titre": "Biométries",
+      "champs": [
+        {
+          "id": "masse_enc",
+          "label": "Masse de l'encéphale fixé",
+          "type": "mes",
+          "unite": "g",
+          "valeur": null
+        },
+        {
+          "id": "masse_cerv",
+          "label": "Masse de l'étage infratentoriel",
+          "type": "mes",
+          "unite": "g",
+          "valeur": null
+        },
+        {
+          "id": "ratio_ce",
+          "label": "Rapport infratentoriel / encéphale",
+          "type": "calc",
+          "unite": "%",
+          "valeur": null
+        },
+        {
+          "id": "DOFD",
+          "label": "Diamètre occipito-frontal droit",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "DOFG",
+          "label": "Diamètre occipito-frontal gauche",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "DT",
+          "label": "Diamètre transverse (BIP cérébral)",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "DTC",
+          "label": "Diamètre transverse du cervelet",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "HautVermis",
+          "label": "Hauteur du vermis",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        }
+      ]
+    },
+    {
+      "id": "cervelet",
+      "titre": "Cervelet et aqueduc",
+      "champs": [
+        {
+          "id": "cervelet_aspect",
+          "label": "Cervelet — aspect",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "cervelet_detail",
+          "label": "Cervelet — précisions",
+          "type": "txt",
+          "valeur": null
+        },
+        {
+          "id": "aqueduc",
+          "label": "Aqueduc de Sylvius",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "aqueduc_detail",
+          "label": "Aqueduc — précisions",
+          "type": "txt",
+          "valeur": null
+        },
+        {
+          "id": "tronc",
+          "label": "Tronc cérébral",
+          "type": "chips",
+          "valeurs": []
+        }
+      ]
+    },
+    {
+      "id": "corps_calleux",
+      "titre": "Corps calleux",
+      "champs": [
+        {
+          "id": "cc",
+          "label": "Corps calleux",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "CC",
+          "label": "Longueur du corps calleux",
+          "type": "mes",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "cc_detail",
+          "label": "Corps calleux — précisions",
+          "type": "txt",
+          "valeur": null
+        },
+        {
+          "id": "ventricules",
+          "label": "Ventricules latéraux",
+          "type": "chips",
+          "valeurs": []
+        }
+      ]
+    },
+    {
+      "id": "oculaire",
+      "titre": "Globes oculaires",
+      "champs": [
+        {
+          "id": "oeil_d_dt",
+          "label": "Œil droit — diamètre transverse",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oeil_d_dap",
+          "label": "Œil droit — diamètre antéro-postérieur",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oeil_d_dc",
+          "label": "Œil droit — diamètre cranio-caudal",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oeil_g_dt",
+          "label": "Œil gauche — diamètre transverse",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oeil_g_dap",
+          "label": "Œil gauche — diamètre antéro-postérieur",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oeil_g_dc",
+          "label": "Œil gauche — diamètre cranio-caudal",
+          "type": "num",
+          "unite": "mm",
+          "valeur": null
+        },
+        {
+          "id": "oculaire_detail",
+          "label": "Globes oculaires — précisions",
+          "type": "txt",
+          "valeur": null
+        }
+      ]
+    },
+    {
+      "id": "tranches_hd",
+      "titre": "Tranches — hémisphère droit",
+      "champs": [
+        {
+          "id": "thd",
+          "label": "Constatations — hémisphère droit",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "thd_detail",
+          "label": "Hémisphère droit — précisions",
+          "type": "txt",
+          "valeur": null
+        }
+      ]
+    },
+    {
+      "id": "tranches_hg",
+      "titre": "Tranches — hémisphère gauche",
+      "champs": [
+        {
+          "id": "thg",
+          "label": "Constatations — hémisphère gauche",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "thg_detail",
+          "label": "Hémisphère gauche — précisions",
+          "type": "txt",
+          "valeur": null
+        }
+      ]
+    },
+    {
+      "id": "prelevements",
+      "titre": "Prélèvements pour histologie",
+      "champs": [
+        {
+          "id": "blocs",
+          "label": "Régions prélevées",
+          "type": "chips",
+          "valeurs": []
+        },
+        {
+          "id": "congelation",
+          "label": "Congélation réalisée",
+          "type": "bool",
+          "valeur": null
+        },
+        {
+          "id": "prelev_detail",
+          "label": "Prélèvements — précisions",
+          "type": "txt",
+          "valeur": "Prélèvements simulés : cerveau, cœur, poumons, foie, reins, gonades et placenta. Aucun matériel biologique réel."
+        },
+        {
+          "id": "commentaire",
+          "label": "Commentaire libre",
+          "type": "txt",
+          "valeur": "Examen entièrement simulé. Constatations et hypothèse diagnostique distinguées dans la conclusion du compte rendu."
+        }
+      ]
+    }
+  ],
+  "terme_sa": 19,
+  "terme_jours": 0,
+  "maceration_maroun": 0,
+  "module": "neuropath",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "fictif": true
+}

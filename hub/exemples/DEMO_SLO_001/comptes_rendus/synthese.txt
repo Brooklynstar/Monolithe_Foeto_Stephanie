@@ -1,0 +1,55 @@
+DEMO_SLO_001 — synthèse
+========================
+
+19 SA · sexe M · IMG · dossier complet
+Indication : DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz — Cas fictif : anomalies échographiques et retard de croissance.
+Remarque de suivi : DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz — CAS ENTIÈREMENT FICTIF
+
+MODULES
+  ✓ administratif        v2.1.0 · poste · Codex · repris le 10/11/2026
+  ✓ autopsie             v1.0.3 · poste · Codex · repris le 10/11/2026
+  ✓ biometrie_clinique   v1.4.0 · poste · Codex · repris le 10/11/2026
+  ✓ examen_clinique      v1.0.1 · poste · Codex · repris le 10/11/2026
+  ✓ macro_placenta       v1.0.0 · poste · Codex · repris le 10/11/2026
+  ✓ micro                v1.0.0 · poste · Codex · repris le 10/11/2026
+  ✓ neuropath            v1.0.0 · poste · Codex · repris le 10/11/2026
+  ✓ radio                v1.0.0 · poste · Codex · repris le 10/11/2026
+
+CE QUI SORT DE LA NORME
+  · Examen externe — Petit gabarit : Aspect général — Petit poids pour le terme dans ce scénario fictif.
+  · Examen externe — Microcéphalie : Forme du crâne — Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées.
+  · Examen externe — Sous-virilisation : OGE — Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY.
+  · Examen externe — Syndactylie 2–3 des pieds : Pieds — Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie.
+  · Biométrie externe — BIP : 35 mm (MB −2,86 DS · P0,21)
+  · Biométrie externe — FO (fronto-occipital) : 45 mm (MB −2,94 DS · P0,17)
+  · Biométrie externe — Masse fœtale : 150 g (GC −2,06 DS · P1,96 ; MA −1,27 DS · P10,22 ; MB −1,81 DS · P3,52)
+  · Biométrie externe — PC (périmètre crânien) : 130 mm (GC −2,91 DS · P0,18 ; MA −2,31 DS · P1,05 ; MB −2,09 DS · P1,84)
+  · Rapport fœto-placentaire 1.67 — à situer dans son percentile, pas à lire seul
+
+CHIFFRES
+  Examen externe : 24/24 item(s) renseigné(s), 4 anormal(aux).
+  Biométrie : 10 mesure(s).
+  · BIP : 35 mm — MB −2,86 DS · P0,21
+  · FO (fronto-occipital) : 45 mm — MB −2,94 DS · P0,17
+  · Hauteur main : 25.4 mm — MB +1,50 DS · P93,32
+  · Masse fœtale : 150 g — GC −2,06 DS · P1,96 ; MA −1,27 DS · P10,22 ; MB −1,81 DS · P3,52
+  · PA (périmètre abdominal) : 95 mm — MB −0,65 DS · P25,91
+  · PC (périmètre crânien) : 130 mm — GC −2,91 DS · P0,18 ; MA −2,31 DS · P1,05 ; MB −2,09 DS · P1,84
+  · Longueur pied : 29.5 mm — GC −0,15 DS · P43,98 ; MA −0,17 DS · P43,38 ; MB +0,00 DS · P50,00
+  · PT (périmètre thoracique) : 126.4 mm — MB +0,00 DS · P50,00
+  · VC (vertex-coccyx) : 145 mm — GC −1,62 DS · P5,28 ; MA −1,08 DS · P14,08 ; MB −0,96 DS · P16,91
+  · VT (vertex-talon) : 220 mm — GC −1,29 DS · P9,91 ; MA −0,47 DS · P31,79 ; MB −0,56 DS · P28,88
+  Microscopie : 7 organe(s), 7 champ(s) renseigné(s).
+  Placenta : macroscopie saisie.
+
+CONCLUSION — CAS FICTIF
+CAS ENTIÈREMENT FICTIF — Démonstration pédagogique, sans valeur de diagnostic individuel. 
+
+Constatations morphologiques simulées : fœtus masculin de 19 SA, de petit poids (150 g), avec réduction du périmètre crânien (130 mm), syndactylie cutanée bilatérale des deuxième et troisième orteils et sous-virilisation des organes génitaux externes (petit bourgeon génital, hypospadias proximal et scrotum bifide). 
+
+Hypothèse diagnostique : cet ensemble évoque un syndrome de Smith-Lemli-Opitz, sans permettre de l’affirmer morphologiquement. 
+
+Confirmation à envisager : une confirmation reposerait sur l’étude biochimique des stérols, notamment du 7-déhydrocholestérol, et sur une analyse moléculaire de DHCR7, avec conseil génétique. Aucun de ces examens n’est réalisé dans ce scénario. Le sexe masculin du scénario est indiqué par un résultat prénatal fictif 46,XY. Le retard de croissance est suggéré par le contexte prénatal et les biométries ; leur interprétation tient compte du référentiel et du terme. Les examens histologiques simulés ne montrent pas de lésion spécifique. Les résultats chiffrés servent à éprouver le logiciel et ne constituent pas une nouvelle norme biométrique.
+
+--
+Produit le 10/11/2026. Brouillon, à relire.

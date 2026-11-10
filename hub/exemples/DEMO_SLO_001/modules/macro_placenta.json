@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.2.0",
+  "module": "macro_placenta",
+  "module_version": "1.1.1",
+  "dossier": "DEMO_SLO_001",
+  "operateur": "Codex",
+  "exported_at": "2026-11-10T09:00:00Z",
+  "trame_attendue": 3,
+  "sections": [
+    {
+      "id": "general",
+      "titre": "Terme & contexte fœtal",
+      "champs": {
+        "indication": null,
+        "indication_detail": null,
+        "terme_sa": 19,
+        "terme_jours": null,
+        "terme_source": null,
+        "masse_foetale": 150,
+        "sexe": null
+      }
+    },
+    {
+      "id": "galette",
+      "titre": "Galette — biométrie et forme",
+      "champs": {
+        "grand_axe": 9,
+        "petit_axe": 8,
+        "epaisseur": 1.2,
+        "forme": null,
+        "completude": []
+      }
+    },
+    {
+      "id": "choriale",
+      "titre": "Plaque choriale",
+      "champs": {
+        "etat_choriale": [],
+        "remarques_choriale": null
+      }
+    },
+    {
+      "id": "basale",
+      "titre": "Plaque basale",
+      "champs": {
+        "etat_basale": [],
+        "remarques_basale": null
+      }
+    },
+    {
+      "id": "cordon",
+      "titre": "Cordon ombilical",
+      "champs": {
+        "cordon_insertion": "Centrale",
+        "cordon_longueur": 22,
+        "cordon_spiralisation": null,
+        "cordon_particularites": [],
+        "remarques_cordon": "Deux artères et une veine dans le scénario fictif."
+      }
+    },
+    {
+      "id": "membranes",
+      "titre": "Membranes",
+      "champs": {
+        "membranes_insertion": null,
+        "membranes_marginee_pct": null,
+        "membranes_aspect": null,
+        "remarques_membranes": null
+      }
+    },
+    {
+      "id": "paree",
+      "titre": "Placenta paré",
+      "champs": {
+        "masse": 90
+      }
+    },
+    {
+      "id": "tranches",
+      "titre": "Tranches de section & lésions",
+      "champs": {
+        "remarques_tranches": "Parenchyme homogène simulé, sans lésion focale identifiée."
+      }
+    }
+  ],
+  "tranches": [],
+  "lesions": [],
+  "cliches_libres": [],
+  "fictif": true
+}

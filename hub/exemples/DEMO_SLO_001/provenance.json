@@ -1,0 +1,16 @@
+{
+  "commit_source": "672adfe2a307dc2366e286b576b43fe8758064ee",
+  "fichiers_conserves_sha256": {
+    "sources_initiales/administratif.json": "31de1be21b3ee7065613275368721adf56ce7d73b05104a2ce67da15b4453361",
+    "sources_initiales/neuropath.json": "63c3cfde5ce28e7db25e2f0de9768708f4e7c1f51b9da1e0ea945851155671cc",
+    "sources_initiales/micro.json": "77c596063c14fa9ef5ce579022bfd02ef338e418ad45715565aa55c6fd2a4ddd",
+    "sources_initiales/autopsie.json": "c6aa511d205ea4e2195946b417083ed59f46336edaa28fae9ec00a91d4c2df4b",
+    "sources_initiales/biometrie_clinique.json": "2a85cffaf55b296ca722ebe04a1c0a0f1d11c0b679bc84d86327199e2b910492",
+    "sources_initiales/examen_clinique.json": "674872db29998296781e81a5c505bbaad071303e9692221e4bc2cec90a39f52b",
+    "sources_initiales/macro_placenta.json": "05d877cc55ad4dc3f34bc1e353e2e4d1fe42c7704ccf23ede6e27f7811e77015",
+    "sources_initiales/radio.json": "816cf5ae2aab54492ebe8c1fcaf211f5ce42bad7cd4d7c46c3ba46370b221809",
+    "comptes_rendus/manifest.json": "1cda12d30125c76d36c8a40eeddfcce55ab6b190a2893db175afcc06d9821141",
+    "comptes_rendus/complet.html": "887e3b6fed21ce44f401eb98ab3a3f058c5be837b09b06d48edfb5144685d450",
+    "comptes_rendus/synthese.txt": "0624abd117e69600a6270e75135a0cd003c4714c8e85b85415b83cba8ee1b5e0"
+  }
+}

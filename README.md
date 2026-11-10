@@ -168,3 +168,10 @@ Creative Commons n'accorde **pas de licence de brevet** et n'a pas de notion de
 l'identique s'applique aussi aux dérivés des scripts. Si un usage logiciel plus
 strict devient nécessaire, PolyForm Noncommercial 1.0.0 dit la même chose en
 termes faits pour du code.
+
+### Dossier fictif permanent de test
+
+Importer une seule fois `hub/exemples/DEMO_SLO_001.json` depuis **Ingestion**.
+Le dossier **FICTIF – TEST – Smith-Lemli-Opitz** rejoint la liste générale et
+reste modifiable dans les modules ordinaires, sans chargement au démarrage.
+[Utilisation, conservation des sources et tests](docs/DOSSIER_TEST_SLO.md).
