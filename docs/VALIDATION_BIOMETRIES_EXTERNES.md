@@ -85,3 +85,12 @@ Conserver `percentiles_biometries` et `port_5006` jusqu'à validation explicite.
 Elles pourront être proposées à la suppression après validation complète et
 vérification de l'absence de développements encore utiles ; rien n'est supprimé.
 Aucune fusion ni création de `stephanie_stable`.
+
+## Séparation du dossier fictif permanent
+
+Le dossier SLO, ses sources et ses comptes rendus ont été récupérés dans
+`dossier_demonstration`, branche indépendante issue de main. Les scripts,
+base isolée et conditions spécifiques au dossier fictif ont été retirés de
+cette branche. Les améliorations générales de présentation des biométries
+dans le Hub et à l'impression restent ici, sans identifiant de dossier codé
+en dur. Les tables et moteurs de calcul restent inchangés.

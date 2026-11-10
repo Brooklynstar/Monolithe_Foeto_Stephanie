@@ -371,11 +371,7 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
 {% endif %}
 
 {{ titre("Conclusion") }}
-{% if admin.demonstration and admin.demonstration.fictif == true and dossier == 'DEMO_SLO_001' %}
-  {{ admin.demonstration.conclusion }}
-{% else %}
   À rédiger.
-{% endif %}
 {% if retenues %}
 
   Éléments retenus pour la conclusion :

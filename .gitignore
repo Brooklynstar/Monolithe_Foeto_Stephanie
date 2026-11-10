@@ -31,7 +31,3 @@ micro/microscopie.html
 hub/biblio/
 signes_*.js
 graphify-out/
-
-# Base locale exclusivement réservée à la démonstration fictive
-/.demo-slo/
-/.demo-python/

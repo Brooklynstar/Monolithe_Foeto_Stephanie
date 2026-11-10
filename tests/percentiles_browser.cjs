@@ -191,6 +191,23 @@ function verifierExport(doc, d){
       await context.close();
       compteur.dossiers++;
     }
+    // Fiche biométrique ordinaire du Hub : zéro et colonnes sans référence.
+    const fiche = await browser.newPage();
+    await fiche.goto(url);
+    const presentationHub = await fiche.evaluate(()=>{
+      const conteneur=document.createElement('div');
+      conteneur.innerHTML=rendreMesures({mesures:{zero:0,absente:null},
+        ecarts_non_arrondis:{zero:{GC:0}},percentiles:{zero:{GC:50}}});
+      document.body.append(conteneur);
+      const table=conteneur.querySelector('table');
+      return {headers:[...table.querySelectorAll('th')].map(c=>c.textContent),
+        text:table.textContent,font:getComputedStyle(table).fontFamily,size:getComputedStyle(table).fontSize};
+    });
+    assert.deepEqual(presentationHub.headers,['Mesure','Valeur','Z-score GC','Percentile GC']);
+    assert.ok(presentationHub.text.includes('P50,00'));
+    assert.ok(presentationHub.font.startsWith('Cambria'));
+    assert.ok(Math.abs(parseFloat(presentationHub.size)-44/3)<.1);
+    await fiche.close();
     // Ancien export importé par le vrai sélecteur de fichier, puis réexporté.
     const context = await browser.newContext({acceptDownloads:true});
     const ancien = JSON.parse(fs.readFileSync(path.join(depot, 'hub/exemples/26P0123_biometrie_clinique.json'), 'utf8'));

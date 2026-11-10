@@ -79,10 +79,7 @@ CHIFFRES
   Clichés : {{ cliches | length }}.
 {% endif %}
 
-{% if admin.demonstration and admin.demonstration.fictif == true and dossier == 'DEMO_SLO_001' %}
-CONCLUSION — CAS FICTIF
-{{ admin.demonstration.conclusion }}
-{% endif %}
+
 
 --
 Produit le {{ genere_at | dtc }}. Brouillon, à relire.
