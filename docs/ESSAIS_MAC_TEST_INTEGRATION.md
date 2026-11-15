@@ -2,10 +2,105 @@
 
 Cette branche réunit `dossier_demonstration`, `percentiles_biometries_externes`
 , `raccourcis_lancement`, `percentiles_masses_organes` et
-`percentiles_placenta`. Elle utilise **le serveur ordinaire**, exclusivement
+`percentiles_placenta`, avec le nouveau module `Placenta` fusionné depuis
+`module_placenta`. Elle utilise **le serveur ordinaire**, exclusivement
 sur `127.0.0.1`, avec **5005** comme port par défaut. Aucun hébergement distant,
 aucun serveur ou écran réservé au dossier fictif, aucune base de démonstration.
 Le port 5005 reste le défaut de la branche indépendante `raccourcis_lancement`.
+
+## Mise à jour du 15 novembre 2026 — nouveau module Placenta
+
+Fusion sans conflit de `module_placenta` (`ecac7375bc6823ed5d9ce8b393bda28b6790bd5c`)
+dans `test-integration` (point de départ `a59f0323a85396de161fc80b86761f42a94cec87`).
+La branche source `module_placenta` reste disponible séparément. L'ancien module
+**Macro placenta**, ses calculs et ses tables de référence sont conservés.
+Le nouvel onglet **Placenta** rassemble **Macroscopie**, **Microscopie**,
+**Conclusion**, dans cet ordre. [Relevé et libellés à vérifier](PLACENTA.md).
+
+### Récupérer et essayer avec GitHub Desktop sur Mac
+
+Pour un essai isolé, sans toucher à votre installation habituelle :
+
+1. Arrêter Monolithe avec **Ctrl+C** dans son Terminal pour libérer le port 5005.
+2. Dans **GitHub Desktop → File → Clone Repository… → URL**, saisir
+   `https://github.com/Brooklynstar/Monolithe_Foeto_Stephanie.git`.
+   Choisir un **nouveau dossier local**, par exemple `Monolithe-test-integration`,
+   puis **Clone**. Si ce clone d'essai existe déjà, le sélectionner dans
+   **Current Repository**, puis cliquer **Fetch origin**.
+3. Dans **Current Branch**, sélectionner **test-integration** (chercher ce nom
+   dans la liste des branches distantes si nécessaire). Cliquer **Pull origin**
+   si ce bouton apparaît après **Fetch origin**. Ne pas choisir `module_placenta`
+   pour cet essai : `test-integration` réunit les deux modules et les percentiles.
+4. Vérifier le propriétaire du dépôt : **Repository → Repository Settings… →
+   Remote** doit indiquer votre fork `Brooklynstar/Monolithe_Foeto_Stephanie`.
+   Vérifier **Current Branch : test-integration**, puis **Repository → Show in Finder**.
+5. Dans ce nouveau dossier, double-cliquer **serveur.command**. Python 3.10 ou
+   plus récent est nécessaire ; le lanceur prépare son environnement et ses
+   dépendances au premier lancement. Laisser le Terminal ouvert.
+   Monolithe s'ouvre sur **http://127.0.0.1:5005**.
+6. Dans **Ingestion → Déposer des JSON → les choisir**, sélectionner le fichier
+   **hub/exemples/DEMO_SLO_001.json** de ce clone. La reprise est automatique.
+   Si ce dossier est déjà présent dans la base choisie, l'ouvrir directement.
+7. Revenir à **Dossiers** et ouvrir **DEMO_SLO_001**. Saisir vos initiales dans
+   le bandeau. L'onglet **Placenta → Le saisir maintenant** ouvre les trois
+   sections. Après saisie, cliquer **Enregistrer au hub**, revenir à **Dossiers**,
+   puis **Placenta → Rouvrir ce module** pour retrouver les valeurs.
+8. Ouvrir aussi **macro placenta → Rouvrir ce module** : les données du dossier
+   fourni comprennent 19 SA, une masse placentaire parée de 90 g, des axes de
+   9 × 8 cm et un cordon de 22 cm. À 19 SA, l'absence de percentile Redline
+   est attendue et expliquée à l'écran (référence exploitable de 22 à 42 SA).
+
+Ce clone neuf utilise son propre `hub/hub.sqlite`, créé au premier lancement.
+Les nouvelles saisies restent dans ce répertoire local et ne doivent pas être
+commitées. Pour continuer à utiliser votre installation et votre base habituelles,
+voir les précautions et le réglage `base_locale.txt` décrits plus bas. Ne pas
+remplacer une base existante avec une base d'essai.
+
+Si macOS refuse l'exécution du lanceur, ouvrir un Terminal **dans ce dossier** :
+
+```sh
+chmod +x serveur.command hub/app/serveur.command
+./serveur.command
+```
+
+### Résultats réellement exécutés après fusion
+
+Environnement : Linux, Python 3.12 et Chromium 156. Pas d'essai natif macOS.
+Aucun conflit de fusion et aucune correction de code fonctionnel nécessaire.
+
+- **37 tests existants réussis**, dont les 918 cas Python/JavaScript/calculateur
+  unifié des percentiles placentaires et les autotests des modules.
+- **1 nouveau test navigateur d'intégration réussi** : vrai serveur ordinaire
+  sur **5005**, import du fichier exact `hub/exemples/DEMO_SLO_001.json` par
+  l'interface Ingestion, puis accès aux deux onglets depuis le dossier.
+- **32 champs et 155 choix** comparés au relevé ; les trois sections ouvertes
+  dans l'ordre et renseignées, y compris le texte libre de Cordon.
+- Après fermeture du navigateur et arrêt/redémarrage du processus serveur sur
+  la même base temporaire : les valeurs des trois sections sont retrouvées ;
+  les **huit saisies préexistantes** et les **deux CR historiques** sont inchangés.
+- Macro placenta : **90 g à 19 SA**, axes et cordon retrouvés ; absence attendue
+  de percentile Redline, avec le motif de limite affiché.
+- Cas positif distinct, sans changer le terme du SLO : **28 SA, 214 g frais paré
+  → P50**, identique dans le navigateur et l'API ; Z brut **−0,13636…**,
+  aucun percentile exact interpolé. Poids fixé exclu de la comparaison.
+- **76 contrôles des comptes rendus réussis**. Aucune erreur JavaScript dans
+  le nouveau parcours. Le fichier SLO source reste identique octet pour octet.
+
+La base et les saisies générées vivent dans un répertoire temporaire supprimé
+à la fin du test. Aucun fichier de données supplémentaire n'est versionné.
+
+Commandes de validation :
+
+```sh
+python -m unittest discover -s tests -p 'test_*.py' -v
+python hub/outils/verifier_cr.py
+```
+
+Le test ajouté s'exécute aussi seul avec
+`python -m unittest discover -s tests -p test_reunion_placenta.py -v`.
+Les bancs nécessitent Python Playwright (`pip install playwright`), Node
+Playwright (`npm install playwright` hors du dépôt), et leurs navigateurs de test.
+`MONOLITHE_CHROMIUM` permet de désigner un Chromium déjà installé.
 
 ## Récupérer la version sans écraser vos données
 
