@@ -8,6 +8,97 @@ sur `127.0.0.1`, avec **5005** comme port par défaut. Aucun hébergement distan
 aucun serveur ou écran réservé au dossier fictif, aucune base de démonstration.
 Le port 5005 reste le défaut de la branche indépendante `raccourcis_lancement`.
 
+## Correctif Placenta 1.1.0 — présentation et calculs
+
+La correction est produite et testée **sur la branche autonome `module_placenta`**,
+puis fusionnée dans `test-integration`. Sa version source est `480e177`.
+Le module affiche **v1.1.0** dans son en-tête. Les deux branches contiennent
+le même fichier `Macro/placenta.html`, le même moteur et la même liaison des mesures.
+[Description, articulation des données et captures comparatives](PLACENTA.md).
+
+Les 32 champs et 155 choix des sections 18–20 sont conservés. La présentation
+reprend les composants de Macro placenta, et les quatre mesures communes
+(poids, longueur, largeur, épaisseur) sont partagées à l'enregistrement, dans
+les deux sens. Les anciennes versions restent dans l'historique. Une divergence
+historique est affichée avant tout remplacement. Les autres constatations et
+les clichés sont conservés.
+
+Le calcul apparaît à côté des mesures. Une transcription historique du champ
+Percentile placenta reste préservée ; les nouvelles saisies peuvent recevoir
+la position calculée automatiquement. À 19 SA, le calcul signale sa limite ;
+le dossier SLO reste à son terme d'origine.
+
+### Télécharger avec Safari et retrouver ses dossiers
+
+1. Dans l'installation actuellement utilisée, ouvrir
+   **http://127.0.0.1:5005/api/etat** dans Safari. Relever la valeur **racine** :
+   elle donne le dossier de données réellement utilisé. En conserver une
+   sauvegarde avec la fonction Sauvegarde de Monolithe.
+2. Arrêter ce serveur avec **Ctrl+C** dans son Terminal.
+3. Télécharger le nouveau code :
+   https://github.com/Brooklynstar/Monolithe_Foeto_Stephanie/archive/refs/heads/test-integration.zip
+4. Ouvrir ce téléchargement depuis la flèche des téléchargements de Safari,
+   puis le décompresser dans un **nouveau dossier**. Ne pas remplacer l'ancien
+   dossier, ni copier son ancien code sur le nouveau.
+5. Dans le **nouveau dossier de code**, créer `base_locale.txt`, à côté de
+   `serveur.command`. Ce fichier doit contenir seulement le chemin **racine**
+   relevé à l'étape 1, sur une seule ligne. Avec TextEdit : **Format → Convertir
+   au format texte**, puis enregistrer sous `base_locale.txt` sans extension
+   `.rtf` ni `.txt` supplémentaire. Exemple si vos données sont toujours dans
+   l'emplacement précédemment indiqué :
+
+   ```text
+   /Users/stephaniedelaunay/Applications_locales/Monolithe_Foeto_Stephanie-test-integration/hub
+   ```
+
+   Pour essayer sans toucher aux données habituelles, on peut indiquer à la
+   place le chemin d'une **copie complète** du répertoire de données, faite
+   après arrêt du serveur. Ne pas faire fonctionner deux serveurs sur cette base.
+6. Double-cliquer sur **serveur.command du nouveau dossier**. Le lanceur lit
+   `base_locale.txt` et utilise la base choisie ; il ne remplace pas ses dossiers.
+   Laisser le Terminal ouvert, puis ouvrir **http://127.0.0.1:5005** dans Safari.
+7. Ouvrir **DEMO_SLO_001 → Placenta → Rouvrir ce module** (ou **Le saisir
+   maintenant** s'il n'a pas encore de saisie). L'en-tête doit indiquer **v1.1.0**.
+   Recharger Safari avec **Commande+R** si un ancien onglet est resté ouvert.
+
+Si vous ne créez pas `base_locale.txt`, le nouveau dossier de code utilise sa
+propre base : vos dossiers habituels peuvent sembler absents, sans être effacés.
+Pour une base d'essai neuve, importer une seule fois
+`hub/exemples/DEMO_SLO_001.json` par **Ingestion → les choisir**. Un import neuf
+ne récupère pas les corrections que vous aviez enregistrées dans une autre base.
+
+### Validation après correction
+
+Les contrôles sont exécutés sous **Linux / Chromium 156**, et non sur un Mac
+natif. La procédure Finder/Safari, les autorisations locales et le rendu des
+polices effectivement installées restent à vérifier sur votre Mac.
+
+- Branche source autonome : **5 tests** (parcours réel 5005 et protection des
+  données), **918 cas Python/JavaScript** et **75 contrôles des CR**, plus le
+  banc historique Placenta, réussis.
+- Version intégrée : **43 tests réussis**, dont les tests existants des
+  biométries, organes, percentiles placentaires, lanceurs, import/export et CR,
+  et les tests nouveaux du module. **76 contrôles des CR réussis**.
+- Comparaison des styles réellement calculés et inspection des captures :
+  corps, largeur, en-tête, cartes, champs et choix, sélectionnés ou non,
+  dans les **quatre thèmes** ; absence de débordement mobile.
+- Import du **fichier SLO exact**, accès aux deux modules, saisie des trois
+  sections, fermeture du navigateur, arrêt et relance du serveur sur **5005** :
+  données et résultats retrouvés, huit saisies préexistantes et deux CR
+  historiques conservés. Les bases et nouvelles saisies de test sont temporaires.
+- **19 SA** : limite Redline correctement signalée. Dossier distinct :
+  **28 SA / 214 g frais paré → P50** ; synchronisation inverse **321 g → P90**.
+  Poids fixé/inconnu exclus et résultats transmis recalculés côté serveur.
+- Photos et données supplémentaires préservées ; un formulaire périmé ne peut
+  pas écraser une saisie plus récente (HTTP 409).
+
+Les essais intermédiaires ont détecté trois points corrigés avant livraison :
+fausse alerte de perte de données lors d'une exclusion du calcul ; omission
+ancienne de la table de rétention clinique à la réindexation ; définition des
+libellés située hors du dossier applicatif dans les tests de copie de l'application.
+Le correctif de ce dernier point est également apporté depuis `module_placenta`.
+
+
 ## Mise à jour du 15 novembre 2026 — nouveau module Placenta
 
 Fusion sans conflit de `module_placenta` (`ecac7375bc6823ed5d9ce8b393bda28b6790bd5c`)
