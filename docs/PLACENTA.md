@@ -75,7 +75,8 @@ bloqués à l'enregistrement (HTTP 409) et demandent de relire les données.
 
 Aucune migration SQL nouvelle. Le document du formulaire reste en schéma
 `0.1.0`, avec des métadonnées supplémentaires compatibles avec l'adaptateur
-à plat. La réindexation du dossier SLO a révélé une omission ancienne de la
+à plat. La définition des libellés est livrée dans `hub/app/` pour que la copie
+du dossier applicatif reste lançable. La réindexation du dossier SLO a révélé une omission ancienne de la
 table `examen_clinique_retention` dans les tables à vider : cette omission est
 corrigée pour permettre de réindexer sans doublon.
 
@@ -105,7 +106,7 @@ utilisé avec Flask installé. Le module ne nécessite aucun fichier d'une autre
 
 Linux, Python 3.12, Chromium 156 via Playwright. Pas d'essai natif Mac/Windows.
 
-- **4 tests d'intégration/protection réussis**, dont un parcours du vrai serveur
+- **5 tests d'intégration/protection réussis**, dont un parcours du vrai serveur
   sur **5005**, avec le fichier SLO exact, une base temporaire, fermeture du
   navigateur et arrêt/redémarrage du serveur ; les trois sections et les
   résultats sont retrouvés. Les huit saisies source et les deux CR historiques

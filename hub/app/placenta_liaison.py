@@ -12,7 +12,7 @@ import percentiles_placenta as pp
 
 PARTAGES = {'macro_01': ('paree', 'masse'), 'macro_03': ('galette', 'grand_axe'),
             'macro_04': ('galette', 'petit_axe'), 'macro_05': ('galette', 'epaisseur')}
-DEFINITION = json.loads((Path(__file__).resolve().parent.parent / 'references/placenta_formulaire.json').read_text(encoding='utf-8'))
+DEFINITION = json.loads((Path(__file__).resolve().parent / 'placenta_formulaire.json').read_text(encoding='utf-8'))
 LIBELLES = {c['id']: c['label'] for s in DEFINITION for c in s['champs']}
 
 
