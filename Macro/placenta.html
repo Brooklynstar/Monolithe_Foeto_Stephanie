@@ -1,0 +1,779 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 | Hub Light | Monolithe_Foeto -->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Placenta</title>
+    <style>
+      :root {
+        --bg: #f6f5f0;
+        --ink: #172d29;
+        --panel: #fff;
+        --line: #c9d4cf;
+        --accent: #235c4d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px system-ui,
+          sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 960px;
+        margin: auto;
+        padding: 24px 20px 90px;
+      }
+      h1 {
+        margin: 0;
+      }
+      header p {
+        margin: 4px 0 18px;
+      }
+      .identite {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      label {
+        display: block;
+      }
+      input[type="text"] {
+        display: block;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        font: inherit;
+        max-width: 100%;
+        width: 340px;
+        color: inherit;
+        background: var(--panel);
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        padding: 14px 0;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        z-index: 2;
+      }
+      nav a,
+      button {
+        font: inherit;
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        padding: 7px 12px;
+        background: var(--panel);
+        color: var(--accent);
+        cursor: pointer;
+        text-decoration: none;
+      }
+      section {
+        scroll-margin-top: 80px;
+      }
+      fieldset {
+        min-width: 0;
+        margin: 0 0 20px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+      }
+      legend {
+        font-weight: 600;
+        padding: 0 6px;
+        max-width: 100%;
+      }
+      .choix {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 6px 0;
+        overflow-wrap: anywhere;
+      }
+      .choix input {
+        flex: none;
+      }
+      button.effacer {
+        font-size: 13px;
+        margin-top: 10px;
+      }
+      .note {
+        font-size: 14px;
+      }
+      #etat {
+        min-height: 24px;
+      }
+      input:focus-visible,
+      a:focus-visible,
+      button:focus-visible {
+        outline: 3px solid #c68029;
+        outline-offset: 3px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 600px) {
+        main {
+          padding: 14px 12px 130px;
+        }
+        .hub-bar {
+          flex-wrap: wrap;
+        }
+        .hub-bar .msg {
+          max-width: 100% !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Placenta</h1>
+        <p>Macroscopie · Microscopie · Conclusion — version 1.0.0</p>
+        <div class="identite">
+          <label
+            >Dossier<input
+              id="dossier"
+              type="text"
+              maxlength="64"
+              autocomplete="off" /></label
+          ><label
+            >Opérateur<input id="operateur" type="text" autocomplete="off"
+          /></label>
+        </div>
+        <p id="etat" role="status" aria-live="polite"></p>
+        <p class="note">
+          Relevé du Google Form du 15 novembre 2026. Tous les champs des trois
+          sections sont facultatifs. Les graphies et les propositions
+          incomplètes sont conservées. Valider la saisie avec « Enregistrer au
+          hub » avant de fermer.
+        </p>
+      </header>
+      <nav aria-label="Sections du placenta">
+        <a href="#macroscopie">Macroscopie</a
+        ><a href="#microscopie">Microscopie</a
+        ><a href="#conclusion">Conclusion</a>
+      </nav>
+      <div id="sections" inert></div>
+    </main>
+    <script>
+      "use strict";
+var MODULE = "placenta";
+var SCHEMA = "0.1.0";
+var VERSION = "1.0.0";
+      // Ce module attend sa propre lecture avant toute saisie, même sans opérateur dans l’URL.
+      var HUB_REPRISE_AUTO = false;
+      var SECTIONS = [
+        {
+          id: "macroscopie",
+          titre: "Macroscopie",
+          champs: [
+            {
+              id: "macro_01",
+              label: "Poids du placenta en g",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_02",
+              label: "Percentile placenta",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_03",
+              label: "Longueur placenta en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_04",
+              label: "largeur placenta en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_05",
+              label: "Epaisseur placenta en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_06",
+              label: "Forme",
+              type: "unique",
+              choix: ["ronde", "bi-partita", "tripartita", "lobe accessoire"],
+            },
+            {
+              id: "macro_07",
+              label: "Cordon d'insertion",
+              type: "unique",
+              choix: [
+                "centrale",
+                "paracentrale",
+                "marginale",
+                "vélamenteuse",
+                "circumvalee",
+                "autre",
+              ],
+            },
+            {
+              id: "macro_08",
+              label: "Cordon",
+              type: "unique",
+              choix: [
+                "deux artères une veine",
+                "artère ombilicale unique",
+                "hyperspiralé",
+                "Thrombose vasculaire",
+                "Autre + texte libre",
+              ],
+              autre: true,
+            },
+            {
+              id: "macro_09",
+              label: "Plaque choriale macro",
+              type: "unique",
+              choix: ["Amnios noueux", "Métaplasie malpighienne", "Kystes"],
+            },
+            {
+              id: "macro_10",
+              label: "infarctus nombre",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_11",
+              label: "infarctus pourcentage de la galette en %",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_12",
+              label: "infarctus taille minimale en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_13",
+              label: "infarctus taille maximale en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_14",
+              label: "Thrombose sous-choriale nombre",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_15",
+              label: "Thrombose sous-choriale taille max en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_16",
+              label: "Thrombose sous-choriale épaisseur max en cm",
+              type: "unique",
+              choix: ["Option 1"],
+            },
+            {
+              id: "macro_17",
+              label: "Hématome décidual basal Taille maximale en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_18",
+              label: "Hématome décidual basal épaisseur maximale en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_19",
+              label: "Kyste trophoblastique nombre",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_20",
+              label: "Kyste trophoblastique taille maximale en cm",
+              type: "texte",
+              choix: [],
+            },
+            {
+              id: "macro_21",
+              label: "thrombose intervilleuse",
+              type: "texte",
+              choix: [],
+            },
+          ],
+        },
+        {
+          id: "microscopie",
+          titre: "Microscopie",
+          champs: [
+            {
+              id: "micro_01",
+              label: "Amnios",
+              type: "unique",
+              choix: [
+                "aplati",
+                "aplati ou cubique",
+                "cubique",
+                "cubique ou cylindrique",
+                "cylindrique",
+                "exfolié",
+              ],
+            },
+            {
+              id: "micro_02",
+              label: "Membranes",
+              type: "unique",
+              choix: [
+                "absence d'infiltrat inflammatoire",
+                "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
+                "chorioamniotite aigue: réponse inflammatoire maternelle (RIM) stade 2 (infiltrat à polynucléaires neutrophiles dans le mésenchyme sous-amniotique)",
+                "chorioamniotite nécrosante: réponse inflammtoire maternelle (RIM) stade 3 (PN neutrophiles dans mésenchyme sous-amniotique, amnios, avec nécrose amnios > 25%)",
+                "de grade 1 - légère à modérée,",
+                "de grade 2 - sévère (au moins 3 micro-abcès sous-choriaux, ou polynucléaires neutrophiles",
+              ],
+            },
+            {
+              id: "micro_03",
+              label: "Cordon micro",
+              type: "unique",
+              choix: [
+                "absence d'anomalie des structures funiculaires,",
+                "foyer de dégénérescence myxoïde de la gelée de Wharton,",
+                "oedème de la gelée de Wharton, sans autre anomalie des structures funiculaires,",
+                "altérations autolytiques des éléments cellulaires, sans autre anomalie des structures funiculaires,",
+                "infiltrat hématique périvasculaire récent, probablement contemporain de l'expulsion,",
+                "artère ombilicale unique,",
+                "présence d'un reliquat vestigial,",
+                "absence d'infiltrat inflammatoire.",
+                "phlébite ombilicale: réponse inflammatoire foetale (RIF) stade 1 (infiltrat à polynucléaires neutrophiles de la veine ombilicale)",
+                "vasculite ombilicale: réponse inflammatoire foetale (RIF) stade 2 (infiltrat à polynucléaires neutrophiles étendu à au moins une artère ombilicale)",
+                "funiculite nécrosante avec périvasculite concentrique: réponse inflammatoire foetalec(RIF) stade 3 (infiltrat à polynucléaires neutrophiles concentrique périvasculaire)",
+                "de grade 1 - légère à modérée",
+                "de grade 2 - sévère (polynucléaires neutrophiles confluents dans la parois des vaisseaux",
+              ],
+            },
+            {
+              id: "micro_04",
+              label: "Plaque choriale amnios",
+              type: "unique",
+              choix: [
+                "aplati,",
+                "aplati ou cubigue,",
+                "cubique,",
+                "cubique ou cylindrique,",
+                "cylindrique,",
+                "exfolié,",
+                "en métaplasie malpighienne,",
+                "clivé,",
+                "nécrosé",
+              ],
+            },
+            {
+              id: "micro_05",
+              label: "Plaque choriale vaisseaux",
+              type: "unique",
+              choix: [
+                "absence de lésion de la plaque choriale,",
+                "lésions de thrombose des vaisseaux chorioallantoidiens,",
+                "dépôts de fibrine intramuraux des vaisseaux choricallantordiens,",
+                "pseudokystes cytotrophoblastiques sous-choriaux,",
+                "vascularite à éosinophiles / lymphocytes T,",
+                "hyperplasie histiocytaire chorionique (infiltrat lympho-histiocytaire lichénoïde de",
+              ],
+            },
+            {
+              id: "micro_06",
+              label: "Plaque choriale inflammation",
+              type: "unique",
+              choix: [
+                "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
+                "chorioamniotite aigue: réponse inflammatoire maternelle (RIM) stade 2 (infiltrat à polynucléaires neutrophiles dans le mésenchyme sous-amniotique)",
+                "chorioamniotite nécrosante: réponse inflammtoire maternelle (RIM) stade 3 (PN neutrophiles dans mésenchyme sous-amniotique, amnios, avec nécrose amnios > 25%)",
+                "de grade 1 - légère à modérée,",
+                "de grade 2 - sévère (au moins 3 micro-abcès sous-choriaux, ou polynucléaires neutrophiles",
+              ],
+            },
+            {
+              id: "micro_07",
+              label: "Plaque basale",
+              type: "unique",
+              choix: [
+                "absence d'anomalie vasculaire ou inflammatoire de la plaque basale,",
+                "nécrose fibrinoïde de la paroi des artères,",
+                "foyers d'athérose aiguë associant une nécrose fibrinoïde et des macrophages spumeux,",
+                "thrombose des artères utéro-placentaires,",
+                "absence de remodelage des artères spiralées dans la caduque basale,",
+                "persistance de trophoblaste intraluminal (anormal au 3ème trimestre),",
+                "déciduite chronique",
+              ],
+            },
+            {
+              id: "micro_08",
+              label: "Villosités",
+              type: "unique",
+              choix: [
+                "sans particularité, maturation en accord avec le terme.",
+                "altérations autolytiques vasculaires des villosités tronculaires (aspect de thromboses)",
+                "focales (moins de 25% des villosités)",
+                "diffuses (plus de 25% des villosités)",
+                "lésions de malperfusion vasculaire d'origine maternelle",
+                "avance de maturation villositaire: villosités terminales hypotrophiques, avec un axe",
+                "hypoplasie des villosités terminales (>30% d'une lame): raréfaction des villosités terminales",
+                "lésions de malperfusion vasculaire d'origine foetale",
+                "non gradée (critères insuffisants pour du haut grade)",
+                "de haut grade (≥ 2 thromboses des gros vaisseaux, ou ≥ 2 foyers > 15 villosités avaculaires)",
+                "thrombose murale ou occlusive des gros troncs villositaires,",
+                "oblitération des vaisseaux tronculaires,",
+                "caryorrhexxie vasculo-stromale villositaire,",
+                "dépôts de fibrine intramuraux des vaisseaux des gros troncs villositaires,",
+                "villosités avasculaires sur environ % du parenchyme examiné,",
+                "lésions de villite chronique (infiltrat inflammatoire à prédominance lymphocytaire,",
+                "de bas grade (≥ 2 foyers de moins de 10 villosités)",
+                "focale (1 section)",
+                "multifocale (≥ 2 sections)",
+                "de haut grade (plusieurs foyers dont 1 foyer ‹",
+                "hétérogène : < 30% des villosités distales",
+                "diffuse : > 30% des villosités distales",
+                "de topographie basale",
+                "retard de maturation villositaire (villosités immatures avec capillaires non marginalisés)",
+                "focal : avec plus de 30% du parenchyme esamine sur une lame",
+                "diffus: avec plus de 30% du parenchyme examiné sur au moins deux lames",
+                "lésions de chorangiose (plus de 10 capillaires dans plus de 10 villosités terminales)",
+                "dystrophies villositaires avec villosités de grande taille, anfractueuses, présentant",
+              ],
+            },
+            {
+              id: "micro_09",
+              label: "Chambre intervilleuse",
+              type: "unique",
+              choix: [
+                "dépôts de matériel fibrinoïde, sans excès",
+                "excès de dépôts de matériel fibrinoïde",
+                "excès de dépôts de matériel fibrinoïde avec nécrose ischémique villositaire focale",
+                "excès de dépôts de matériel fibrinoïde avec nécrose ischémique villositaire diffuse",
+                "absence de calcification",
+                "rares calcifications",
+                "quelques calcifications",
+                "nombreuses calcifications",
+                "absence d'infiltrat inflammatoire chronique",
+                "intervillite chronique d'étiologie indéterminée d'accompagnement (infiltrat inflammatoire",
+                "intervillite chronique d'étiologie indéterminée de grade 1 (infiltrat inflammatoire à prédominance",
+                "intervillite chronique d'étiologie indéterminée de grade 2 (infiltrat inflammatoire à prédominance",
+                "intervillite chronique d'étiologie indéterminée de grade 3 (infiltrat inflammatoire à prédominance",
+              ],
+            },
+            {
+              id: "micro_10",
+              label: "Lésions",
+              type: "unique",
+              choix: [
+                "absence de lésion focale microscopique",
+                "lésion de nécrose ischémique villositaire (infarctus)",
+                "infarctus-hématome",
+                "hématome décidual basal",
+                "thrombose intervilleuse",
+                "thrombose sous-choriale",
+                "pseudokystes cytotrophoblastiques à prédominance sous choriale",
+                "pseudokystes cytotrophoblastiques intraparenchymateux",
+                "chorangiome",
+              ],
+            },
+          ],
+        },
+        {
+          id: "conclusion",
+          titre: "Conclusion",
+          champs: [
+            {
+              id: "conclusion_01",
+              label: "Conclusion",
+              type: "unique",
+              choix: [
+                "hypotrophique",
+                "eutrophique",
+                "hypertrophique",
+                "un aspect macro- et microscopique sensiblement conforme au terme, sans élément lésionnel",
+                "des lésions de malperfusion vasculaire maternelle",
+                "légères",
+                "modérées",
+                "sévères",
+                "des lésions de malperfusion vasculaire foetale",
+                "non gradée",
+                "de haut grade",
+                "des lésions de subchorionite (RIM stade 1)",
+                "des lésions de chorioamniotite aiguë (RIM stade 2)",
+                "de grade 1",
+                "de grade 2",
+                "des lésions de chorioamniotite nécrosantes (RIM stade 3)",
+                "sans réponse inflammatoire foetale",
+                "avec réponse inflammatoire foetale dans les vaisseaux chorioniques ou la veine ombilicale",
+                "avec réponse inflammatoire foetale étendue à au moins une artère ombilicale ( RIF stade 2)",
+                "avec funiculite nécrosante (RIF stade 3)",
+                "des lésions de villite chronique",
+                "de bas grade focale",
+                "de bas grade multifocale",
+                "de haut grade hétérogène",
+                "de haut grade diffus",
+                "une intervillite chronique d'étiologie indéterminée I (5-10%) de la chambre intervilleuse",
+                "une intervillite chronique d'étiologie indéterminée II (10-50%) de la chambre intervilleuse",
+                "une intervillite chronique d'étiologie indéterminée III (>50%) de la chambre intervilleuse",
+                "un retard de maturation villositaire focal: avec plus de 30% du parenchyme examiné sur une lame",
+                "un retard de maturation villositaire diffus: avec plus de 30% du parenchyme examiné sur au moins deux lames",
+                'des dépôts fibrinoïdes périvilleux massifs (ex-NIDF)de topographie juxta-basale ("maternal foor infarct")',
+                "des dépôts fibrinoïdes périvilleux massifs (ex-NIDF)de topographie centrale",
+                "des altérations funiculaires et placentaires secondaires à l'autolyse",
+                "des dystrophies villositaires fréquemment retrouvées dans les aneuploïdes ou",
+              ],
+            },
+          ],
+        },
+      ];
+      var documentLu = {},
+        charge = false,
+        numeroCharge = "",
+        requete = 0;
+      var el = function (id) {
+        return document.getElementById(id);
+      };
+      function element(tag, texte) {
+        var e = document.createElement(tag);
+        if (texte !== undefined) e.textContent = texte;
+        return e;
+      }
+      SECTIONS.forEach(function (s) {
+        var section = element("section");
+        section.id = s.id;
+        section.appendChild(element("h2", s.titre));
+        s.champs.forEach(function (c) {
+          var f = element("fieldset");
+          f.id = "g_" + c.id;
+          var legend = element("legend", c.label);
+          legend.id = "l_" + c.id;
+          f.appendChild(legend);
+          if (c.type === "texte") {
+            var input = element("input");
+            input.type = "text";
+            input.id = c.id;
+            input.setAttribute("aria-labelledby", legend.id);
+            f.appendChild(input);
+          } else {
+            c.choix.forEach(function (v, i) {
+              var label = element("label");
+              label.className = "choix";
+              var input = element("input");
+              input.type = "radio";
+              input.name = c.id;
+              input.value = v;
+              input.id = c.id + "_" + i;
+              label.appendChild(input);
+              label.appendChild(element("span", v));
+              f.appendChild(label);
+            });
+            if (c.autre) {
+              var label = element("label", "Autre — texte libre");
+              label.id = "l_" + c.id + "_autre";
+              var input = element("input");
+              input.type = "text";
+              input.id = c.id + "_autre";
+              input.setAttribute("aria-labelledby", label.id);
+              label.appendChild(input);
+              f.appendChild(label);
+              f.addEventListener("change", function () {
+                majAutre(c);
+              });
+            }
+            var clear = element("button", "Effacer la réponse");
+            clear.type = "button";
+            clear.className = "effacer";
+            clear.setAttribute("aria-label", "Effacer : " + c.label);
+            clear.onclick = function () {
+              f.querySelectorAll("input[type=radio]").forEach(function (r) {
+                r.checked = false;
+              });
+              if (c.autre) {
+                el(c.id + "_autre").value = "";
+                majAutre(c);
+              }
+            };
+            f.appendChild(clear);
+          }
+          section.appendChild(f);
+        });
+        el("sections").appendChild(section);
+      });
+      function majAutre(c) {
+        var r = document.querySelector('input[name="' + c.id + '"]:checked');
+        var input = el(c.id + "_autre");
+        input.parentElement.hidden = !r || r.value !== "Autre + texte libre";
+      }
+      function vider() {
+        SECTIONS.forEach(function (s) {
+          s.champs.forEach(function (c) {
+            if (c.type === "texte") el(c.id).value = "";
+            else {
+              document
+                .querySelectorAll('input[name="' + c.id + '"]')
+                .forEach(function (r) {
+                  r.checked = false;
+                });
+              if (c.autre) {
+                el(c.id + "_autre").value = "";
+                majAutre(c);
+              }
+            }
+          });
+        });
+        documentLu = {};
+      }
+      function appliquer(o) {
+        vider();
+        documentLu = JSON.parse(JSON.stringify(o));
+        SECTIONS.forEach(function (s) {
+          var donnees = (o.sections || []).find(function (x) {
+            return x.id === s.id;
+          });
+          var valeurs = (donnees && donnees.champs) || {};
+          s.champs.forEach(function (c) {
+            var v = valeurs[c.id];
+            if (c.type === "texte") el(c.id).value = v == null ? "" : v;
+            else {
+              var choix = c.autre && v && typeof v === "object" ? v.choix : v;
+              document
+                .querySelectorAll('input[name="' + c.id + '"]')
+                .forEach(function (r) {
+                  r.checked = r.value === choix;
+                });
+              if (c.autre) {
+                el(c.id + "_autre").value = (v && v.texte) || "";
+                majAutre(c);
+              }
+            }
+          });
+        });
+      }
+      async function relire(o) {
+        if (o.module !== MODULE || o.dossier !== el("dossier").value.trim())
+          throw new Error("Saisie d'un autre module ou dossier");
+        appliquer(o);
+        if (!el("operateur").value) el("operateur").value = o.operateur || "";
+      }
+      function collecter() {
+        if (charge) throw new Error("Lecture du dossier en cours");
+        if (!numeroCharge || numeroCharge !== el("dossier").value.trim())
+          throw new Error("Valider le numéro de dossier avant d'enregistrer");
+        var o = JSON.parse(JSON.stringify(documentLu));
+        o.module = MODULE;
+        o.schema_version = SCHEMA;
+        o.module_version = VERSION;
+        o.dossier = numeroCharge;
+        o.operateur = el("operateur").value.trim();
+        o.exported_at = new Date().toISOString();
+        o.sections = o.sections || [];
+        SECTIONS.forEach(function (s) {
+          var bloc = o.sections.find(function (x) {
+            return x.id === s.id;
+          });
+          if (!bloc) {
+            bloc = { id: s.id, titre: s.titre, champs: {} };
+            o.sections.push(bloc);
+          }
+          bloc.champs = bloc.champs || {};
+          s.champs.forEach(function (c) {
+            var v;
+            if (c.type === "texte") v = el(c.id).value;
+            else {
+              var r = document.querySelector(
+                'input[name="' + c.id + '"]:checked',
+              );
+              v = r ? r.value : "";
+              if (c.autre)
+                v = {
+                  choix: v,
+                  texte:
+                    v === "Autre + texte libre"
+                      ? el(c.id + "_autre").value
+                      : "",
+                };
+            }
+            bloc.champs[c.id] = v;
+          });
+        });
+        return o;
+      }
+      async function charger() {
+        var n = el("dossier").value.trim().toUpperCase().replace(/\s/g, "");
+        el("dossier").value = n;
+        if (!n || n === numeroCharge) return;
+        if (!/^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(n)) {
+          el("etat").textContent = "Numéro de dossier invalide.";
+          return;
+        }
+        var ticket = ++requete;
+        charge = true;
+        el("sections").inert = true;
+        el("etat").textContent = "Lecture de " + n + "…";
+        try {
+          var r = await fetch(
+            "/api/saisie/" + encodeURIComponent(n) + "/" + MODULE,
+          );
+          if (ticket !== requete) return;
+          if (r.status === 404) vider();
+          else {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            var o = await r.json();
+            if (ticket !== requete) return;
+            await relire(o);
+          }
+          numeroCharge = n;
+          el("dossier").readOnly = true;
+          if (el("hubRetour"))
+            el("hubRetour").href = "/?dossier=" + encodeURIComponent(n);
+          el("etat").textContent =
+            "Dossier " +
+            n +
+            " — " +
+            (r.status === 404 ? "nouvelle saisie" : "saisie retrouvée") +
+            ". Pour changer de dossier, revenir à Dossiers.";
+        } catch (e) {
+          if (ticket === requete)
+            el("etat").textContent =
+              "Lecture impossible : " +
+              e.message +
+              ". Revenir au dossier et réessayer.";
+        } finally {
+          if (ticket === requete) {
+            charge = false;
+            el("sections").inert = false;
+          }
+        }
+      }
+      el("dossier").addEventListener("change", charger);
+      SECTIONS.forEach(function (s) {
+        s.champs
+          .filter(function (c) {
+            return c.autre;
+          })
+          .forEach(majAutre);
+      });
+      // La liaison existante fournit l'enregistrement, l'archivage et le retour au dossier.
+      // Le chargement ici fonctionne aussi quand l'URL ne porte pas d'opérateur.
+    </script>
+  </body>
+</html>

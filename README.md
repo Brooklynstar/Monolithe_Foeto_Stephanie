@@ -15,6 +15,10 @@ ce soit n'est ni possible ni souhaitable.
 
 ## Modules
 
+**Module Placenta (sections 18 à 20 du Google Form)** : onglet **Placenta**
+du dossier dans le hub, sur la branche `module_placenta`.
+[Lancement Mac/Windows, libellés à vérifier et tests](docs/PLACENTA.md).
+
 | Fichier | Contenu |
 |---|---|
 | `admin/administratif.html` | Identité, circuit du prélèvement, antécédents, grossesses précédentes, examens prénataux |

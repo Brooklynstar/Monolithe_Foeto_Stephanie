@@ -283,7 +283,10 @@
       dire("reprise du hub impossible : " + e.message, true);
     }
   }
-  if (params.get("dossier")) setTimeout(function () { reprendreDuHub(params.get("dossier")); }, 600);
+  /* Un module qui attend déjà sa lecture du hub évite une seconde reprise
+     différée, qui pourrait annuler un effacement fait juste après ouverture. */
+  if (params.get("dossier") && window.HUB_REPRISE_AUTO !== false)
+    setTimeout(function () { reprendreDuHub(params.get("dossier")); }, 600);
 
   dire(params.get("dossier") ? "dossier " + params.get("dossier") + " — non enregistré"
                              : "non enregistré");
