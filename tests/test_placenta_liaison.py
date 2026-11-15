@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import shutil
+import subprocess
 import unittest
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
@@ -36,6 +38,13 @@ class LiaisonPlacenta(unittest.TestCase):
 
     def versions(self):
         return self.client.get('/api/dossiers/TEST-LIAISON/placenta-liaison').json['versions']
+
+    def test_application_copiee_reste_importable(self):
+        app=self.base/'copie avec espaces'/'hub'/'app'
+        shutil.copytree(ROOT/'hub/app',app,ignore=shutil.ignore_patterns('__pycache__','.venv','python'))
+        code='import sys;sys.path.insert(0,'+repr(str(app))+');import serveur,placenta_liaison;assert len(placenta_liaison.LIBELLES)==32'
+        r=subprocess.run([sys.executable,'-I','-c',code],capture_output=True,text=True,cwd=self.base)
+        self.assertEqual(r.returncode,0,r.stdout+r.stderr)
 
     def test_cliches_inconnus_historique_et_conflit_atomique(self):
         before=self.versions();self.doc['liaison_versions']=before
