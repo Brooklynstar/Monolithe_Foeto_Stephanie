@@ -102,7 +102,7 @@ def main():
                 url = 'http://127.0.0.1:5005'
                 module = context.request.get(url + '/api/modules').json()['placenta']
                 assert module['ingerable'] is True
-                assert (module['module'], module['schema_version'], module['module_version']) == ('placenta', '0.1.0', '1.0.0')
+                assert (module['module'], module['schema_version'], module['module_version']) == ('placenta', '0.1.0', '1.1.0')
                 page.goto(url + '/?dossier=DEMO_SLO_001')
                 page.locator('[data-o="m_placenta"]').wait_for()
                 assert page.locator('[data-o="m_placenta"]').inner_text().strip() == 'Placenta'
@@ -182,11 +182,14 @@ def main():
                 print('OK sauvegarde puis fermeture et réouverture sans stockage navigateur : trois sections et texte Other retrouvés')
                 # Les autres modules n'ont subi aucune réécriture.
                 assert context.request.get(url + '/api/saisie/DEMO_SLO_001/administratif').json() == admin
-                assert context.request.get(url + '/api/saisie/DEMO_SLO_001/macro_placenta').json() == ancien
+                macro_sync = context.request.get(url + '/api/saisie/DEMO_SLO_001/macro_placenta').json()
+                assert macro_sync['sections'][0]['champs']['masse'] == 125.5
+                assert macro_sync['dossier'] == ancien['dossier']
+                assert macro_sync['schema_version'] == ancien['schema_version']
                 dossier = context.request.get(url + '/api/dossiers/DEMO_SLO_001').json()
                 assert (dossier['terme_sa'], dossier['type_issue'], dossier['indication']) == (19, 'IMG', 'Smith-Lemli-Opitz')
                 assert len([s for s in dossier['historique'] if s['module'] == 'placenta']) == 1
-                print('OK administratif, ancien module macro, valeurs antérieures et historique préservés')
+                print('OK administratif et valeurs antérieures préservés ; poids synchronisé dans Macro placenta et historique conservé')
                 # Autre dossier : aucune valeur du premier ne doit apparaître.
                 page.goto(url + '/modules/placenta?dossier=DEMO_AUTRE&operateur=TEST')
                 page.wait_for_function('numeroCharge === "DEMO_AUTRE" && !charge')

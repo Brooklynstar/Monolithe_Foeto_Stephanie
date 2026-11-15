@@ -85,7 +85,7 @@ class ReunionPlacenta(unittest.TestCase):
                         link = page.get_by_role('link', name='Le saisir maintenant')
                         page.goto(URL + link.get_attribute('href'))
                         page.wait_for_function('numeroCharge === "DEMO_SLO_001" && !charge')
-                        self.assertEqual(page.locator('section h2').all_text_contents(), ['Macroscopie', 'Microscopie', 'Conclusion'])
+                        self.assertEqual(page.locator('#sections section h2').evaluate_all('(hs)=>hs.map(h=>[...h.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join("").trim())'), ['Macroscopie', 'Microscopie', 'Conclusion'])
                         rendu = page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
                         self.assertEqual(rendu, json.loads(json.dumps(schema_releve())))
                         self.assertEqual(page.locator('fieldset').count(), 32)

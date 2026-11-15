@@ -850,7 +850,17 @@ function rendreModule(s){
            "n'est pas en base.<br>Un <span class=\"mono\">ingest.py --rejouer</span> le rattrape " +
            "depuis l'archive.</p>";
   var corps;
-  if (d.etapes) corps = rendreEtapes(d);
+  if(d.module==='placenta'){
+    corps=(d.sections||[]).map(function(section){
+      var lignes=Object.keys(section.champs||{}).filter(function(k){var v=section.champs[k];return v!==null&&v!==''&&(!v||typeof v!=='object'||v.choix);}).map(function(k){
+        var v=section.champs[k];if(v&&typeof v==='object')v=v.texte||v.choix;
+        return '<tr><td>'+esc((d.libelles||{})[k]||k)+'</td><td>'+esc(lisible(v))+'</td></tr>';
+      }).join('');
+      return '<h3>'+esc(section.titre||section.id)+'</h3><table><tbody>'+lignes+'</tbody></table>';
+    }).join('')+'<div id="percentilesFormulaireHub">Calcul des percentiles…</div>';
+    if(SERVI){var n=COURANT;setTimeout(function(){api('/api/dossiers/'+encodeURIComponent(n)+'/percentiles-placenta-formulaire').then(function(o){var e=document.getElementById('percentilesFormulaireHub');if(e&&COURANT===n)e.innerHTML=o.html;}).catch(function(e){var x=document.getElementById('percentilesFormulaireHub');if(x)x.textContent=e.message;});},0);}
+  }
+  else if (d.etapes) corps = rendreEtapes(d);
   else if (d.etages) corps = rendreEtages(d);
   else if (d.mesures){
     var reste = {};

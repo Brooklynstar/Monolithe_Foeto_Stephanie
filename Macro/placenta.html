@@ -6,170 +6,829 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Placenta</title>
     <style>
+      /* BEGIN styles Monolithe : Macro/macro_placenta.html */
       :root {
-        --bg: #f6f5f0;
-        --ink: #172d29;
-        --panel: #fff;
-        --line: #c9d4cf;
-        --accent: #235c4d;
+        --paper: #edefee;
+        --card: #ffffff;
+        --grey18: #7a7e7c;
+        --ink: #161d1c;
+        --ink-soft: #5a6462;
+        --rule: #cbd2d0;
+        --drape: #0e6b62;
+        --drape-soft: #e2efec;
+        --alert: #9c3a28;
+        --amber: #8a6a18;
+        --mono:
+          ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        --sans:
+          ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial,
+          sans-serif;
       }
       * {
         box-sizing: border-box;
       }
+      html,
       body {
         margin: 0;
-        background: var(--bg);
-        color: var(--ink);
-        font:
-          16px system-ui,
-          sans-serif;
-        line-height: 1.5;
+        padding: 0;
       }
-      main {
-        max-width: 960px;
-        margin: auto;
-        padding: 24px 20px 90px;
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.45;
+        -webkit-text-size-adjust: 100%;
+      }
+      .wrap {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 16px 14px 80px;
+      }
+
+      header {
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--drape);
+        margin: 0 0 4px;
       }
       h1 {
+        font-size: 21px;
+        line-height: 1.2;
         margin: 0;
+        font-weight: 650;
+        letter-spacing: -0.01em;
       }
-      header p {
-        margin: 4px 0 18px;
+      .sub {
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin: 6px 0 0;
       }
-      .identite {
+      .ver {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--ink-soft);
+        letter-spacing: 0.06em;
+      }
+
+      section {
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        padding: 14px;
+        margin-bottom: 14px;
+      }
+      h2 {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin: 0 0 12px;
+        font-weight: 600;
         display: flex;
-        gap: 18px;
+        align-items: baseline;
+        gap: 8px;
+      }
+      h2 .n {
+        color: var(--drape);
+      }
+      h2 .tally {
+        margin-left: auto;
+        color: var(--ink-soft);
+        letter-spacing: 0.06em;
+      }
+      section.off {
+        opacity: 0.42;
+      }
+      section.off input,
+      section.off select,
+      section.off textarea,
+      section.off button {
+        pointer-events: none;
+      }
+
+      .row {
+        display: flex;
         flex-wrap: wrap;
+        gap: 10px;
+      }
+      .field {
+        flex: 1 1 180px;
+        min-width: 0;
+      }
+      .field.large {
+        flex: 1 1 100%;
       }
       label {
         display: block;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 4px;
       }
-      input[type="text"] {
-        display: block;
-        padding: 10px;
-        border: 1px solid var(--line);
-        border-radius: 4px;
-        font: inherit;
-        max-width: 100%;
-        width: 340px;
-        color: inherit;
-        background: var(--panel);
+      label .u {
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--drape);
       }
-      nav {
-        position: sticky;
-        top: 0;
-        background: var(--bg);
-        padding: 14px 0;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        z-index: 2;
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        font-family: var(--sans);
+        font-size: 16px;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        padding: 9px 10px;
       }
-      nav a,
-      button {
-        font: inherit;
-        border: 1px solid var(--accent);
-        border-radius: 4px;
-        padding: 7px 12px;
-        background: var(--panel);
-        color: var(--accent);
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid var(--drape);
+        outline-offset: -1px;
+        background: var(--card);
+      }
+      textarea {
+        width: 100%;
+        font-family: var(--sans);
+        font-size: 16px;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        padding: 9px 10px;
+        resize: vertical;
+      }
+      .mono {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .hint {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-soft);
+        margin-top: 5px;
+      }
+      .hint.bad {
+        color: var(--alert);
+      }
+      .hint.good {
+        color: var(--drape);
+      }
+      .hint.warn {
+        color: var(--amber);
+      }
+
+      .btn {
+        appearance: none;
+        font-family: var(--sans);
+        font-size: 15px;
+        font-weight: 550;
+        border: 1px solid var(--ink);
+        background: var(--card);
+        color: var(--ink);
+        border-radius: 2px;
+        padding: 11px 15px;
         cursor: pointer;
-        text-decoration: none;
+        min-height: 44px;
       }
-      section {
-        scroll-margin-top: 80px;
+      .btn:hover {
+        background: var(--drape-soft);
       }
-      fieldset {
-        min-width: 0;
-        margin: 0 0 20px;
-        padding: 16px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: var(--panel);
+      .btn:focus-visible {
+        outline: 3px solid var(--drape);
+        outline-offset: 2px;
+      }
+      .btn.primary {
+        background: var(--drape);
+        border-color: var(--drape);
+        color: #fff;
+      }
+      .btn.primary:hover {
+        background: #0b564f;
+      }
+      .btn.danger {
+        border-color: var(--alert);
+        color: var(--alert);
+      }
+      .btn.danger:hover {
+        background: #f7eae7;
+      }
+      .btn[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      td {
+        padding: 6px 4px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      td:first-child {
+        color: var(--ink-soft);
+        white-space: nowrap;
+        padding-right: 12px;
+      }
+      .ok {
+        color: var(--drape);
+        font-weight: 600;
+      }
+      .ko {
+        color: var(--alert);
+        font-weight: 600;
+      }
+      .warn {
+        color: var(--amber);
+        font-weight: 600;
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--ink-soft);
+        border-left: 2px solid var(--rule);
+        padding-left: 10px;
+        margin: 12px 0 0;
+      }
+      .flash {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 10px 14px;
+        border-radius: 2px;
+        max-width: 90vw;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 50;
+      }
+      .flash.on {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .chip {
+        appearance: none;
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        padding: 8px 11px;
+        cursor: pointer;
+        min-height: 38px;
+      }
+      .chip:hover {
+        background: var(--drape-soft);
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--drape);
+        border-color: var(--drape);
+        color: #fff;
+        font-weight: 550;
+      }
+      .chip:focus-visible {
+        outline: 3px solid var(--drape);
+        outline-offset: 2px;
+      }
+      .mini {
+        appearance: none;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid var(--rule);
+        background: var(--card);
+        color: var(--ink);
+        border-radius: 2px;
+        padding: 8px 11px;
+        cursor: pointer;
+        min-height: 36px;
+        margin-top: 8px;
+      }
+      .mini:hover {
+        background: var(--drape-soft);
+      }
+      .mini.danger {
+        border-color: var(--alert);
+        color: var(--alert);
+      }
+
+      /* END styles Monolithe */
+      .sousTitre{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-soft);border-bottom:1px solid var(--rule);padding-bottom:5px;margin:16px 0 9px}
+.sousTitre:first-child{margin-top:0}
+/* Adaptation structurelle des fieldsets au composant .field existant. */
+      fieldset.field {
+        padding: 0;
+        margin: 0;
+        border: 0;
+      }
+      fieldset.field.large {
+        flex-basis: 100%;
       }
       legend {
-        font-weight: 600;
-        padding: 0 6px;
-        max-width: 100%;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        padding: 0;
+        margin-bottom: 4px;
       }
-      .choix {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-        padding: 6px 0;
+      label.chip {
+        text-transform: none;
+        letter-spacing: normal;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        text-align: left;
         overflow-wrap: anywhere;
       }
-      .choix input {
-        flex: none;
+      .chip input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
       }
-      button.effacer {
-        font-size: 13px;
-        margin-top: 10px;
+      .chip:has(input:checked) {
+        background: var(--drape);
+        border-color: var(--drape);
+        color: var(--sur-drape, #fff);
+        font-weight: 550;
       }
-      .note {
-        font-size: 14px;
+      .chip:has(input:focus-visible) {
+        outline: 3px solid var(--drape);
+        outline-offset: 2px;
+      }
+      nav a {
+        text-decoration: none;
+      }
+      nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      section {
+        scroll-margin-top: 12px;
+      }
+      fieldset .chips {
+        margin-top: 2px;
+      }
+      .effacer {
+        margin-top: 5px;
+      }
+      .calcul {
+        flex-basis: 100%;
+        border-top: 1px solid var(--rule);
+        padding-top: 12px;
+        margin-top: 4px;
       }
       #etat {
-        min-height: 24px;
-      }
-      input:focus-visible,
-      a:focus-visible,
-      button:focus-visible {
-        outline: 3px solid #c68029;
-        outline-offset: 3px;
+        min-height: 16px;
       }
       [hidden] {
         display: none !important;
       }
+      #sections[inert] {
+        opacity: 0.42;
+      }
       @media (max-width: 600px) {
-        main {
-          padding: 14px 12px 130px;
-        }
         .hub-bar {
           flex-wrap: wrap;
         }
         .hub-bar .msg {
           max-width: 100% !important;
         }
+        .chip {
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
+    <main class="wrap">
       <header>
-        <h1>Placenta</h1>
-        <p>Macroscopie · Microscopie · Conclusion — version 1.0.0</p>
-        <div class="identite">
-          <label
-            >Dossier<input
-              id="dossier"
-              type="text"
-              maxlength="64"
-              autocomplete="off" /></label
-          ><label
-            >Opérateur<input id="operateur" type="text" autocomplete="off"
-          /></label>
-        </div>
-        <p id="etat" role="status" aria-live="polite"></p>
-        <p class="note">
-          Relevé du Google Form du 15 novembre 2026. Tous les champs des trois
-          sections sont facultatifs. Les graphies et les propositions
-          incomplètes sont conservées. Valider la saisie avec « Enregistrer au
-          hub » avant de fermer.
+        <p class="eyebrow">Fœtopathologie · placenta</p>
+        <h1>Placenta <span class="ver">v1.1.0</span></h1>
+        <p class="sub">
+          Macroscopie, microscopie et conclusion — sections 18 à 20 du
+          formulaire.
         </p>
       </header>
+      <section id="identite">
+        <h2><span class="n">01</span>Dossier</h2>
+        <div class="row">
+          <div class="field">
+            <label for="dossier">Numéro de dossier</label
+            ><input
+              id="dossier"
+              class="mono"
+              type="text"
+              maxlength="64"
+              autocomplete="off"
+            />
+            <div class="hint">
+              Libre, mis en majuscules. Conditionne l’enregistrement.
+            </div>
+          </div>
+          <div class="field">
+            <label for="operateur">Opérateur</label
+            ><input
+              id="operateur"
+              type="text"
+              placeholder="Initiales"
+              autocomplete="off"
+            />
+            <div class="hint">Requis pour enregistrer au hub.</div>
+          </div>
+        </div>
+        <p id="etat" class="hint" role="status" aria-live="polite"></p>
+      </section>
       <nav aria-label="Sections du placenta">
-        <a href="#macroscopie">Macroscopie</a
-        ><a href="#microscopie">Microscopie</a
-        ><a href="#conclusion">Conclusion</a>
+        <a class="btn" href="#macroscopie">Macroscopie</a
+        ><a class="btn" href="#microscopie">Microscopie</a
+        ><a class="btn" href="#conclusion">Conclusion</a>
       </nav>
       <div id="sections" inert></div>
+      <p class="note">
+        Champs facultatifs. Les graphies et les propositions incomplètes du
+        relevé sont conservées. Enregistrer au hub avant de fermer.
+      </p>
     </main>
+    <!-- BEGIN percentiles_placenta.js -->
+    <script>
+      // SPDX-License-Identifier: CC-BY-NC-SA-4.0
+      var PlacentaPercentiles = (function () {
+        var references =
+          /* BEGIN REFERENCES */
+          {
+            Redline: {
+              18: {
+                moyenne: 107,
+                sd: 23,
+                P10: 52,
+                P50: 89,
+                P90: 181,
+                source: "Extrapol",
+              },
+              19: {
+                moyenne: 113,
+                sd: 25,
+                P10: 56,
+                P50: 94,
+                P90: 196,
+                source: "Extrapol",
+              },
+              20: {
+                moyenne: 130,
+                sd: 26,
+                P10: 82,
+                P50: 110,
+                P90: 214,
+                source: "Extrapol",
+              },
+              21: {
+                moyenne: 150,
+                sd: 25,
+                P10: 95,
+                P50: 130,
+                P90: 230,
+                source: "Extrapol",
+              },
+              22: {
+                moyenne: 189,
+                sd: 89,
+                P10: 107,
+                P50: 166,
+                P90: 285,
+                source: "Redline",
+              },
+              23: {
+                moyenne: 190,
+                sd: 41,
+                P10: 127,
+                P50: 188,
+                P90: 262,
+                source: "Redline",
+              },
+              24: {
+                moyenne: 190,
+                sd: 42,
+                P10: 128,
+                P50: 192,
+                P90: 252,
+                source: "Redline",
+              },
+              25: {
+                moyenne: 197,
+                sd: 70,
+                P10: 128,
+                P50: 184,
+                P90: 299,
+                source: "Redline",
+              },
+              26: {
+                moyenne: 226,
+                sd: 100,
+                P10: 138,
+                P50: 200,
+                P90: 281,
+                source: "Redline",
+              },
+              27: {
+                moyenne: 240,
+                sd: 77,
+                P10: 130,
+                P50: 242,
+                P90: 332,
+                source: "Redline",
+              },
+              28: {
+                moyenne: 223,
+                sd: 66,
+                P10: 140,
+                P50: 214,
+                P90: 321,
+                source: "Redline",
+              },
+              29: {
+                moyenne: 269,
+                sd: 96,
+                P10: 161,
+                P50: 252,
+                P90: 352,
+                source: "Redline",
+              },
+              30: {
+                moyenne: 324,
+                sd: 88,
+                P10: 208,
+                P50: 316,
+                P90: 433,
+                source: "Redline",
+              },
+              31: {
+                moyenne: 314,
+                sd: 105,
+                P10: 175,
+                P50: 313,
+                P90: 417,
+                source: "Redline",
+              },
+              32: {
+                moyenne: 325,
+                sd: 77,
+                P10: 241,
+                P50: 318,
+                P90: 436,
+                source: "Redline",
+              },
+              33: {
+                moyenne: 351,
+                sd: 83,
+                P10: 252,
+                P50: 352,
+                P90: 446,
+                source: "Redline",
+              },
+              34: {
+                moyenne: 381,
+                sd: 84,
+                P10: 283,
+                P50: 382,
+                P90: 479,
+                source: "Redline",
+              },
+              35: {
+                moyenne: 411,
+                sd: 99,
+                P10: 291,
+                P50: 401,
+                P90: 544,
+                source: "Redline",
+              },
+              36: {
+                moyenne: 447,
+                sd: 110,
+                P10: 320,
+                P50: 440,
+                P90: 580,
+                source: "Redline",
+              },
+              37: {
+                moyenne: 467,
+                sd: 107,
+                P10: 349,
+                P50: 452,
+                P90: 607,
+                source: "Redline",
+              },
+              38: {
+                moyenne: 493,
+                sd: 103,
+                P10: 365,
+                P50: 484,
+                P90: 629,
+                source: "Redline",
+              },
+              39: {
+                moyenne: 500,
+                sd: 103,
+                P10: 379,
+                P50: 490,
+                P90: 635,
+                source: "Redline",
+              },
+              40: {
+                moyenne: 510,
+                sd: 100,
+                P10: 390,
+                P50: 501,
+                P90: 643,
+                source: "Redline",
+              },
+              41: {
+                moyenne: 524,
+                sd: 100,
+                P10: 403,
+                P50: 515,
+                P90: 655,
+                source: "Redline",
+              },
+              42: {
+                moyenne: 532,
+                sd: 99,
+                P10: 412,
+                P50: 525,
+                P90: 658,
+                source: "Redline",
+              },
+            },
+          };
+        /* END REFERENCES */ function calculer(sa, masse, conditions) {
+          var out = {
+            terme_sa: sa,
+            masse_g: masse,
+            conditions_masse: conditions,
+            reference: "Redline",
+            z_brut: null,
+            position_percentile: null,
+            percentile_exact: null,
+            seuils: null,
+            motif: null,
+            methode:
+              "position parmi P10, P50, P90 publiés ; pas de loi normale ni interpolation",
+            limite_mb:
+              "Müller-Brochut : moyenne/ET présents dans le calculateur, distribution et protocole non établis ; aucun percentile exact déduit.",
+          };
+          if (!Number.isInteger(sa)) {
+            out.motif =
+              "Terme entier nécessaire, sans arrondi ni extrapolation.";
+            return out;
+          }
+          if (
+            typeof masse !== "number" ||
+            !Number.isFinite(masse) ||
+            masse < 0
+          ) {
+            out.motif = "Masse manquante ou invalide.";
+            return out;
+          }
+          if (conditions !== "fraiche_paree") {
+            out.motif =
+              "Référence non appliquée : préciser un poids frais paré ; poids fixé ou protocole inconnu non comparé.";
+            return out;
+          }
+          var ref = references.Redline[sa];
+          if (!ref || ref.source !== "Redline") {
+            out.motif =
+              "Pas de quantiles publiés exploités à ce terme (22–42 SA) ; valeurs extrapolées 18–21 exclues.";
+            return out;
+          }
+          out.z_brut = (masse - ref.moyenne) / ref.sd;
+          out.seuils = { P10: ref.P10, P50: ref.P50, P90: ref.P90 };
+          out.position_percentile =
+            masse === ref.P10
+              ? "P10"
+              : masse === ref.P50
+                ? "P50"
+                : masse === ref.P90
+                  ? "P90"
+                  : masse < ref.P10
+                    ? "< P10"
+                    : masse < ref.P50
+                      ? "P10–P50"
+                      : masse < ref.P90
+                        ? "P50–P90"
+                        : "> P90";
+          return out;
+        }
+        function html(r) {
+          function e(s) {
+            return String(s)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;");
+          }
+          var titres = [
+            "Valeur",
+            "Référence",
+            "Z-score",
+            "Position percentile",
+            "Limite",
+          ];
+          var cells = [
+            r.masse_g == null ? null : r.masse_g + " g",
+            r.reference,
+            r.z_brut == null
+              ? null
+              : (r.z_brut >= 0 ? "+" : "") + r.z_brut.toFixed(2) + " DS",
+            r.position_percentile,
+            r.motif,
+          ];
+          var style =
+            "border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none";
+          return (
+            "<table style=\"font:11pt Cambria,'Times New Roman',serif;border-collapse:collapse;width:100%\"><thead><tr>" +
+            titres
+              .map(function (t, i) {
+                return cells[i] == null
+                  ? ""
+                  : '<th style="' +
+                      style +
+                      ';white-space:nowrap">' +
+                      e(t) +
+                      "</th>";
+              })
+              .join("") +
+            "</tr></thead><tbody><tr>" +
+            cells
+              .map(function (c) {
+                return c == null
+                  ? ""
+                  : '<td style="' + style + '">' + e(c) + "</td>";
+              })
+              .join("") +
+            "</tr></tbody></table>"
+          );
+        }
+        return { calculer: calculer, html: html };
+      })();
+    </script>
+    <!-- END percentiles_placenta.js -->
     <script>
       "use strict";
 var MODULE = "placenta";
 var SCHEMA = "0.1.0";
-var VERSION = "1.0.0";
+var VERSION = "1.1.0";
       // Ce module attend sa propre lecture avant toute saisie, même sans opérateur dans l’URL.
       var HUB_REPRISE_AUTO = false;
       var SECTIONS = [
@@ -545,6 +1204,8 @@ var VERSION = "1.0.0";
           ],
         },
       ];
+      var liaison = null;
+      var percentileAuto = true;
       var documentLu = {},
         charge = false,
         numeroCharge = "",
@@ -560,10 +1221,20 @@ var VERSION = "1.0.0";
       SECTIONS.forEach(function (s) {
         var section = element("section");
         section.id = s.id;
-        section.appendChild(element("h2", s.titre));
+        var h2 = element("h2");
+        h2.appendChild(
+          element("span", String(SECTIONS.indexOf(s) + 2).padStart(2, "0")),
+        );
+        h2.firstChild.className = "n";
+        h2.appendChild(document.createTextNode(s.titre));
+        section.appendChild(h2);
+        var row = element("div");
+        row.className = "row";
+        section.appendChild(row);
         s.champs.forEach(function (c) {
           var f = element("fieldset");
           f.id = "g_" + c.id;
+          f.className = "field" + (c.type === "unique" ? " large" : "");
           var legend = element("legend", c.label);
           legend.id = "l_" + c.id;
           f.appendChild(legend);
@@ -574,9 +1245,12 @@ var VERSION = "1.0.0";
             input.setAttribute("aria-labelledby", legend.id);
             f.appendChild(input);
           } else {
+            var choices = element("div");
+            choices.className = "chips";
+            f.appendChild(choices);
             c.choix.forEach(function (v, i) {
               var label = element("label");
-              label.className = "choix";
+              label.className = "chip";
               var input = element("input");
               input.type = "radio";
               input.name = c.id;
@@ -584,7 +1258,7 @@ var VERSION = "1.0.0";
               input.id = c.id + "_" + i;
               label.appendChild(input);
               label.appendChild(element("span", v));
-              f.appendChild(label);
+              choices.appendChild(label);
             });
             if (c.autre) {
               var label = element("label", "Autre — texte libre");
@@ -601,12 +1275,13 @@ var VERSION = "1.0.0";
             }
             var clear = element("button", "Effacer la réponse");
             clear.type = "button";
-            clear.className = "effacer";
+            clear.className = "mini effacer";
             clear.setAttribute("aria-label", "Effacer : " + c.label);
             clear.onclick = function () {
               f.querySelectorAll("input[type=radio]").forEach(function (r) {
                 r.checked = false;
               });
+              majChoix();
               if (c.autre) {
                 el(c.id + "_autre").value = "";
                 majAutre(c);
@@ -614,10 +1289,19 @@ var VERSION = "1.0.0";
             };
             f.appendChild(clear);
           }
-          section.appendChild(f);
+          row.appendChild(f);
         });
         el("sections").appendChild(section);
+        if (s.id === "macroscopie") {
+          var calcul = element("div");
+          calcul.className = "calcul";
+          calcul.innerHTML =
+            '<div class="sousTitre">Percentiles du poids placentaire</div><div class="row"><div class="field"><label for="terme_sa">Terme en SA</label><input type="number" id="terme_sa" step="1" min="0"><div class="hint" id="termeOrigine"></div></div><div class="field"><label for="conditions_masse">Conditions de pesée</label><select id="conditions_masse"><option value="non_documentees">Non précisées / pièce non parée</option><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option></select></div></div><div id="resultatsPercentilesPlacenta" aria-live="polite"></div><p class="hint" id="percentileTranscrit"></p><button type="button" class="mini" id="reprendreCalcul">Utiliser le calcul dans le champ Percentile placenta</button><p class="hint">Redline : position parmi P10, P50, P90, sans interpolation. Pas de comparaison des poids fixés ou de protocole inconnu. Le champ « Percentile placenta » reçoit la position calculée ou conserve une transcription manuelle.</p><p class="note" id="liaisonMesures">Les mesures numériques communes (poids, longueur, largeur, épaisseur) sont enregistrées dans les deux modules. Les autres constatations restent propres à chaque module.</p><div id="divergencesMesures" role="status"></div>';
+          row.insertBefore(calcul, row.children[5] || null);
+        }
       });
+      function majChoix(){document.querySelectorAll("label.chip").forEach(function(l){l.classList.toggle("on",l.querySelector("input").checked);});}
+      el("sections").addEventListener("change",majChoix);
       function majAutre(c) {
         var r = document.querySelector('input[name="' + c.id + '"]:checked');
         var input = el(c.id + "_autre");
@@ -641,10 +1325,18 @@ var VERSION = "1.0.0";
           });
         });
         documentLu = {};
+        percentileAuto = true;
       }
       function appliquer(o) {
         vider();
         documentLu = JSON.parse(JSON.stringify(o));
+        percentileAuto =
+          o.percentile_automatique === true ||
+          !(
+            (o.sections || []).find(function (x) {
+              return x.id === "macroscopie";
+            }) || { champs: {} }
+          ).champs.macro_02;
         SECTIONS.forEach(function (s) {
           var donnees = (o.sections || []).find(function (x) {
             return x.id === s.id;
@@ -672,6 +1364,8 @@ var VERSION = "1.0.0";
         if (o.module !== MODULE || o.dossier !== el("dossier").value.trim())
           throw new Error("Saisie d'un autre module ou dossier");
         appliquer(o);
+        majChoix();
+        await chargerLiaison();
         if (!el("operateur").value) el("operateur").value = o.operateur || "";
       }
       function collecter() {
@@ -685,6 +1379,25 @@ var VERSION = "1.0.0";
         o.dossier = numeroCharge;
         o.operateur = el("operateur").value.trim();
         o.exported_at = new Date().toISOString();
+        o.terme_sa = nombre(el("terme_sa").value);
+        o.conditions_masse = el("conditions_masse").value;
+        o.percentile_automatique = percentileAuto;
+        o.resultats_placentaires = calculer();
+        o.liaison_versions = liaison && liaison.versions;
+        if (
+          liaison &&
+          liaison.divergences.length &&
+          !el("accordDivergences").checked
+        )
+          throw new Error(
+            "Choisir les mesures à conserver et confirmer les divergences signalées avant d’enregistrer",
+          );
+        o.libelles = Object.assign({}, o.libelles);
+        SECTIONS.forEach(function (s) {
+          s.champs.forEach(function (c) {
+            o.libelles[c.id] = c.label;
+          });
+        });
         o.sections = o.sections || [];
         SECTIONS.forEach(function (s) {
           var bloc = o.sections.find(function (x) {
@@ -717,6 +1430,116 @@ var VERSION = "1.0.0";
         });
         return o;
       }
+      function nombre(v) {
+        if (v == null || String(v).trim() === "") return null;
+        var t = String(v).trim().replace(",", ".");
+        return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(t) &&
+          Number.isFinite(Number(t))
+          ? Number(t)
+          : null;
+      }
+      function calculer() {
+        return PlacentaPercentiles.calculer(
+          nombre(el("terme_sa").value),
+          nombre(el("macro_01").value),
+          el("conditions_masse").value,
+        );
+      }
+      function majCalcul() {
+        var r = calculer();
+        el("resultatsPercentilesPlacenta").innerHTML =
+          PlacentaPercentiles.html(r);
+        if (percentileAuto) el("macro_02").value = r.position_percentile || "";
+        el("percentileTranscrit").textContent =
+          !percentileAuto && el("macro_02").value
+            ? "Transcription conservée : « " +
+              el("macro_02").value +
+              " ». Résultat de référence : " +
+              (r.position_percentile || r.motif)
+            : "La position calculée renseigne le champ Percentile placenta tant qu’il n’est pas modifié manuellement.";
+      }
+      el("reprendreCalcul").onclick = function () {
+        percentileAuto = true;
+        majCalcul();
+      };
+      async function chargerLiaison() {
+        var n = el("dossier").value.trim();
+        var r = await fetch(
+          "/api/dossiers/" + encodeURIComponent(n) + "/placenta-liaison",
+        );
+        if (!r.ok)
+          throw new Error(
+            "Lecture des mesures partagées impossible (HTTP " + r.status + ")",
+          );
+        liaison = await r.json();
+        Object.keys(liaison.valeurs).forEach(function (id) {
+          if (!el(id).value && liaison.valeurs[id] != null)
+            el(id).value = String(liaison.valeurs[id]);
+        });
+        var sa =
+          liaison.terme_sa != null ? liaison.terme_sa : documentLu.terme_sa;
+        el("terme_sa").value = sa == null ? "" : sa;
+        el("terme_sa").readOnly = liaison.terme_sa != null;
+        el("termeOrigine").textContent =
+          liaison.terme_sa != null
+            ? "Terme du dossier administratif. À corriger dans Administratif si nécessaire."
+            : "Terme non renseigné dans le dossier.";
+        el("conditions_masse").value =
+          documentLu.conditions_masse ||
+          liaison.conditions_masse ||
+          "non_documentees";
+        var div = el("divergencesMesures");
+        div.replaceChildren();
+        liaison.divergences.forEach(function (d) {
+          var p = element(
+            "p",
+            d.label +
+              " : Placenta « " +
+              d.placenta +
+              " » ; Macro placenta « " +
+              d.macro_placenta +
+              " ». ",
+          );
+          p.className = "hint warn";
+          var b = element("button", "Reprendre Macro placenta");
+          b.type = "button";
+          b.className = "mini";
+          b.onclick = function () {
+            el(d.id).value = String(d.macro_placenta);
+            majCalcul();
+          };
+          p.appendChild(b);
+          div.appendChild(p);
+        });
+        if (liaison.divergences.length) {
+          var l = element(
+            "label",
+            " Je confirme les mesures affichées à enregistrer dans les deux modules.",
+          );
+          var c = element("input");
+          c.type = "checkbox";
+          c.id = "accordDivergences";
+          l.prepend(c);
+          div.appendChild(l);
+        }
+        el("liaisonMesures").textContent = Object.keys(liaison.valeurs).length
+          ? "Mesures existantes de Macro placenta reprises dans les champs vides. À l’enregistrement, les quatre mesures numériques communes sont mises à jour dans les deux modules ; les versions précédentes restent dans l’historique."
+          : "Les quatre mesures numériques communes (poids, longueur, largeur, épaisseur) sont enregistrées dans les deux modules lorsqu’un Macro placenta existe. Les autres constatations sont conservées.";
+        majCalcul();
+      }
+      el("sections").addEventListener("input", function (e) {
+        if (e.target.id === "macro_02") percentileAuto = false;
+        majCalcul();
+      });
+      el("sections").addEventListener("change", majCalcul);
+      window.addEventListener("hub:enregistre", async function (e) {
+        documentLu = JSON.parse(JSON.stringify(e.detail));
+        try {
+          await chargerLiaison();
+        } catch (err) {
+          el("etat").textContent = err.message;
+        }
+      });
       async function charger() {
         var n = el("dossier").value.trim().toUpperCase().replace(/\s/g, "");
         el("dossier").value = n;
@@ -734,8 +1557,10 @@ var VERSION = "1.0.0";
             "/api/saisie/" + encodeURIComponent(n) + "/" + MODULE,
           );
           if (ticket !== requete) return;
-          if (r.status === 404) vider();
-          else {
+          if (r.status === 404) {
+            vider();
+            await chargerLiaison();
+          } else {
             if (!r.ok) throw new Error("HTTP " + r.status);
             var o = await r.json();
             if (ticket !== requete) return;

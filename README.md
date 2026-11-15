@@ -18,7 +18,7 @@ ce soit n'est ni possible ni souhaitable.
 **Module Placenta (sections 18 à 20 du Google Form)** : onglet **Placenta**
 du dossier dans le hub, intégré dans `test-integration` et également disponible
 sur sa branche source `module_placenta`.
-[Lancement Mac/Windows, libellés à vérifier et tests](docs/PLACENTA.md).
+[Présentation harmonisée, calculs intégrés, lancement Mac/Windows et tests](docs/PLACENTA.md).
 
 | Fichier | Contenu |
 |---|---|

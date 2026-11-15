@@ -19,6 +19,14 @@
   var API = "";                                  /* même origine que la page */
   var el = function (i) { return document.getElementById(i); };
   var params = new URLSearchParams(location.search);
+  var versionsMacro = null, numeroVersions = null, lectureVersions = null;
+  async function reprendreVersions(n) {
+    if(window.MODULE !== "macro_placenta" || !n) return;
+    var r=await fetch(API+"/api/dossiers/"+encodeURIComponent(n)+"/placenta-liaison");
+    if(!r.ok) throw new Error("Lecture des versions placentaires impossible");
+    var o=await r.json();versionsMacro=o.versions;numeroVersions=n;
+  }
+
 
   /* ── Thème ───────────────────────────────────────────────────────────────
      Le module servi prend le thème choisi dans la page des dossiers : même
@@ -176,6 +184,11 @@
     dire("préparation…");
     try {
       var doc = window.paquet ? await window.paquet() : window.collecter();
+      if(window.MODULE === "macro_placenta") {
+        if(lectureVersions) await lectureVersions;
+        if(numeroVersions !== n) await reprendreVersions(n);
+        doc.liaison_versions=versionsMacro;
+      }
       /* Garde-fou : ce qui part devient la saisie courante. Un formulaire
          rouvert vide qui remplacerait une saisie remplie masquerait tout sur
          la fiche — on demande avant. */
@@ -198,7 +211,9 @@
       });
       var o = await r.json();
       if (!r.ok) throw new Error(o.erreur || ("HTTP " + r.status));
+      if(window.MODULE === "macro_placenta") await reprendreVersions(n);
       dire(o.message);
+      window.dispatchEvent(new CustomEvent("hub:enregistre", {detail:doc}));
       el("hubRetour").href = "/?dossier=" + encodeURIComponent(n);
       /* Prévenir la page des dossiers, si elle est ouverte dans un autre
          onglet : elle écoute « storage » sur cette clé et se recharge. */
@@ -232,13 +247,19 @@
       window.appliquer(o);
       if (window.majTousZ) window.majTousZ();
     }
+    if(window.MODULE === "macro_placenta") await reprendreVersions(o.dossier);
   }
   /* Nombre de valeurs renseignées dans un document, enveloppe et clichés
      exclus. Les constantes d'un module (titres d'étapes, trame attendue…)
      sont des deux côtés d'une comparaison : elles s'annulent. */
   var ENV = { schema_version: 1, module: 1, module_version: 1, dossier: 1,
-              operateur: 1, exported_at: 1, photos: 1 };
+              operateur: 1, exported_at: 1, photos: 1,
+              resultats_placentaires: 1, liaison_versions: 1, libelles: 1, percentile_automatique: 1 };
   function remplis(v, prof) {
+    if(prof===0 && v && v.module==="placenta" && v.percentile_automatique===true){
+      v=JSON.parse(JSON.stringify(v));
+      (v.sections||[]).forEach(function(s){if(s.id==="macroscopie" && s.champs) delete s.champs.macro_02;});
+    }
     if (v == null || v === "" || v === false) return 0;
     if (Array.isArray(v)) return v.reduce(function (s, x) { return s + remplis(x, prof + 1); }, 0);
     if (typeof v === "object") return Object.keys(v).reduce(function (s, k) {
@@ -288,6 +309,11 @@
   if (params.get("dossier") && window.HUB_REPRISE_AUTO !== false)
     setTimeout(function () { reprendreDuHub(params.get("dossier")); }, 600);
 
+  if(window.MODULE === "macro_placenta"){
+    var numChamp=el("dossier");
+    function lireVersions(){var n=numChamp.value.trim();lectureVersions=reprendreVersions(n).catch(function(e){versionsMacro=null;numeroVersions=null;dire(e.message,true);});}
+    if(numChamp){numChamp.addEventListener("change",lireVersions);if(numChamp.value)lireVersions();}
+  }
   dire(params.get("dossier") ? "dossier " + params.get("dossier") + " — non enregistré"
                              : "non enregistré");
 })();

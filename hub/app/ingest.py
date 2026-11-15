@@ -941,7 +941,7 @@ TABLES_INDEX = {
     "administratif":      ["admin_dossier", "admin_grossesses", "admin_chronologie",
                            "admin_coherence"],
     "examen_clinique":    ["examen_clinique", "examen_clinique_items",
-                           "examen_clinique_cliches_libres"],
+                           "examen_clinique_cliches_libres", "examen_clinique_retention"],
     "biometrie_clinique": ["biometrie_clinique", "biometrie_clinique_mesures"],
     "radio":              ["radio", "radio_chips", "radio_os_longs",
                            "radio_maturation", "radio_hpo"],
