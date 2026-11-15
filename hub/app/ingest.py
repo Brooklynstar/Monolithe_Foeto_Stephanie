@@ -580,6 +580,7 @@ ADAPTATEURS = {
     ("autopsie",           "0.2.0"): (4, adapt_autopsie),
     ("micro",              "0.2.0"): (4, adapt_plat),
     ("macro_placenta",     "0.2.0"): (4, adapt_plat),
+    ("placenta",           "0.1.0"): (4, adapt_plat),
 }
 ADAPTATEURS.update({(m, "0.1.0"): (1, adapt_microscopie) for m in MODULES_MICRO})
 ADAPTATEURS.update({(m, "0.2.0"): (4, adapt_microscopie) for m in MODULES_MICRO})
@@ -590,7 +591,7 @@ ADAPTATEURS.update({(m, "0.3.0"): (4, adapt_microscopie) for m in MODULES_MICRO}
 # L'ordre du compte rendu, et celui des onglets de la fiche. La microscopie s'y
 # tient entre l'autopsie et la neuropathologie — c'est là qu'elle se fait.
 ORDRE_MODULES = ["administratif", "examen_clinique", "biometrie_clinique",
-                 "radio", "autopsie", "macro_placenta", "microscopie", "neuropath"]
+                 "radio", "autopsie", "macro_placenta", "placenta", "microscopie", "neuropath"]
 
 # Une saisie porte le nom de son module ; la fiche la range dans un créneau.
 # Les dix-sept grilles partagent le créneau « microscopie » : un dossier peut
@@ -606,7 +607,7 @@ def slot(module):
 
 # Un dossier sans microscopie n'est pas incomplet : c'est le cas courant. Le
 # créneau existe pour ranger et pour ouvrir les grilles, pas pour réclamer.
-MODULES_FACULTATIFS = {"microscopie", "macro_placenta"}
+MODULES_FACULTATIFS = {"microscopie", "macro_placenta", "placenta"}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -945,7 +946,7 @@ TABLES_INDEX = {
     "neuropath":          ["neuropath", "neuropath_champs", "neuropath_cliches_libres"],
 }
 TABLES_INDEX.update({m: ["microscopie", "microscopie_valeurs"] for m in MODULES_MICRO})
-TABLES_INDEX.update({"micro": ["valeurs_plates"], "macro_placenta": ["valeurs_plates"]})
+TABLES_INDEX.update({"micro": ["valeurs_plates"], "macro_placenta": ["valeurs_plates"], "placenta": ["valeurs_plates"]})
 
 
 def desindexer(cx, sid, module):

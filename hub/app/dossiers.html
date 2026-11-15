@@ -792,7 +792,7 @@ function ongletsDe(d){
   var l = [{id:"dossier", t:"Dossier"}];
   INDEX.modules_attendus.forEach(function(m){
     var ls = saisiesDe(d, m), s = ls[0];
-    var titre = m.replace(/_/g, " ");
+    var titre = m === "placenta" ? "Placenta" : m.replace(/_/g, " ");
     if (m === "microscopie" && ls.length) titre += " (" + ls.length + ")";
     l.push({id:"m_" + m, t:titre, recu:!!s,
             poste: !!(s && s.provenance === "poste"), facultatif: facultatif(m)});
