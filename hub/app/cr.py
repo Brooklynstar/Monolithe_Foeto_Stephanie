@@ -32,6 +32,7 @@ from pathlib import Path
 
 import biometrie
 import cr_lumi
+import placenta_liaison
 
 ICI = Path(__file__).resolve().parent
 GABARITS = ICI / "gabarits"
@@ -498,6 +499,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "autopsie": {"etapes": _trame(aut), "masses": lignes_masses,
                      "maceration": maceration,
                      "ouverture_at": aut.get("ouverture_at")},
+        "placenta_formulaire": placenta_liaison.compte_rendu(cx, numero, (s.get("placenta") or {}).get("donnees", {})),
         "placenta": _placenta(plac),
         "micro": _micro(mic),
         "grilles": grilles,

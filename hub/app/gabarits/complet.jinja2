@@ -1,5 +1,5 @@
 {# titre: Compte rendu complet #}
-{# version: 2.0.0 #}
+{# version: 2.2.0 #}
 {# format: html #}
 {#
    Ce gabarit parcourt les trames plutôt que de nommer les champs : un champ
@@ -363,6 +363,17 @@ Dossier {{ dossier }}{% if terme.sa %} — {{ terme.texte }}{% endif %}
   {{ m }} : {% for p in cliches if p.module == m %}{{ p.label or p.cle }}{% if not loop.last %} · {% endif %}{% endfor %}
 
 {% endfor %}
+{% endif %}
+
+{% if placenta_formulaire %}
+{{ titre("Placenta — formulaire structuré") }}
+{% for section in placenta_formulaire.sections %}
+{{ sous(section.titre) }}
+{% for champ in section.champs %}
+  {{ champ.label }} : {{ champ.valeur }}
+{% endfor %}
+{% endfor %}
+  Masse placentaire : {{ placenta_formulaire.percentiles.masse_g | fr }} g — {{ placenta_formulaire.percentiles.position_percentile or placenta_formulaire.percentiles.motif }}.
 {% endif %}
 
 {{ titre("Conclusion") }}

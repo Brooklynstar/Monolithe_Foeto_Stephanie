@@ -1,0 +1,2213 @@
+{
+  "type": "monolithe_dossier",
+  "version": 1,
+  "dossier": "DEMO_SLO_001",
+  "nom": "FICTIF – TEST – Smith-Lemli-Opitz",
+  "operateur": "Codex",
+  "fictif": true,
+  "saisies": [
+    {
+      "schema_version": "0.3.0",
+      "module": "administratif",
+      "module_version": "2.2.0",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "identite": {
+        "nom_mere": "DÉMONSTRATION",
+        "nom_naiss": null,
+        "prenom_mere": "CAS FICTIF",
+        "ddn_mere": null,
+        "prenom_foetus": "DEMO SLO",
+        "ipp": null,
+        "ipp_fetus": null,
+        "ins": null,
+        "id_ext": "DEMO_SLO_001",
+        "opposition": null
+      },
+      "circuit": {
+        "date_naissance": null,
+        "date_deces": null,
+        "date_reception": null,
+        "date_examen": null,
+        "medecin": null,
+        "medecin_rpps": null,
+        "service": "Démonstration — aucune donnée réelle",
+        "ville_maternite": null
+      },
+      "issue": {
+        "type_issue": "IMG",
+        "terme_sa": 19,
+        "terme_j": 0,
+        "sexe": "M",
+        "voie": null,
+        "multiple": null,
+        "indication": "FICTIF – TEST – Smith-Lemli-Opitz — Scénario entièrement fictif : anomalies échographiques et retard de croissance.",
+        "bamara": {
+          "birth": false,
+          "termination_type": "IMG",
+          "stp_type": null
+        }
+      },
+      "atcd_mat": {
+        "profession_mere": null,
+        "groupe_sanguin": null,
+        "rhesus": null,
+        "consanguinite": null,
+        "fdr": {
+          "hta": false,
+          "diabete": false,
+          "tabac": false,
+          "alcool": false
+        },
+        "atcd_medicaux": "Scénario fictif : antécédents sans particularité rapportée.",
+        "traitements": "Aucun traitement renseigné dans le scénario."
+      },
+      "atcd_obs": {
+        "gestite": 1,
+        "parite": 0,
+        "grossesses": []
+      },
+      "grossesse": {
+        "mode_conception": "SPONTANEE",
+        "amp_type": null,
+        "ddg": null,
+        "lieu_suivi": null,
+        "risque_t21": null,
+        "bhcg": null,
+        "pappa": null,
+        "lcc": null,
+        "cn": null,
+        "histoire_clinique": "CAS FICTIF : grossesse unique ; découverte à 19 SA d’un retard de croissance et d’anomalies génitales externes.",
+        "contexte_clinique": "FICTIF – TEST – Smith-Lemli-Opitz. CAS ENTIÈREMENT FICTIF — Démonstration pédagogique, sans valeur de diagnostic individuel. \n\nConstatations morphologiques simulées : fœtus masculin de 19 SA, de petit poids (150 g), avec réduction du périmètre crânien (130 mm), syndactylie cutanée bilatérale des deuxième et troisième orteils et sous-virilisation des organes génitaux externes (petit bourgeon génital, hypospadias proximal et scrotum bifide). \n\nHypothèse diagnostique : cet ensemble évoque un syndrome de Smith-Lemli-Opitz, sans permettre de l’affirmer morphologiquement. \n\nConfirmation à envisager : une confirmation reposerait sur l’étude biochimique des stérols, notamment du 7-déhydrocholestérol, et sur une analyse moléculaire de DHCR7, avec conseil génétique. Aucun de ces examens n’est réalisé dans ce scénario. Le sexe masculin du scénario est indiqué par un résultat prénatal fictif 46,XY. Le retard de croissance est suggéré par le contexte prénatal et les biométries ; leur interprétation tient compte du référentiel et du terme. Les examens histologiques simulés ne montrent pas de lésion spécifique. Les résultats chiffrés servent à éprouver le logiciel et ne constituent pas une nouvelle norme biométrique.",
+        "chronologie": []
+      },
+      "prenatal": {
+        "echo_t1": null,
+        "echo_t1_details": null,
+        "echo_t2": null,
+        "echo_t2_details": "Scénario simulé : petit gabarit fœtal, petit périmètre crânien et anomalie des organes génitaux externes.",
+        "echo_t3": null,
+        "echo_t3_details": null,
+        "autres_examens": "Résultat fictif 46,XY ; étude des stérols et de DHCR7 non réalisée."
+      },
+      "coherence": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.2.0",
+      "module": "autopsie",
+      "module_version": "2.1.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "ouverture_at": null,
+      "terme_sa": 19,
+      "terme_jours": 0,
+      "maceration_maroun": 0,
+      "trame_attendue": 34,
+      "etapes": [
+        {
+          "id": "ouverture",
+          "titre": "Ouverture",
+          "champs": [
+            {
+              "id": "situs",
+              "label": "Situs",
+              "type": "chips",
+              "valeurs": [
+                "Solitus"
+              ],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "ep_pleural_d",
+              "label": "Épanchement pleural D",
+              "type": "num",
+              "valeur": null,
+              "unite": "mL"
+            },
+            {
+              "id": "ep_pleural_g",
+              "label": "Épanchement pleural G",
+              "type": "num",
+              "valeur": null,
+              "unite": "mL"
+            },
+            {
+              "id": "ep_peritoine",
+              "label": "Épanchement péritonéal",
+              "type": "num",
+              "valeur": null,
+              "unite": "mL"
+            },
+            {
+              "id": "ep_pericarde",
+              "label": "Épanchement péricardique",
+              "type": "num",
+              "valeur": null,
+              "unite": "mL"
+            },
+            {
+              "id": "anasarque",
+              "label": "Anasarque",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "diaphragme",
+              "label": "Diaphragme",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            }
+          ]
+        },
+        {
+          "id": "en_place",
+          "titre": "Organes en place",
+          "champs": [
+            {
+              "id": "veine_omb",
+              "label": "Veine ombilicale",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "art_omb",
+              "label": "Artères ombilicales",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "vessie",
+              "label": "Vessie",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "ogi",
+              "label": "Organes génitaux internes",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "ogi_detail",
+              "label": "OGI — précisions",
+              "type": "txt",
+              "valeur": "Constatation simulée : gonades intra-abdominales d’aspect testiculaire ; pas de structure müllérienne identifiée macroscopiquement."
+            },
+            {
+              "id": "appendice",
+              "label": "Appendice",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "vb",
+              "label": "Vésicule biliaire",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            }
+          ]
+        },
+        {
+          "id": "thorax",
+          "titre": "Thorax",
+          "champs": [
+            {
+              "id": "voies_aer",
+              "label": "Trachée / œsophage",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "thymus_aspect",
+              "label": "Thymus — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "thymus_masse",
+              "label": "Thymus",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "thymus_prelev",
+              "label": "Thymus prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "tvi",
+              "label": "Tronc veineux innominé",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "pericarde",
+              "label": "Péricarde — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "pericarde_prelev",
+              "label": "Péricarde prélevé",
+              "type": "bool",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "coeur",
+          "titre": "Cœur",
+          "champs": [
+            {
+              "id": "pointe",
+              "label": "Pointe",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "gros_vx",
+              "label": "Gros vaisseaux",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "tsa",
+              "label": "Troncs supra-aortiques",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "rvp_d",
+              "label": "Retour veineux pulmonaire D",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "rvp_g",
+              "label": "Retour veineux pulmonaire G",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "crosse",
+              "label": "Crosse et isthme",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "quatre_cav",
+              "label": "Quatre cavités",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "foramen_ovale",
+              "label": "Foramen ovale",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "septum_iv",
+              "label": "Septum interventriculaire",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "valves",
+              "label": "Valves",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "canal_art",
+              "label": "Canal artériel perméable",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "coronaires",
+              "label": "Coronaires d'origine normale",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "coeur_masse",
+              "label": "Cœur",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "coeur_prelev",
+              "label": "Cœur prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "coeur_detail",
+              "label": "Cœur — précisions",
+              "type": "txt",
+              "valeur": "Examen simulé : quatre cavités et connexions concordantes ; pas de malformation majeure identifiée."
+            }
+          ]
+        },
+        {
+          "id": "poumons",
+          "titre": "Poumons",
+          "champs": [
+            {
+              "id": "poumon_d_aspect",
+              "label": "Poumon droit — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "poumon_g_aspect",
+              "label": "Poumon gauche — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "poumons_masse",
+              "label": "Poumons",
+              "type": "masse2",
+              "droite": null,
+              "gauche": null,
+              "total": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "docimasie",
+              "label": "Docimasie pulmonaire",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "poumons_prelev",
+              "label": "Poumons prélevés",
+              "type": "bool",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "digestif",
+          "titre": "Appareil digestif",
+          "champs": [
+            {
+              "id": "foie_aspect",
+              "label": "Foie — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "foie_masse",
+              "label": "Foie",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "foie_prelev",
+              "label": "Foie prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "estomac",
+              "label": "Estomac",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "tube_dig",
+              "label": "Tube digestif",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "meconium",
+              "label": "Méconium",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "tubedig_prelev",
+              "label": "Tube digestif prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "pancreas_aspect",
+              "label": "Pancréas — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "pancreas_masse",
+              "label": "Pancréas",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "intrication_spleno_panc",
+              "label": "Intrication spléno-pancréatique",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "rate_aspect",
+              "label": "Rate — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "rate_masse",
+              "label": "Rate",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            }
+          ]
+        },
+        {
+          "id": "retroperitoine",
+          "titre": "Rétropéritoine",
+          "champs": [
+            {
+              "id": "surrenales_aspect",
+              "label": "Surrénales — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "surrenales_masse",
+              "label": "Surrénales",
+              "type": "masse2",
+              "droite": null,
+              "gauche": null,
+              "total": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "surr_prelev",
+              "label": "Surrénales prélevées",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "reins_aspect",
+              "label": "Reins — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "reins_masse",
+              "label": "Reins",
+              "type": "masse2",
+              "droite": null,
+              "gauche": null,
+              "total": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "reins_prelev",
+              "label": "Reins prélevés",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "voies_urin",
+              "label": "Voies urinaires",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            }
+          ]
+        },
+        {
+          "id": "neuro",
+          "titre": "Système nerveux",
+          "champs": [
+            {
+              "id": "cerveau_ext",
+              "label": "Encéphale — aspect",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "gyration",
+              "label": "Gyration",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "fosse_post",
+              "label": "Fosse postérieure",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "cerveau_masse",
+              "label": "Encéphale",
+              "type": "masse",
+              "grammes": null,
+              "zscores": {
+                "gc": null,
+                "ma": null,
+                "mb": null
+              }
+            },
+            {
+              "id": "cerveau_prelev",
+              "label": "Encéphale prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "rachis_ouv",
+              "label": "Rachis ouvert",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "moelle",
+              "label": "Moelle",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "neuro_detail",
+              "label": "Neuro — précisions",
+              "type": "txt",
+              "valeur": "Petit volume encéphalique ; pas de malformation majeure macroscopiquement identifiée."
+            }
+          ]
+        },
+        {
+          "id": "prelevements",
+          "titre": "Prélèvements",
+          "champs": [
+            {
+              "id": "annexes",
+              "label": "Annexes",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "speciaux",
+              "label": "Prélèvements spéciaux",
+              "type": "chips",
+              "valeurs": [],
+              "hpo": [],
+              "vu_normal": []
+            },
+            {
+              "id": "congelation",
+              "label": "Congélation",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "dnatheque",
+              "label": "DNAthèque",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "prelev_detail",
+              "label": "Prélèvements — précisions",
+              "type": "txt",
+              "valeur": "Prélèvements simulés : cerveau, cœur, poumons, foie, reins, gonades et placenta. Aucun matériel biologique réel."
+            }
+          ]
+        },
+        {
+          "id": "restitution",
+          "titre": "Restitution",
+          "champs": [
+            {
+              "id": "commentaire",
+              "label": "Commentaire de l'autopsie",
+              "type": "txt",
+              "valeur": "Examen entièrement simulé. Constatations et hypothèse diagnostique distinguées dans la conclusion du compte rendu."
+            }
+          ]
+        }
+      ],
+      "cliches_libres": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.1.0",
+      "module": "biometrie_clinique",
+      "module_version": "1.4.0",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "terme": {
+        "sa": 19,
+        "jours": 0
+      },
+      "sexe": "M",
+      "mesures": {
+        "masse": 150,
+        "pied": 29.5,
+        "bip": 35,
+        "fo": 45,
+        "dici": null,
+        "dice": null,
+        "fpg": null,
+        "fpd": null,
+        "dim": null,
+        "sternum": null,
+        "main": 25.4,
+        "vt": 220,
+        "vc": 145,
+        "pc": 130,
+        "pt": 126.4,
+        "pa": 95
+      },
+      "libelles": {
+        "masse": "Masse fœtale",
+        "pied": "Longueur pied",
+        "bip": "BIP",
+        "fo": "FO (fronto-occipital)",
+        "dici": "DICI",
+        "dice": "DICE",
+        "fpg": "FPG (fente palpébrale G)",
+        "fpd": "FPD (fente palpébrale D)",
+        "dim": "DIM (intermamelonnaire)",
+        "sternum": "Hauteur sternum",
+        "main": "Hauteur main",
+        "vt": "VT (vertex-talon)",
+        "vc": "VC (vertex-coccyx)",
+        "pc": "PC (périmètre crânien)",
+        "pt": "PT (périmètre thoracique)",
+        "pa": "PA (périmètre abdominal)"
+      },
+      "unites": {
+        "masse": "g",
+        "pied": "mm",
+        "bip": "mm",
+        "fo": "mm",
+        "dici": "mm",
+        "dice": "mm",
+        "fpg": "mm",
+        "fpd": "mm",
+        "dim": "mm",
+        "sternum": "mm",
+        "main": "mm",
+        "vt": "mm",
+        "vc": "mm",
+        "pc": "mm",
+        "pt": "mm",
+        "pa": "mm"
+      },
+      "ecarts": {
+        "masse": {
+          "GC": -2.06,
+          "MA": -1.27,
+          "MB": -1.81
+        },
+        "pied": {
+          "GC": -0.15,
+          "MA": -0.17,
+          "MB": 0
+        },
+        "bip": {
+          "MB": -2.86
+        },
+        "fo": {
+          "MB": -2.94
+        },
+        "main": {
+          "MB": 1.5
+        },
+        "vt": {
+          "GC": -1.29,
+          "MA": -0.47,
+          "MB": -0.56
+        },
+        "vc": {
+          "GC": -1.62,
+          "MA": -1.08,
+          "MB": -0.96
+        },
+        "pc": {
+          "GC": -2.91,
+          "MA": -2.31,
+          "MB": -2.09
+        },
+        "pt": {
+          "MB": 0
+        },
+        "pa": {
+          "MB": -0.65
+        }
+      },
+      "ecarts_non_arrondis": {
+        "masse": {
+          "GC": -2.061295971978984,
+          "MA": -1.2692307692307692,
+          "MB": -1.8093151948351396
+        },
+        "pied": {
+          "GC": -0.15151515151515152,
+          "MA": -0.16666666666666666,
+          "MB": 0
+        },
+        "bip": {
+          "MB": -2.8571428571428563
+        },
+        "fo": {
+          "MB": -2.9375000000000013
+        },
+        "main": {
+          "MB": 1.5000000000000013
+        },
+        "vt": {
+          "GC": -1.2865168539325846,
+          "MA": -0.47368421052631504,
+          "MB": -0.556962025316455
+        },
+        "vc": {
+          "GC": -1.618320610687022,
+          "MA": -1.076923076923077,
+          "MB": -0.957746478873239
+        },
+        "pc": {
+          "GC": -2.9069767441860463,
+          "MA": -2.3076923076923075,
+          "MB": -2.088888888888889
+        },
+        "pt": {
+          "MB": 0
+        },
+        "pa": {
+          "MB": -0.646153846153846
+        }
+      },
+      "percentiles": {
+        "masse": {
+          "GC": 1.9637406133394268,
+          "MA": 10.217938495690154,
+          "MB": 3.5201024850023908
+        },
+        "pied": {
+          "GC": 43.9784679817334,
+          "MA": 43.381616738909635,
+          "MB": 50
+        },
+        "bip": {
+          "MB": 0.21373669800862877
+        },
+        "fo": {
+          "MB": 0.1654350859547501
+        },
+        "main": {
+          "MB": 93.31927987311421
+        },
+        "vt": {
+          "GC": 9.913137034009845,
+          "MA": 31.786255725485933,
+          "MB": 28.87766875560147
+        },
+        "vc": {
+          "GC": 5.27967605739264,
+          "MA": 14.07573162550112,
+          "MB": 16.90953066789234
+        },
+        "pc": {
+          "GC": 0.18247016391052975,
+          "MA": 1.050812811375934,
+          "MB": 1.8358863134443797
+        },
+        "pt": {
+          "MB": 50
+        },
+        "pa": {
+          "MB": 25.90898631673329
+        }
+      },
+      "fictif": true
+    },
+    {
+      "schema_version": "0.3.0",
+      "module": "examen_clinique",
+      "module_version": "2.2.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "trame_attendue": 15,
+      "retention": {
+        "maroun": 0,
+        "genest": null,
+        "genest_h": null,
+        "genest_libelle": null
+      },
+      "etages": [
+        {
+          "id": "general",
+          "titre": "Général",
+          "items": [
+            {
+              "id": "aspect_general",
+              "label": "Aspect général",
+              "etat": "anormal",
+              "anomalies": [
+                {
+                  "label": "Petit pour l’âge gestationnel",
+                  "hpo_id": "HP:0001518"
+                }
+              ],
+              "vu_normal": [],
+              "precisions": "Petit poids pour le terme dans ce scénario fictif."
+            },
+            {
+              "id": "symetrie",
+              "label": "Symétrie",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001507"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "proportions",
+              "label": "Proportions",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001507"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "teguments",
+              "label": "Téguments",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001574"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "pilosite",
+              "label": "Pilosité",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0011362"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "tete",
+          "titre": "Tête & face",
+          "items": [
+            {
+              "id": "crane",
+              "label": "Forme du crâne",
+              "etat": "anormal",
+              "anomalies": [
+                {
+                  "label": "Microcéphalie",
+                  "hpo_id": "HP:0000252"
+                }
+              ],
+              "vu_normal": [],
+              "precisions": "Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées."
+            },
+            {
+              "id": "fontanelles",
+              "label": "Fontanelles / sutures",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0011328"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "cheveux",
+              "label": "Implantation des cheveux",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0011362"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "yeux",
+              "label": "Yeux & sourcils",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000478"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "nez",
+              "label": "Nez",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000366"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "bouche",
+              "label": "Bouche / palais",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000153"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "oreilles",
+              "label": "Oreilles",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000598"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "cou_thorax",
+          "titre": "Cou & thorax",
+          "items": [
+            {
+              "id": "cou",
+              "label": "Cou",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0025668"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "thorax",
+              "label": "Thorax",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000765"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "abdomen",
+          "titre": "Abdomen, dos & cordon",
+          "items": [
+            {
+              "id": "abdomen",
+              "label": "Abdomen",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001438",
+                "HP:0010866"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "dos",
+              "label": "Dos / rachis",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0000925",
+                "HP:0010301"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "cordon",
+              "label": "Cordon",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0010881"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "perinee",
+          "titre": "Périnée",
+          "items": [
+            {
+              "id": "oge",
+              "label": "OGE",
+              "etat": "anormal",
+              "anomalies": [
+                {
+                  "label": "Hypospadias",
+                  "hpo_id": "HP:0000047"
+                }
+              ],
+              "vu_normal": [],
+              "precisions": "Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY."
+            },
+            {
+              "id": "anus",
+              "label": "Anus",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0004378"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "membres_sup",
+          "titre": "Membres supérieurs & mains",
+          "items": [
+            {
+              "id": "membres_sup",
+              "label": "Membres supérieurs",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0002817"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "mains",
+              "label": "Mains",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001155"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "ongles",
+              "label": "Ongles",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0001597"
+              ],
+              "precisions": null
+            }
+          ]
+        },
+        {
+          "id": "membres_inf",
+          "titre": "Membres inférieurs & pieds",
+          "items": [
+            {
+              "id": "membres_inf",
+              "label": "Membres inférieurs",
+              "etat": "normal",
+              "anomalies": [],
+              "vu_normal": [
+                "HP:0002814"
+              ],
+              "precisions": null
+            },
+            {
+              "id": "pieds_morpho",
+              "label": "Pieds",
+              "etat": "anormal",
+              "anomalies": [
+                {
+                  "label": "Syndactylie",
+                  "hpo_id": "HP:0004691"
+                }
+              ],
+              "vu_normal": [],
+              "precisions": "Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie."
+            }
+          ]
+        }
+      ],
+      "cliches_libres": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.2.0",
+      "module": "macro_placenta",
+      "module_version": "1.1.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "trame_attendue": 3,
+      "sections": [
+        {
+          "id": "general",
+          "titre": "Terme & contexte fœtal",
+          "champs": {
+            "indication": null,
+            "indication_detail": null,
+            "terme_sa": 19,
+            "terme_jours": null,
+            "terme_source": null,
+            "masse_foetale": 150,
+            "sexe": null
+          }
+        },
+        {
+          "id": "galette",
+          "titre": "Galette — biométrie et forme",
+          "champs": {
+            "grand_axe": 9,
+            "petit_axe": 8,
+            "epaisseur": 1.2,
+            "forme": null,
+            "completude": []
+          }
+        },
+        {
+          "id": "choriale",
+          "titre": "Plaque choriale",
+          "champs": {
+            "etat_choriale": [],
+            "remarques_choriale": null
+          }
+        },
+        {
+          "id": "basale",
+          "titre": "Plaque basale",
+          "champs": {
+            "etat_basale": [],
+            "remarques_basale": null
+          }
+        },
+        {
+          "id": "cordon",
+          "titre": "Cordon ombilical",
+          "champs": {
+            "cordon_insertion": "Centrale",
+            "cordon_longueur": 22,
+            "cordon_spiralisation": null,
+            "cordon_particularites": [],
+            "remarques_cordon": "Deux artères et une veine dans le scénario fictif."
+          }
+        },
+        {
+          "id": "membranes",
+          "titre": "Membranes",
+          "champs": {
+            "membranes_insertion": null,
+            "membranes_marginee_pct": null,
+            "membranes_aspect": null,
+            "remarques_membranes": null
+          }
+        },
+        {
+          "id": "paree",
+          "titre": "Placenta paré",
+          "champs": {
+            "masse": 90
+          }
+        },
+        {
+          "id": "tranches",
+          "titre": "Tranches de section & lésions",
+          "champs": {
+            "remarques_tranches": "Parenchyme homogène simulé, sans lésion focale identifiée."
+          }
+        }
+      ],
+      "tranches": [],
+      "lesions": [],
+      "cliches_libres": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.2.0",
+      "module": "micro",
+      "module_version": "1.0.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "terme_sa": 19,
+      "terme_jours": null,
+      "trame_attendue": 0,
+      "sections": [
+        {
+          "n": 1,
+          "rang": 1,
+          "organe": "cerveau",
+          "titre": "Système nerveux central",
+          "champs": [
+            {
+              "id": "s1_cerveau_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s1_cerveau_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s1_cerveau_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s1_cerveau_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        },
+        {
+          "n": 2,
+          "rang": 2,
+          "organe": "coeur",
+          "titre": "Cœur",
+          "champs": [
+            {
+              "id": "s2_coeur_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s2_coeur_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s2_coeur_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s2_coeur_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        },
+        {
+          "n": 3,
+          "rang": 3,
+          "organe": "poumon",
+          "titre": "Poumon",
+          "champs": [
+            {
+              "id": "s3_poumon_compte",
+              "label": "Compte radial alvéolaire",
+              "type": "num",
+              "valeur": null,
+              "unite": "alvéoles"
+            },
+            {
+              "id": "s3_poumon_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s3_poumon_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s3_poumon_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s3_poumon_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        },
+        {
+          "n": 4,
+          "rang": 4,
+          "organe": "foie",
+          "titre": "Foie",
+          "champs": [
+            {
+              "id": "s4_foie_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s4_foie_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s4_foie_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s4_foie_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        },
+        {
+          "n": 5,
+          "rang": 5,
+          "organe": "rein",
+          "titre": "Rein et voies urinaires",
+          "champs": [
+            {
+              "id": "s5_rein_compte",
+              "label": "Compte radial glomérulaire",
+              "type": "num",
+              "valeur": null,
+              "unite": "glomérules"
+            },
+            {
+              "id": "s5_rein_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s5_rein_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s5_rein_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s5_rein_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        },
+        {
+          "n": 6,
+          "rang": 6,
+          "organe": "genital",
+          "titre": "Appareil génital",
+          "champs": [
+            {
+              "id": "s6_genital_maturation",
+              "label": "Maturation",
+              "type": "axe",
+              "etat": "normal",
+              "termes": [],
+              "autre": null,
+              "note": "CAS FICTIF — Histologie entièrement simulée : tissu de maturation compatible avec le terme, sans lésion spécifique. Aucune lame réellement examinée."
+            },
+            {
+              "id": "s6_genital_architecture",
+              "label": "Cytoarchitecture",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s6_genital_pathologie",
+              "label": "Lésions",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            },
+            {
+              "id": "s6_genital_retention",
+              "label": "Rétention",
+              "type": "axe",
+              "etat": null,
+              "termes": [],
+              "autre": null,
+              "note": null
+            }
+          ]
+        }
+      ],
+      "cliches_libres": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.1.0",
+      "module": "neuropath",
+      "module_version": "1.1.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "terme_sa": 19,
+      "terme_jours": 0,
+      "trame_attendue": 23,
+      "etapes": [
+        {
+          "id": "prelevement",
+          "titre": "Prélèvement et fixation",
+          "champs": [
+            {
+              "id": "preleve",
+              "label": "Encéphale prélevé",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "fixation",
+              "label": "Fixation",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "duree_fixation",
+              "label": "Durée de fixation",
+              "type": "num",
+              "valeur": null,
+              "unite": "jours"
+            },
+            {
+              "id": "etat_reception",
+              "label": "État à la réception",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "fosse_post",
+              "label": "Fosse postérieure",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "prelevement_detail",
+              "label": "Prélèvement — précisions",
+              "type": "txt",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "aspect",
+          "titre": "Aspect général — les six faces",
+          "champs": [
+            {
+              "id": "symetrie",
+              "label": "Symétrie hémisphérique",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "consistance",
+              "label": "Consistance après fixation",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "aspect_detail",
+              "label": "Aspect général — précisions",
+              "type": "txt",
+              "valeur": "Scénario fictif : encéphale de petit volume, symétrique."
+            }
+          ]
+        },
+        {
+          "id": "macro",
+          "titre": "Description macroscopique",
+          "champs": [
+            {
+              "id": "meninges",
+              "label": "Méninges",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "meninges_detail",
+              "label": "Méninges — précisions",
+              "type": "txt",
+              "valeur": null
+            },
+            {
+              "id": "gyration",
+              "label": "Gyration",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "gyration_detail",
+              "label": "Gyration — précisions",
+              "type": "txt",
+              "valeur": "Aspect simulé compatible avec 19 SA, sans anomalie majeure identifiée."
+            },
+            {
+              "id": "willis",
+              "label": "Polygone de Willis",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "willis_detail",
+              "label": "Polygone de Willis — précisions",
+              "type": "txt",
+              "valeur": null
+            },
+            {
+              "id": "mamillaires",
+              "label": "Corps mamillaires",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "colliculi",
+              "label": "Colliculi",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "macro_detail",
+              "label": "Autres constatations macroscopiques",
+              "type": "txt",
+              "valeur": "Microcéphalie dans le contexte malformatif décrit ; absence de lésion macroscopique spécifique simulée."
+            }
+          ]
+        },
+        {
+          "id": "biometrie",
+          "titre": "Biométries",
+          "champs": [
+            {
+              "id": "masse_enc",
+              "label": "Masse de l'encéphale fixé",
+              "type": "mes",
+              "valeur": null,
+              "unite": "g",
+              "zscore": {
+                "reference": "ME",
+                "source": "Guihard-Costa 2002 / Maroun 2017",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "masse_cerv",
+              "label": "Masse de l'étage infratentoriel",
+              "type": "mes",
+              "valeur": null,
+              "unite": "g",
+              "zscore": {
+                "reference": "MI",
+                "source": "Guihard-Costa 2002 / Maroun 2017",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "ratio_ce",
+              "label": "Rapport infratentoriel / encéphale",
+              "type": "calc",
+              "valeur": null,
+              "unite": "%",
+              "zscore": {
+                "reference": "RI",
+                "source": "Guihard-Costa 2002 / Maroun 2017",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "DOFD",
+              "label": "Diamètre occipito-frontal droit",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "DOFD",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "DOFG",
+              "label": "Diamètre occipito-frontal gauche",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "DOFG",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "DT",
+              "label": "Diamètre transverse (BIP cérébral)",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "DT",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "DTC",
+              "label": "Diamètre transverse du cervelet",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "DTC",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "HautVermis",
+              "label": "Hauteur du vermis",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "HautVermis",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            }
+          ]
+        },
+        {
+          "id": "cervelet",
+          "titre": "Cervelet et aqueduc",
+          "champs": [
+            {
+              "id": "cervelet_aspect",
+              "label": "Cervelet — aspect",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "cervelet_detail",
+              "label": "Cervelet — précisions",
+              "type": "txt",
+              "valeur": null
+            },
+            {
+              "id": "aqueduc",
+              "label": "Aqueduc de Sylvius",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "aqueduc_detail",
+              "label": "Aqueduc — précisions",
+              "type": "txt",
+              "valeur": null
+            },
+            {
+              "id": "tronc",
+              "label": "Tronc cérébral",
+              "type": "chips",
+              "valeurs": []
+            }
+          ]
+        },
+        {
+          "id": "corps_calleux",
+          "titre": "Corps calleux",
+          "champs": [
+            {
+              "id": "cc",
+              "label": "Corps calleux",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "CC",
+              "label": "Longueur du corps calleux",
+              "type": "mes",
+              "valeur": null,
+              "unite": "mm",
+              "zscore": {
+                "reference": "CC",
+                "source": "Données internes / littérature neuropathologique",
+                "z": null,
+                "attendu_m": null,
+                "attendu_sd": null
+              }
+            },
+            {
+              "id": "cc_detail",
+              "label": "Corps calleux — précisions",
+              "type": "txt",
+              "valeur": null
+            },
+            {
+              "id": "ventricules",
+              "label": "Ventricules latéraux",
+              "type": "chips",
+              "valeurs": []
+            }
+          ]
+        },
+        {
+          "id": "oculaire",
+          "titre": "Globes oculaires",
+          "champs": [
+            {
+              "id": "oeil_d_dt",
+              "label": "Œil droit — diamètre transverse",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oeil_d_dap",
+              "label": "Œil droit — diamètre antéro-postérieur",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oeil_d_dc",
+              "label": "Œil droit — diamètre cranio-caudal",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oeil_g_dt",
+              "label": "Œil gauche — diamètre transverse",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oeil_g_dap",
+              "label": "Œil gauche — diamètre antéro-postérieur",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oeil_g_dc",
+              "label": "Œil gauche — diamètre cranio-caudal",
+              "type": "num",
+              "valeur": null,
+              "unite": "mm"
+            },
+            {
+              "id": "oculaire_detail",
+              "label": "Globes oculaires — précisions",
+              "type": "txt",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "tranches_hd",
+          "titre": "Tranches — hémisphère droit",
+          "champs": [
+            {
+              "id": "thd",
+              "label": "Constatations — hémisphère droit",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "thd_detail",
+              "label": "Hémisphère droit — précisions",
+              "type": "txt",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "tranches_hg",
+          "titre": "Tranches — hémisphère gauche",
+          "champs": [
+            {
+              "id": "thg",
+              "label": "Constatations — hémisphère gauche",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "thg_detail",
+              "label": "Hémisphère gauche — précisions",
+              "type": "txt",
+              "valeur": null
+            }
+          ]
+        },
+        {
+          "id": "prelevements",
+          "titre": "Prélèvements pour histologie",
+          "champs": [
+            {
+              "id": "blocs",
+              "label": "Régions prélevées",
+              "type": "chips",
+              "valeurs": []
+            },
+            {
+              "id": "congelation",
+              "label": "Congélation réalisée",
+              "type": "bool",
+              "valeur": null
+            },
+            {
+              "id": "prelev_detail",
+              "label": "Prélèvements — précisions",
+              "type": "txt",
+              "valeur": "Prélèvements simulés : cerveau, cœur, poumons, foie, reins, gonades et placenta. Aucun matériel biologique réel."
+            },
+            {
+              "id": "commentaire",
+              "label": "Commentaire libre",
+              "type": "txt",
+              "valeur": "Examen entièrement simulé. Constatations et hypothèse diagnostique distinguées dans la conclusion du compte rendu."
+            }
+          ]
+        }
+      ],
+      "cliches_libres": [],
+      "fictif": true
+    },
+    {
+      "schema_version": "0.1.0",
+      "module": "radio",
+      "module_version": "1.0.1",
+      "dossier": "DEMO_SLO_001",
+      "operateur": "Codex",
+      "exported_at": "2026-11-10T09:00:00Z",
+      "terme": {
+        "sa": 19,
+        "jours": 0
+      },
+      "squelette": {
+        "aspect_general": "Examen simulé : minéralisation sans anomalie majeure ; pas de polydactylie ni de synostose identifiée. La syndactylie cutanée des orteils est une constatation clinique.",
+        "cotes": {
+          "droite": 12,
+          "gauche": 12
+        },
+        "thorax_forme": null,
+        "vertebres": {
+          "aspects": [],
+          "remarques": null
+        },
+        "aspect_os": {
+          "aspects": [],
+          "remarques": null
+        }
+      },
+      "biometries": {
+        "bip_osseux_mm": null,
+        "pc_radio_mm": null,
+        "os_longs": {
+          "Humerus": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Radius": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Ulna": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Femur": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Tibia": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Fibula": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          },
+          "Piedradio": {
+            "droite": null,
+            "gauche": null,
+            "moyenne": null,
+            "zscore_chitty": null
+          }
+        }
+      },
+      "scores_staturaux": {
+        "hadlock_sa": null,
+        "adalian_sa": null
+      },
+      "maturation_osseuse": [],
+      "remarques": null,
+      "hpo": [
+        {
+          "code": "HP:0001161",
+          "term_fr": "Polydactylie",
+          "source": "texte"
+        },
+        {
+          "code": "HP:0001159",
+          "term_fr": "Syndactylie",
+          "source": "texte"
+        }
+      ],
+      "fictif": true
+    }
+  ],
+  "comptes_rendus": [
+    {
+      "gabarit": "complet",
+      "gabarit_version": "2.1.0",
+      "operateur": "Codex",
+      "format": "html",
+      "texte": "<b>COMPTE RENDU D'EXAMEN FŒTOPATHOLOGIQUE — BROUILLON</b>\nDossier DEMO_SLO_001 — 19 SA\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">IDENTIFICATION</h2>\n  Mère : DÉMONSTRATION CAS FICTIF\n  Prénom du fœtus : DEMO SLO\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Circuit</h3>\n  Issue : IMG — sexe M.\n\n  Indication de l'examen : DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz — Cas fictif : anomalies échographiques et retard de croissance.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">RENSEIGNEMENTS CLINIQUES</h2>\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Antécédents maternels</h3>\n  Antécédents : Scénario fictif : antécédents sans particularité rapportée.\n  Traitements : Aucun traitement renseigné dans le scénario.\n\n  Gestité 1, parité 0.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Grossesse en cours</h3>\n  Conception : SPONTANEE.\n\n  CAS FICTIF : grossesse unique ; découverte à 19 SA d’un retard de croissance et d’anomalies génitales externes.\n  DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Examens prénataux</h3>\n  Échographie T2 : ANORMALE — Scénario simulé : petit gabarit fœtal, petit périmètre crânien et anomalie des organes génitaux externes.\n  Autres examens : Résultat fictif 46,XY ; étude des stérols et de DHCR7 non réalisée.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">EXAMEN EXTERNE</h2>\n  24 item(s) renseigné(s) sur 24.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Anomalies constatées</h3>\n  Aspect général (Général) : Petit gabarit — Petit poids pour le terme dans ce scénario fictif.\n  Forme du crâne (Tête &amp; face) : Microcéphalie — Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées.\n  OGE (Périnée) : Sous-virilisation — Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY.\n  Pieds (Membres inférieurs &amp; pieds) : Syndactylie 2–3 des pieds — Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie.\n\n<section style=\"break-inside:avoid;page-break-inside:avoid\">\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">BIOMÉTRIE EXTERNE</h2>\n  Terme biométrique : 19 SA.\n<table cellpadding=\"4\" cellspacing=\"0\" style=\"border-collapse:collapse;font-family:Cambria,'Times New Roman',serif;font-size:11pt;table-layout:auto;width:100%;white-space:normal;break-inside:avoid;page-break-inside:avoid\">\n<thead style=\"display:table-header-group\"><tr><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Mesure</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Valeur</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Moyenne GC</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\"><span style=\"white-space:nowrap\">Z-score</span> GC</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Percentile GC</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\"><span style=\"white-space:nowrap\">Z-score</span> MA</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Percentile MA</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\"><span style=\"white-space:nowrap\">Z-score</span> MB</th><th style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;white-space:normal;text-align:center\">Percentile MB</th></tr></thead><tbody>\n<tr data-mesure=\"bip\" style=\"font-weight:bold;background:#fff1e0;break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">BIP</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">35 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,86 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P0,21</td></tr>\n<tr data-mesure=\"fo\" style=\"font-weight:bold;background:#fff1e0;break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">FO (fronto-occipital)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">45 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,94 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P0,17</td></tr>\n<tr data-mesure=\"main\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">Hauteur main</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">25.4 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">+1,50 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P93,32</td></tr>\n<tr data-mesure=\"masse\" style=\"font-weight:bold;background:#fff1e0;break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">Masse fœtale</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">150 g</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">267.7</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,06 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P1,96</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−1,27 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P10,22</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−1,81 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P3,52</td></tr>\n<tr data-mesure=\"pa\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">PA (périmètre abdominal)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">95 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,65 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P25,91</td></tr>\n<tr data-mesure=\"PC\" style=\"font-weight:bold;background:#fff1e0;break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">PC (périmètre crânien)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">130 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">167.5</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,91 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P0,18</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,31 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P1,05</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−2,09 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P1,84</td></tr>\n<tr data-mesure=\"pied\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">Longueur pied</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">29.5 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">30</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,15 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P43,98</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,17 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P43,38</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">+0,00 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P50,00</td></tr>\n<tr data-mesure=\"pt\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">PT (périmètre thoracique)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">126.4 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">—</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">+0,00 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P50,00</td></tr>\n<tr data-mesure=\"VC\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">VC (vertex-coccyx)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">145 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">166.2</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−1,62 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P5,28</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−1,08 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P14,08</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,96 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P16,91</td></tr>\n<tr data-mesure=\"VT\" style=\"break-inside:avoid\"><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:left\">VT (vertex-talon)</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">220 mm</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">242.9</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−1,29 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P9,91</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,47 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P31,79</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">−0,56 DS</td><td style=\"border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none;text-align:right\">P28,88</td></tr></tbody></table>\n  Références biométriques : GC Guihard-Costa AM et al., 2002 ; MA Maroun LL, Graem N, 2017 ; MB Muller-Brochut AC et al., 2018.\n</section>\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">IMAGERIE</h2>\n  Aspect général : Examen simulé : minéralisation sans anomalie majeure ; pas de polydactylie ni de synostose identifiée. La syndactylie cutanée des orteils est une constatation clinique.\n  Côtes : 12 à droite, 12 à gauche.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">EXAMEN INTERNE</h2>\n  Macération, grade de Maroun : 0.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Ouverture</h3>\n  Situs : Solitus\n  Diaphragme : Intègre\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Organes en place</h3>\n  OGI — précisions : Constatation simulée : gonades intra-abdominales d’aspect testiculaire ; pas de structure müllérienne identifiée macroscopiquement.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Cœur</h3>\n  Cœur — précisions : Examen simulé : quatre cavités et connexions concordantes ; pas de malformation majeure identifiée.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Système nerveux</h3>\n  Neuro — précisions : Petit volume encéphalique ; pas de malformation majeure macroscopiquement identifiée.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Prélèvements</h3>\n  Prélèvements — précisions : Prélèvements simulés : cerveau, cœur, poumons, foie, reins, gonades et placenta. Aucun matériel biologique réel.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Restitution</h3>\n  Commentaire de l&#39;autopsie : Examen entièrement simulé. Constatations et hypothèse diagnostique distinguées dans la conclusion du compte rendu.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">PLACENTA — EXAMEN MACROSCOPIQUE</h2>\n  Galette ovalaire de 9 × 8 cm, épaisse de 1.2 cm, masse parée 90 g.\n\n  Rapport fœto-placentaire 1.67 (150 g / 90 g) — à situer\n  dans son percentile pour le terme et le référentiel retenu, pas à lire seul.\n\n  Plaque choriale : sans particularité.\n\n  Plaque basale : complète.\n\n  Cordon : insertion centrale, 22 cm (Deux artères et une veine dans le scénario fictif).\n\n  Membranes : insertion marginale, aspect translucides.\n\n  Tranches de section : Parenchyme homogène simulé, sans lésion focale identifiée.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">MICROSCOPIE</h2>\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Cerveau</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Cœur</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Poumons</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Foie</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Reins</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Gonades</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Placenta</h3>\n  Histologie simulée : Tissu de maturation compatible avec le terme, sans lésion spécifique dans ce scénario fictif.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">NEUROPATHOLOGIE</h2>\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Aspect général — les six faces</h3>\n  Aspect général — précisions : Scénario fictif : encéphale de petit volume, symétrique.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Description macroscopique</h3>\n  Gyration — précisions : Aspect simulé compatible avec 19 SA, sans anomalie majeure identifiée.\n\n  Autres constatations macroscopiques : Microcéphalie dans le contexte malformatif décrit ; absence de lésion macroscopique spécifique simulée.\n\n<h3 style=\"font-size:13.5px;margin:10px 0 0;white-space:normal\">Prélèvements pour histologie</h3>\n  Prélèvements — précisions : Prélèvements simulés : cerveau, cœur, poumons, foie, reins, gonades et placenta. Aucun matériel biologique réel.\n\n  Commentaire libre : Examen entièrement simulé. Constatations et hypothèse diagnostique distinguées dans la conclusion du compte rendu.\n\n<h2 style=\"font-size:15px;margin:16px 0 0;white-space:normal\">CONCLUSION</h2>\n  CAS ENTIÈREMENT FICTIF — Démonstration pédagogique, sans valeur de diagnostic individuel. \n\nConstatations morphologiques simulées : fœtus masculin de 19 SA, de petit poids (150 g), avec réduction du périmètre crânien (130 mm), syndactylie cutanée bilatérale des deuxième et troisième orteils et sous-virilisation des organes génitaux externes (petit bourgeon génital, hypospadias proximal et scrotum bifide). \n\nHypothèse diagnostique : cet ensemble évoque un syndrome de Smith-Lemli-Opitz, sans permettre de l’affirmer morphologiquement. \n\nConfirmation à envisager : une confirmation reposerait sur l’étude biochimique des stérols, notamment du 7-déhydrocholestérol, et sur une analyse moléculaire de DHCR7, avec conseil génétique. Aucun de ces examens n’est réalisé dans ce scénario. Le sexe masculin du scénario est indiqué par un résultat prénatal fictif 46,XY. Le retard de croissance est suggéré par le contexte prénatal et les biométries ; leur interprétation tient compte du référentiel et du terme. Les examens histologiques simulés ne montrent pas de lésion spécifique. Les résultats chiffrés servent à éprouver le logiciel et ne constituent pas une nouvelle norme biométrique.\n\n  Éléments retenus pour la conclusion :\n  <i>Examen externe</i>\n    · Petit gabarit — Aspect général — Petit poids pour le terme dans ce scénario fictif.\n    · Microcéphalie — Forme du crâne — Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées.\n    · Sous-virilisation — OGE — Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY.\n    · Syndactylie 2–3 des pieds — Pieds — Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie.\n  <i>Biométrie externe</i>\n    · BIP — 35 mm (MB −2,86 DS · P0,21)\n    · FO (fronto-occipital) — 45 mm (MB −2,94 DS · P0,17)\n    · Masse fœtale — 150 g (GC −2,06 DS · P1,96 ; MA −1,27 DS · P10,22 ; MB −1,81 DS · P3,52)\n    · PC (périmètre crânien) — 130 mm (GC −2,91 DS · P0,18 ; MA −2,31 DS · P1,05 ; MB −2,09 DS · P1,84)\n\n--\nBrouillon produit le 10/11/2026 à partir des saisies en base. À relire\net à corriger avant signature : rien ici n'a été validé par un humain.\nModules repris : administratif v2.1.0 (poste, Codex) · autopsie v1.0.3 (poste, Codex) · biometrie_clinique v1.4.0 (poste, Codex) · examen_clinique v1.0.1 (poste, Codex) · macro_placenta v1.0.0 (poste, Codex) · micro v1.0.0 (poste, Codex) · neuropath v1.0.0 (poste, Codex) · radio v1.0.0 (poste, Codex).\n"
+    },
+    {
+      "gabarit": "synthese",
+      "gabarit_version": "1.3.0",
+      "operateur": "Codex",
+      "format": "texte",
+      "texte": "DEMO_SLO_001 — synthèse\n========================\n\n19 SA · sexe M · IMG · dossier complet\nIndication : DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz — Cas fictif : anomalies échographiques et retard de croissance.\nRemarque de suivi : DÉMONSTRATION — Syndrome de Smith-Lemli-Opitz — CAS ENTIÈREMENT FICTIF\n\nMODULES\n  ✓ administratif        v2.1.0 · poste · Codex · repris le 10/11/2026\n  ✓ autopsie             v1.0.3 · poste · Codex · repris le 10/11/2026\n  ✓ biometrie_clinique   v1.4.0 · poste · Codex · repris le 10/11/2026\n  ✓ examen_clinique      v1.0.1 · poste · Codex · repris le 10/11/2026\n  ✓ macro_placenta       v1.0.0 · poste · Codex · repris le 10/11/2026\n  ✓ micro                v1.0.0 · poste · Codex · repris le 10/11/2026\n  ✓ neuropath            v1.0.0 · poste · Codex · repris le 10/11/2026\n  ✓ radio                v1.0.0 · poste · Codex · repris le 10/11/2026\n\nCE QUI SORT DE LA NORME\n  · Examen externe — Petit gabarit : Aspect général — Petit poids pour le terme dans ce scénario fictif.\n  · Examen externe — Microcéphalie : Forme du crâne — Périmètre crânien 130 mm à 19 SA ; interpréter avec les trois références affichées.\n  · Examen externe — Sous-virilisation : OGE — Petit bourgeon génital ; hypospadias proximal et scrotum bifide. Sexe chromosomique fictif 46,XY.\n  · Examen externe — Syndactylie 2–3 des pieds : Pieds — Syndactylie cutanée bilatérale des deuxième et troisième orteils, sans polydactylie.\n  · Biométrie externe — BIP : 35 mm (MB −2,86 DS · P0,21)\n  · Biométrie externe — FO (fronto-occipital) : 45 mm (MB −2,94 DS · P0,17)\n  · Biométrie externe — Masse fœtale : 150 g (GC −2,06 DS · P1,96 ; MA −1,27 DS · P10,22 ; MB −1,81 DS · P3,52)\n  · Biométrie externe — PC (périmètre crânien) : 130 mm (GC −2,91 DS · P0,18 ; MA −2,31 DS · P1,05 ; MB −2,09 DS · P1,84)\n  · Rapport fœto-placentaire 1.67 — à situer dans son percentile, pas à lire seul\n\nCHIFFRES\n  Examen externe : 24/24 item(s) renseigné(s), 4 anormal(aux).\n  Biométrie : 10 mesure(s).\n  · BIP : 35 mm — MB −2,86 DS · P0,21\n  · FO (fronto-occipital) : 45 mm — MB −2,94 DS · P0,17\n  · Hauteur main : 25.4 mm — MB +1,50 DS · P93,32\n  · Masse fœtale : 150 g — GC −2,06 DS · P1,96 ; MA −1,27 DS · P10,22 ; MB −1,81 DS · P3,52\n  · PA (périmètre abdominal) : 95 mm — MB −0,65 DS · P25,91\n  · PC (périmètre crânien) : 130 mm — GC −2,91 DS · P0,18 ; MA −2,31 DS · P1,05 ; MB −2,09 DS · P1,84\n  · Longueur pied : 29.5 mm — GC −0,15 DS · P43,98 ; MA −0,17 DS · P43,38 ; MB +0,00 DS · P50,00\n  · PT (périmètre thoracique) : 126.4 mm — MB +0,00 DS · P50,00\n  · VC (vertex-coccyx) : 145 mm — GC −1,62 DS · P5,28 ; MA −1,08 DS · P14,08 ; MB −0,96 DS · P16,91\n  · VT (vertex-talon) : 220 mm — GC −1,29 DS · P9,91 ; MA −0,47 DS · P31,79 ; MB −0,56 DS · P28,88\n  Microscopie : 7 organe(s), 7 champ(s) renseigné(s).\n  Placenta : macroscopie saisie.\n\nCONCLUSION — CAS FICTIF\nCAS ENTIÈREMENT FICTIF — Démonstration pédagogique, sans valeur de diagnostic individuel. \n\nConstatations morphologiques simulées : fœtus masculin de 19 SA, de petit poids (150 g), avec réduction du périmètre crânien (130 mm), syndactylie cutanée bilatérale des deuxième et troisième orteils et sous-virilisation des organes génitaux externes (petit bourgeon génital, hypospadias proximal et scrotum bifide). \n\nHypothèse diagnostique : cet ensemble évoque un syndrome de Smith-Lemli-Opitz, sans permettre de l’affirmer morphologiquement. \n\nConfirmation à envisager : une confirmation reposerait sur l’étude biochimique des stérols, notamment du 7-déhydrocholestérol, et sur une analyse moléculaire de DHCR7, avec conseil génétique. Aucun de ces examens n’est réalisé dans ce scénario. Le sexe masculin du scénario est indiqué par un résultat prénatal fictif 46,XY. Le retard de croissance est suggéré par le contexte prénatal et les biométries ; leur interprétation tient compte du référentiel et du terme. Les examens histologiques simulés ne montrent pas de lésion spécifique. Les résultats chiffrés servent à éprouver le logiciel et ne constituent pas une nouvelle norme biométrique.\n\n--\nProduit le 10/11/2026. Brouillon, à relire.\n"
+    }
+  ]
+}

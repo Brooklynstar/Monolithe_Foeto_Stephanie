@@ -56,6 +56,8 @@ import biometrie
 import cr as compte_rendu
 import ingest
 import perinatal
+import placenta_liaison
+import percentiles_placenta
 from ingest import (ADAPTATEURS, MODULES_FACULTATIFS, MODULES_MICRO,
                     ORDRE_MODULES, Refus, slot, arborescence, construire_index,
                     ecrire_index, ingerer, ingerer_fichier, ingerer_paquet, journal,
@@ -374,6 +376,30 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
         finally:
             cx.close()
 
+    @app.get('/api/dossiers/<numero>/placenta-liaison')
+    def api_placenta_liaison(numero):
+        if not DOSSIER_OK.match(numero):
+            return erreur('Numéro de dossier invalide')
+        cx = base()
+        try:
+            return jsonify(placenta_liaison.contexte(cx, numero))
+        finally:
+            cx.close()
+
+    @app.get('/api/dossiers/<numero>/percentiles-placenta-formulaire')
+    def api_percentiles_formulaire(numero):
+        if not DOSSIER_OK.match(numero):
+            return erreur('Numéro de dossier invalide')
+        cx = base()
+        try:
+            r = cx.execute("SELECT donnees_json FROM saisies WHERE dossier=? AND module='placenta' AND courant=1", (numero,)).fetchone()
+            if not r:
+                return erreur('Aucune saisie Placenta', 404)
+            resultat = placenta_liaison.resultat(cx, numero, json.loads(r[0]))
+            return jsonify({'resultats': resultat, 'html': percentiles_placenta.tableau(resultat)})
+        finally:
+            cx.close()
+
     @app.post("/api/saisie/<int:sid>/courante")
     def api_rendre_courante(sid):
         """Remonte une saisie de l'historique — l'actuelle y descend."""
@@ -408,7 +434,13 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
                 nom = f"{enveloppe.get('dossier')}_{enveloppe.get('module')}.json"
             except (ValueError, AttributeError):
                 nom = "saisie.json"
-            etat, msg, sid = ingerer(cx, racine, brut, nom, provenance="poste")
+            if isinstance(enveloppe, dict) and enveloppe.get('module') in ('placenta', 'macro_placenta'):
+                # Valider avant toute synchronisation ; les deux versions sont atomiques.
+                enveloppe = ingest.lire_enveloppe(brut, nom)
+                cx.execute('BEGIN IMMEDIATE')
+                etat, msg, sid = placenta_liaison.enregistrer(cx, racine, enveloppe)
+            else:
+                etat, msg, sid = ingerer(cx, racine, brut, nom, provenance="poste")
             cx.commit()
             journal(cx, "doublon" if etat == "doublon" else "info", msg,
                     fichier=nom, dossier=enveloppe.get("dossier") if isinstance(enveloppe, dict) else None,
@@ -420,7 +452,7 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
             cx.rollback()
             journal(cx, "rejet", str(e), fichier="POST /api/saisie")
             cx.commit()
-            return erreur(str(e), 422)
+            return erreur(str(e), 409 if isinstance(e, placenta_liaison.Conflit) else 422)
         finally:
             cx.close()
 
