@@ -318,7 +318,7 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
 
     @app.put("/api/dossiers/<numero>")
     def api_maj_dossier(numero):
-        """Statut, remarques, opérateur assigné — les seuls champs qui ne
+        """Statut, remarques, opérateur assigné, macro refaite — les seuls champs qui ne
         viennent pas d'un module. Une constatation ne se corrige pas ici."""
         if not DOSSIER_OK.match(numero):
             return erreur("numéro de dossier inutilisable (lettres, chiffres, . _ -)")
@@ -332,7 +332,9 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
             champs.append("clos_at = ?")
             valeurs.append(ingest.dt.datetime.now().isoformat(timespec="seconds")
                            if corps["statut"] == "clos" else None)
-        for c in ("remarques", "assigne_a"):
+        if corps.get("macro_refaite") not in (None, "", "fixee"):
+            return erreur("signalement de macro inconnu")
+        for c in ("remarques", "assigne_a", "macro_refaite"):
             if c in corps:
                 champs.append(f"{c} = ?")
                 valeurs.append((corps[c] or "").strip() or None)
@@ -371,6 +373,7 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
                 'SELECT gabarit,gabarit_version,texte,operateur,format FROM comptes_rendus WHERE dossier=? ORDER BY id', (numero,))]
             paquet = {'type': 'monolithe_dossier', 'version': 1, 'dossier': numero,
                       'nom': d['remarques'], 'operateur': d['assigne_a'],
+                      'macro_refaite': d['macro_refaite'],
                       'saisies': docs, 'comptes_rendus': rapports}
             reponse = jsonify(paquet)
             reponse.headers['Content-Disposition'] = f'attachment; filename="{numero}.json"'

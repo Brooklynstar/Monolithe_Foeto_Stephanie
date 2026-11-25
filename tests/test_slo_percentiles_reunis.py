@@ -59,7 +59,11 @@ class SLOPercentilesReunis(unittest.TestCase):
             for g in ('complet','synthese','placenta'):
                 r=client.post('/api/dossiers/DEMO_SLO_001/cr',json={'gabarit':g})
                 self.assertEqual(r.status_code,200,r.text)
-                self.assertIn('214 g',r.json['texte']);self.assertIn('P50',r.json['texte'])
+                if g == 'complet':
+                    self.assertNotIn('214 g', r.json['texte'])
+                else:
+                    self.assertIn('214 g', r.json['texte'])
+                    self.assertIn('P50', r.json['texte'])
             autre=serveur.creer_app(base,ROOT).test_client()
             self.assertEqual(autre.get('/api/dossiers/DEMO_SLO_001').status_code,200)
             export=autre.get('/api/dossiers/DEMO_SLO_001/export.json')

@@ -27,8 +27,8 @@
     "hub/references/biometrie_clinique.json": "3bdd91ef5c223fecc4050de8855b829565f8f447fb59dcf362d6a43a5579af47",
     "hub/app/serveur.bat": "d83e7a593d9b835f293181133538ea1b99638e32631564d37375ae5be8112549",
     "serveur.bat": "3cc4cd3aacfbf46251a0555199147be68cc84d39dcff68ba79abfd10ec3a0205",
-    "Macro/biometrie_clinique.html": "0f39ce21d9daa5fdd0e5f9c3ea0dcd540179e2d017d023dc6c22c520c6d2c305",
-    "Macro/examen_clinique.html": "76fe67ca3cb5bd51f425a6156c4d4f82e6c416d1f6e2bdedcc7a1ef926e80b48"
+    "Macro/biometrie_clinique.html": "0d85bb650c709302a886f836ea90e8c06717302ee4f7024875f94b0335dcc844",
+    "Macro/examen_clinique.html": "987aec0484ad8e9fc36b3f34a4f457b790178d9d44500a51d5e77519b506cc5f"
   },
   "python_data": {
     "DONNEES_PLACENTA": "eaf9203c17a42d85f8621fd2c5b194d1b696c1afa0b8652dfd618871e4b2a64e",

@@ -77,6 +77,9 @@ def importer(cx, racine, brut, nom, dry=False):
         raise ingest.Refus('Enveloppe de dossier portable invalide.')
     if not isinstance(docs, list) or not docs or len(docs) > 100 or not isinstance(rapports, list) or len(rapports) > 100:
         raise ingest.Refus('Liste de saisies ou de comptes rendus invalide.')
+    macro_refaite = paquet.get('macro_refaite')
+    if macro_refaite not in (None, '', 'fixee'):
+        raise ingest.Refus('Signalement de macro inconnu.')
     enveloppes, modules, crs = [], set(), []
     for doc in docs:
         if not isinstance(doc, dict) or doc.get('dossier') != numero:
@@ -113,8 +116,8 @@ def importer(cx, racine, brut, nom, dry=False):
             cx.execute('INSERT INTO comptes_rendus(dossier,gabarit,gabarit_version,texte,operateur,format) VALUES (?,?,?,?,?,?)',
                        (numero, g, version, texte, operateur, fmt))
         titre = str(paquet.get('nom') or '')[:500]
-        cx.execute('UPDATE dossiers SET remarques=?, assigne_a=? WHERE numero=?',
-                   (titre or None, str(paquet.get('operateur') or '')[:100] or None, numero))
+        cx.execute('UPDATE dossiers SET remarques=?, assigne_a=?, macro_refaite=? WHERE numero=?',
+                   (titre or None, str(paquet.get('operateur') or '')[:100] or None, macro_refaite or None, numero))
         cible = racine / 'archive' / numero / ('dossier_' + ingest.sha256(brut)[:16] + '.json')
         cible.write_bytes(brut)
         cx.execute('RELEASE SAVEPOINT dossier_portable')

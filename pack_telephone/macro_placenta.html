@@ -34,6 +34,9 @@ h2{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:up
 h2 .n{color:var(--drape)}
 h2 .tally{margin-left:auto;color:var(--ink-soft);letter-spacing:.06em}
 section.off{opacity:.42}
+.zone-saisie{border:0;margin:0;padding:0;min-width:0}
+.zone-saisie:disabled .grid{opacity:.55}
+#etatSaisieMacro{margin-left:8px}
 section.off input,section.off select,section.off textarea,section.off button{pointer-events:none}
 
 .row{display:flex;flex-wrap:wrap;gap:10px}
@@ -144,6 +147,11 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
   <p class="sub">Document autonome, à la paillasse, hors réseau. Clichés et constatations restent sur cet appareil ; rien n'est transmis. L'export produit un fichier JSON nommé d'après le numéro de dossier. Placenta d'un fœtus unique : les gémellaires ne sont pas traités ici.</p>
 </header>
 
+<section aria-label="Mode de saisie">
+  <button class="btn" type="button" id="modeSaisieMacro">Activer la saisie</button>
+  <span id="etatSaisieMacro" class="note" role="status">Lecture seule</span>
+</section>
+
 <!-- 01 — Dossier -->
 <section>
   <h2><span class="n">01</span>Dossier</h2>
@@ -159,13 +167,15 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
       <div class="hint" id="operateurHint">Requis pour déverrouiller la saisie.</div>
     </div>
   </div>
+  <fieldset class="zone-saisie" id="saisieEtiquette" disabled>
   <div class="sousTitre">Étiquette patient</div>
   <div class="grid" id="ph_etiquette"></div>
   <div class="hint" id="etiquetteHint">Photographier l'étiquette : elle certifie le numéro saisi.</div>
+  </fieldset>
 </section>
 
 <!-- Sections : construites par le script -->
-<div id="sections"></div>
+<fieldset class="zone-saisie" id="saisieConstats" disabled><div id="sections"></div></fieldset>
 
 <!-- Stockage -->
 <section class="jauge" id="secJauge">
@@ -182,8 +192,8 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
   <h2><span class="n">10</span>Sortie</h2>
   <div class="btns">
     <button class="btn primary" id="btnExport" disabled>Exporter le JSON</button>
-    <button class="btn" id="btnImport">Relire un JSON</button>
-    <button class="btn danger" id="btnWipe">Effacer le stockage</button>
+    <button class="btn" id="btnImport" disabled>Relire un JSON</button>
+    <button class="btn danger" id="btnWipe" disabled>Effacer le stockage</button>
   </div>
   <p class="note" id="outHint">Saisir le numéro de dossier pour activer l'export.</p>
 </section>
@@ -198,7 +208,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 <section><h2>Percentiles du poids placentaire</h2>
 <label for="conditions_masse">Conditions de pesée</label>
-<select id="conditions_masse"><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option><option value="non_documentees">Non précisées / pièce non parée</option></select>
+<select id="conditions_masse" disabled><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option><option value="non_documentees">Non précisées / pièce non parée</option></select>
 <div id="resultatsPercentilesPlacenta"></div>
 <p class="hint">Redline : position parmi P10, P50, P90, sans percentile exact interpolé. Pas de comparaison des poids fixés ou de protocole inconnu. Ce résultat concerne la masse placentaire, pas le rapport fœto-placentaire.</p></section>
 <input type="file" id="pick" accept="image/*" capture="environment">
@@ -450,10 +460,27 @@ function champHTML(c){
 })();
 
 /* ── Verrou ───────────────────────────────────────────────────────────────── */
+var saisieMacroActive = false;
 function verrouiller(ouvert){
-  SECTIONS.forEach(function(s){ $("sec_" + s.id).classList.toggle("off", !ouvert); });
+  const modifier = ouvert && saisieMacroActive;
+  $("saisieEtiquette").disabled = !modifier;
+  $("saisieConstats").disabled = !modifier;
+  $("conditions_masse").disabled = !modifier;
+  $("btnImport").disabled = !saisieMacroActive;
+  $("btnWipe").disabled = !saisieMacroActive;
+  const sauvegarde = $("hubSave");
+  if (sauvegarde) sauvegarde.disabled = !modifier;
+  SECTIONS.forEach(function(s){ $("sec_" + s.id).classList.toggle("off", !modifier); });
   $("secSortie").classList.toggle("off", !ouvert);
 }
+
+$("modeSaisieMacro").onclick = function(){
+  saisieMacroActive = !saisieMacroActive;
+  this.textContent = saisieMacroActive ? "Repasser en lecture seule" : "Activer la saisie";
+  $("etatSaisieMacro").textContent = saisieMacroActive ? "Saisie activée" : "Lecture seule";
+  majDossier();
+};
+document.addEventListener("DOMContentLoaded", function(){ majDossier(); });
 
 /* ── Champs ───────────────────────────────────────────────────────────────── */
 function valeur(id){
@@ -539,7 +566,7 @@ function lesionsPresentes(){
 /* ── Interactions ─────────────────────────────────────────────────────────── */
 document.addEventListener("click", function(ev){
   var t = ev.target;
-  if (!t.closest) return;
+  if (!saisieMacroActive || !t.closest) return;
   var sec = t.closest("section");
   if (sec && sec.classList.contains("off")) return;
 
@@ -568,7 +595,7 @@ document.addEventListener("click", function(ev){
   if (slot){ ouvrirSlot(slot.dataset.k); return; }
 });
 document.addEventListener("keydown", function(ev){
-  if (ev.key !== "Enter" && ev.key !== " ") return;
+  if (!saisieMacroActive || (ev.key !== "Enter" && ev.key !== " ")) return;
   var s = ev.target.classList && ev.target.classList.contains("slot") ? ev.target : null;
   if (s && !s.closest("section").classList.contains("off")){ ev.preventDefault(); ouvrirSlot(s.dataset.k); }
 });
@@ -857,7 +884,7 @@ async function chargerDossier(){
 /* ── Enregistrement continu ───────────────────────────────────────────────── */
 var attente = null;
 function enregistrer(){
-  if (!dossier || !db) return;
+  if (!saisieMacroActive || !dossier || !db) return;
   clearTimeout(attente);
   attente = setTimeout(function(){
     putSaisie(collecter()).catch(function(e){ flash("Enregistrement refusé : " + e.message); });
@@ -1098,6 +1125,8 @@ async function autotest(){
   chk("opérateur manquant",       $("sec_galette").classList.contains("off"));
   set("operateur", "RM");
   await new Promise(function(r){ setTimeout(r, 40); });
+  chk("lecture seule par défaut", $("saisieConstats").disabled);
+  $("modeSaisieMacro").click();
   chk("déverrouillé",            !$("sec_galette").classList.contains("off"));
   chk("dossier normalisé",        $("dossier").value === "26P0123");
   chk("export activé",           !$("btnExport").disabled);

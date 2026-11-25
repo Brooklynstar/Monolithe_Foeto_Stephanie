@@ -633,7 +633,7 @@ function poserNormaux(id){
 }
 function chargerTrameNormale(){
   if (!/^https?:$/.test(location.protocol)) return;
-  fetch("/api/trame-normale/examen-clinique").then(function(r){
+  return fetch("/api/trame-normale/examen-clinique").then(function(r){
     if (!r.ok) throw new Error("Trame Normal indisponible.");
     return r.json();
   }).then(function(doc){
@@ -686,7 +686,7 @@ function chargerTrameNormale(){
     });
   }).catch(function(e){ flash(e.message); });
 }
-chargerTrameNormale();
+const chargementTrameNormale = chargerTrameNormale();
 
 function etatDe(id){ return $("it_" + id).dataset.etat || null; }
 function poserEtat(id, v){
@@ -1304,11 +1304,24 @@ async function autotest(){
   chk("export activé",           !$("btnExport").disabled);
   chk("version en entête",        $("ver").textContent === "v" + VERSION);
 
+  await chargementTrameNormale;
   var it = $("it_yeux"), tg = it.querySelector(".tog");
-  clic(tg.children[0]); chk("bascule normal",  etatDe("yeux") === "n");
-  clic(tg.children[1]); chk("bascule anormal", etatDe("yeux") === "a");
-  clic(tg.children[1]); chk("second appui remet à vide", etatDe("yeux") === null);
-  clic(tg.children[1]);
+  if (ciblesNormales.has("yeux")){
+    clic(tg.children[0]);
+    clic(it.querySelector("[data-normal-item]"));
+    chk("bascule normal", etatDe("yeux") === "n");
+    clic(tg.children[1]);
+    chk("bascule anormal conserve la sélection", it.dataset.volet === "a" && etatDe("yeux") === "n");
+    clic(tg.children[0]);
+    clic(it.querySelector("[data-normal-item]"));
+    chk("retrait du constat remet à vide", etatDe("yeux") === null);
+    clic(tg.children[1]);
+  } else {
+    clic(tg.children[0]); chk("bascule normal", etatDe("yeux") === "n");
+    clic(tg.children[1]); chk("bascule anormal", etatDe("yeux") === "a");
+    clic(tg.children[1]); chk("second appui remet à vide", etatDe("yeux") === null);
+    clic(tg.children[1]);
+  }
 
   var ch = $("ch_yeux");
   clic(ch.children[2]); clic(ch.children[3]);
@@ -1316,6 +1329,7 @@ async function autotest(){
   chk("chip télécanthus",         chipsDe("yeux").indexOf("Télécanthus") >= 0);
   set("tx_yeux", "fentes courtes");
   clic($("it_crane").querySelector(".tog").children[0]);
+  if (ciblesNormales.has("crane")) clic($("it_crane").querySelector("[data-normal-item]"));
   chk("tally de l'étage",         $("tal_tete").textContent.indexOf("2/7") >= 0);
   chk("un anormal compté",        $("tal_tete").textContent.indexOf("1 anormal") >= 0);
 

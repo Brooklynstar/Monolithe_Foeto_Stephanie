@@ -634,6 +634,8 @@ function mesureHTML(g, m){
 })();
 
 /* ── Recalcul ─────────────────────────────────────────────────────────────── */
+const RENVOIS_BIOMETRIE = {GC:"*", MA:"**", MB:"***"};
+const LEGENDE_BIOMETRIE = '<p class="note"><sup>*</sup> Guihard-Costa · <sup>**</sup> Maroun et Graem · <sup>***</sup> Müller-Brochut.</p>';
 function recalculer(){
   var sa = num("terme_sa");
   TRAME.forEach(function(g){
@@ -644,13 +646,15 @@ function recalculer(){
       var zEl = $("z_" + m.k), fEl = $("fix_" + m.k);
       if (!isFinite(v)){ zEl.innerHTML = ""; fEl.innerHTML = ""; return; }
       var list = ecarts(m, v, sa);
-      zEl.innerHTML = list.length ? '<table><thead><tr><th>Réf.</th><th>Z-score</th><th>Percentile</th></tr></thead><tbody>' + list.map(function(e){
+      zEl.innerHTML = list.length ? '<table><thead><tr><th>Écart-type (DS)</th><th>Percentile</th></tr></thead><tbody>' + list.map(function(e){
         var a = Math.abs(e.z);
         var cls = a > SEUIL_UNITE ? "z far" : a > 2 ? "z out" : "z";
-        return '<tr class="' + cls + '" data-reference="' + e.src + '"><td>' + e.src + ' </td><td data-valeur="z">' +
-          Percentiles.formaterZ(e.z) + '</td><td data-valeur="percentile">' +
-          esc(Percentiles.formater(e.percentile)) + '</td></tr>';
-      }).join("") + '</tbody></table>' : "";
+        const renvoi = '<sup>' + RENVOIS_BIOMETRIE[e.src] + '</sup>';
+        return '<tr class="' + cls + '" data-reference="' + e.src + '"><td data-valeur="z">' +
+          Percentiles.formaterZ(e.z).replace(".", ",").replace("-", "−") + renvoi +
+          '</td><td data-valeur="percentile">' +
+          (e.percentile == null ? '' : esc(Percentiles.formater(e.percentile)) + renvoi) + '</td></tr>';
+      }).join("") + '</tbody></table>' + LEGENDE_BIOMETRIE : "";
       var s = suspicionUnite(m, v, sa, g.unite);
       fEl.innerHTML = s
         ? '<div class="fix"><b>' + s.valeur + ' ' + g.unite + ' ?</b> — ' + esc(s.cause) +
@@ -975,7 +979,7 @@ async function autotest(){
   chk("dossier normalisé",        $("dossier").value === "26P0123");
   chk("export activé",           !$("btnExport").disabled);
   set("terme_sa", "20"); set("v_vt", "246"); set("v_masse", "312");
-  chk("z affiché pour VT",        $("z_vt").textContent.indexOf("MA +0.00") >= 0);
+  chk("z affiché pour VT",        $("z_vt").querySelector('[data-reference="MA"] [data-valeur="z"]')?.textContent === "+0,00**");
   chk("compteur ruban à 1",       $("t_ruban").textContent === "1/5");
   set("v_masse", "0.312");
   chk("alerte unité affichée",    $("fix_masse").textContent.indexOf("kilogrammes") >= 0);

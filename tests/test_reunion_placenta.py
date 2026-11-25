@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'hub/outils'))
 from verifier_placenta import schema_releve
 
-URL = 'http://127.0.0.1:5005'
+PORT = int(os.environ.get('MONOLITHE_TEST_PORT', '5005'))
+URL = f'http://127.0.0.1:{PORT}'
 
 
 class ReunionPlacenta(unittest.TestCase):
@@ -30,14 +31,14 @@ class ReunionPlacenta(unittest.TestCase):
                 def start():
                     proc = subprocess.Popen(
                         [sys.executable, '-u', str(ROOT / 'hub/app/serveur.py'),
-                         '--base', str(base), '--port', '5005'],
+                         '--base', str(base), '--port', str(PORT)],
                         cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
                     for _ in range(150):
                         if proc.poll() is not None:
                             break
                         try:
                             with urlopen(URL + '/api/etat', timeout=.3) as r:
-                                if json.load(r)['racine'] == str(base):
+                                if json.load(r)['racine'] == str(base.resolve()):
                                     return proc
                         except OSError:
                             pass
@@ -46,7 +47,7 @@ class ReunionPlacenta(unittest.TestCase):
                         proc.terminate()
                         proc.wait(timeout=5)
                     log.seek(0)
-                    self.fail('Serveur 5005 indisponible : ' + log.read())
+                    self.fail(f'Serveur {PORT} indisponible : ' + log.read())
 
                 def stop(proc):
                     if proc.poll() is None:
@@ -126,6 +127,7 @@ class ReunionPlacenta(unittest.TestCase):
                         print('OK après redémarrage sur 5005 : trois sections et huit saisies préexistantes identiques')
                         page.goto(URL + '/?dossier=DEMO_SLO_001')
                         page.locator('#operateur').fill('TEST')
+                        page.locator('#panneau [data-acces-macro]').click()
                         page.locator('[data-o=m_macro_placenta]').click()
                         page.goto(URL + page.get_by_role('link', name='Rouvrir ce module').get_attribute('href'))
                         page.wait_for_function('document.getElementById("f_masse").value === "90"')
@@ -140,6 +142,7 @@ class ReunionPlacenta(unittest.TestCase):
                         # Cas positif distinct : le terme et les données SLO restent inchangés.
                         page.goto(URL + '/modules/macro_placenta?dossier=TEST-PCT-028&operateur=TEST')
                         page.wait_for_function('dossier === "TEST-PCT-028"')
+                        page.get_by_role('button', name='Activer la saisie').click()
                         page.locator('#f_terme_sa').fill('28')
                         page.locator('#f_masse').fill('214')
                         page.locator('#conditions_masse').select_option('fraiche_paree')

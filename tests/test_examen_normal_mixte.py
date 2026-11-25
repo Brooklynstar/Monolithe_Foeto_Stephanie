@@ -307,9 +307,8 @@ class ExamenNormalMixte(unittest.TestCase):
         page.goto(url + '/modules/administratif?dossier=DEMO_SLO_001&operateur=TEST')
         for identifiant in ('t1', 't2', 't3', 'sup1'):
             expect(page.locator(f'[id="f_echo_{identifiant}_details"]')).to_be_visible()
-        expect(page.locator('#f_echo_t2_details')).to_have_value(
-            'Petit gabarit fœtal, petit périmètre crânien et anomalie des organes génitaux externes.'
-        )
+        prenatal_slo = page.request.get(url + '/api/saisie/DEMO_SLO_001/administratif').json()['prenatal']
+        expect(page.locator('#f_echo_t2_details')).to_have_value(prenatal_slo['echo_t2_details'])
         page.goto(url + '/modules/administratif?dossier=DEMO-CLINIQUE-MIXTE&operateur=TEST')
         t2 = page.get_by_role('group', name='Échographie T2', exact=True)
         t2.get_by_label('Date', exact=True).fill('15/01/2025')

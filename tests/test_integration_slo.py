@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
 """Vrai serveur ordinaire sur 5005, import et redémarrage sur la même base."""
 import json
+import os
 from pathlib import Path
 import socket
 import subprocess
@@ -11,16 +12,17 @@ import unittest
 from urllib.request import Request, urlopen
 
 DEPOT=Path(__file__).resolve().parents[1]
-URL='http://127.0.0.1:5005'
+PORT = int(os.environ.get('MONOLITHE_TEST_PORT', '5005'))
+URL = f'http://127.0.0.1:{PORT}'
 
 
 class IntegrationSLO(unittest.TestCase):
     def test_serveur_5005_import_percentiles_et_persistance_apres_redemarrage(self):
         with socket.socket() as s:
             try:
-                s.bind(('127.0.0.1',5005))
+                s.bind(('127.0.0.1',PORT))
             except OSError:
-                self.skipTest('port 5005 occupé par un service extérieur')
+                self.skipTest(f'port {PORT} occupé par un service extérieur')
         with tempfile.TemporaryDirectory(prefix='integration-slo-') as tmp:
             base=Path(tmp)/'hub'
             log=open(Path(tmp)/'serveur.log','w+')
@@ -31,12 +33,12 @@ class IntegrationSLO(unittest.TestCase):
                     return json.load(r)
             def demarrer():
                 p=subprocess.Popen([sys.executable,'-u',str(DEPOT/'hub/app/serveur.py'),
-                                    '--base',str(base),'--depot',str(DEPOT)],stdout=log,stderr=subprocess.STDOUT)
+                                    '--base',str(base),'--depot',str(DEPOT),'--port',str(PORT)],stdout=log,stderr=subprocess.STDOUT)
                 for _ in range(150):
                     if p.poll() is not None: break
                     try:
                         etat=appel('/api/etat')
-                        if etat['racine']==str(base): return p
+                        if etat['racine']==str(base.resolve()): return p
                     except OSError: pass
                     time.sleep(.05)
                 if p.poll() is None: p.terminate();p.wait(timeout=5)
@@ -59,7 +61,7 @@ class IntegrationSLO(unittest.TestCase):
                 appel('/api/saisie',admin,'POST')
                 cr=appel('/api/dossiers/DEMO_SLO_001/cr',{'gabarit':'complet','operateur':'Codex'},'POST')
                 self.assertIn('P50,00',cr['texte'])
-                self.assertIn('Percentile GC',cr['texte'])
+                self.assertIn('Guihard-Costa',cr['texte'])
                 self.assertIn('Note fictive persistante',cr['texte'])
                 bio=appel('/api/saisie/DEMO_SLO_001/biometrie_clinique')
                 self.assertEqual(bio['percentiles']['pied']['MB'],50)

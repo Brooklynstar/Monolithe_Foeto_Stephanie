@@ -1879,6 +1879,7 @@ async function autotest(){
   chk("signes attestés reins",    signesDe("reins_aspect").signes.length > 20);
   chk("aucun RELATED embarqué",   !/RELATED/.test(JSON.stringify(SIGNES)));
   chk("normal connu par champ",   signesDe("gros_vx").normal[0] === "Concordants" && signesDe("pointe").normal[0] === "À gauche");
+  poserChips("gros_vx", []);
   clic($("ch_gros_vx").querySelector('[data-v="Concordants"]'));
   chk("vu normal → ancres",       exportChamp(champDef("gros_vx")).vu_normal[0] === "HP:0030962");
   clic(document.querySelector('[data-plus="gros_vx"]'));

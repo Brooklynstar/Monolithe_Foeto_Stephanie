@@ -253,13 +253,25 @@ const Engine = (function() {
 
     function entropy(probs) { return _entropyVec(Float64Array.from(probs)); }
 
-    function suggest(present, absent, topN) {
+    // Ancêtres HPO d'une liste de signes : un signe présent les rend acquis (une CIV EST une
+    // anomalie morphologique du cœur), on ne les propose donc pas.
+    function _ancetres(ids) {
+        const vus = new Set(), pile = ids.slice();
+        while (pile.length) for (const p of (_parents[pile.pop()] || [])) if (!vus.has(p)) { vus.add(p); pile.push(p); }
+        return vus;
+    }
+    // modalite : 'echo' (mode échographiste) ne propose que les signes visibles par cette modalité
+    const _voitPar = (h, modalite) => !modalite || ((_hpo[h] || {}).modalites || []).includes(modalite);
+
+    function suggest(present, absent, topN, modalite) {
         topN = topN || 6;
         const pIdx = present.map(h => _hpoIdx[h]).filter(i => i !== undefined);
         const aIdx = absent.map(h => _hpoIdx[h]).filter(i => i !== undefined);
         const probs = _postVec(pIdx, aIdx);
         const curH = _entropyVec(probs);
         const already = new Set([...pIdx, ...aIdx]);
+        for (const h of _ancetres(present)) if (_hpoIdx[h] !== undefined) already.add(_hpoIdx[h]);
+        for (let hi = 0; hi < _hpoList.length; hi++) if (!_voitPar(_hpoList[hi], modalite)) already.add(hi);
         const nH = _hpoList.length;
 
         const indexed = [];
@@ -314,17 +326,22 @@ const Engine = (function() {
         return scored.slice(0, topN);
     }
 
-    function searchHPO(query, excludeSet, ctxFilter, catFilter) {
+    // Mots dans n'importe quel ordre, sans accents, sur le libellé fr et en, les synonymes fr et l'id
+    // (« atresie digestive » trouve HP:0002589 par son synonyme) ; libellé touché en entier d'abord.
+    const plat = s => (s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    function searchHPO(query, excludeSet, ctxFilter, catFilter, modalite) {
         if (!query || query.length < 2) return [];
-        const q = query.toLowerCase();
+        const q = plat(query).trim(), mots = q.split(/\s+/);
         return Object.entries(_hpo)
             .filter(([id, t]) => {
                 if (excludeSet && excludeSet.has(id)) return false;
                 if (ctxFilter && t.context !== ctxFilter && t.context !== 'both') return false;
                 if (catFilter && t.category !== catFilter) return false;
-                const n = (t.name_fr || t.name || '').toLowerCase();
-                return n.includes(q) || id.toLowerCase().includes(q);
+                if (!_voitPar(id, modalite)) return false;
+                const n = t._plat || (t._plat = plat([t.name_fr, t.name, t.aliases, id].join(' | ')));
+                return mots.every(m => n.includes(m));
             })
+            .sort(([, a], [, b]) => !plat(a.name_fr || a.name).includes(q) - !plat(b.name_fr || b.name).includes(q))
             .slice(0, 12)
             .map(([id, t]) => ({ id, name: t.name_fr || t.name || id, context: t.context || 'both', category: t.category, type: t.type || 'hpo' }));
     }
@@ -353,6 +370,7 @@ const state = {
     usePubmed: false,
     useLivres: false,
     useFoeto: true,
+    echographiste: false,   // ne propose et ne cherche que les signes visibles à l'écho
 };
 
 // akEsc et non esc : une fonction globale esc() écraserait celle de la page du hub,
@@ -427,7 +445,7 @@ function searchHPO(idx, query) {
     if (query.length < 2) return;
 
     const exclude = new Set(state.signs.filter(s => s.hpo).map(s => s.hpo).concat(state.additional.map(o => o.hpo)));
-    const results = Engine.searchHPO(query, exclude, state.contextFilter, state.categoryFilter);
+    const results = Engine.searchHPO(query, exclude, state.contextFilter, state.categoryFilter, state.echographiste ? 'echo' : '');
     if (!results.length) return;
 
     const row = document.getElementById('signRow'+idx);
@@ -552,7 +570,7 @@ function updateRanking() {
     card.innerHTML = html;
 
     if (state.phase === 'refine') {
-        const suggestions = Engine.suggest(present, absent, 6);
+        const suggestions = Engine.suggest(present, absent, 6, state.echographiste ? 'echo' : '');
         renderSuggestions(suggestions);
         renderObsHistory();
     }

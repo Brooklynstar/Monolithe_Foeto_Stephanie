@@ -979,7 +979,7 @@ async function autotest(){
   chk("dossier normalisé",        $("dossier").value === "26P0123");
   chk("export activé",           !$("btnExport").disabled);
   set("terme_sa", "20"); set("v_vt", "246"); set("v_masse", "312");
-  chk("z affiché pour VT",        $("z_vt").textContent.indexOf("MA +0.00") >= 0);
+  chk("z affiché pour VT",        $("z_vt").querySelector('[data-reference="MA"] [data-valeur="z"]')?.textContent === "+0,00**");
   chk("compteur ruban à 1",       $("t_ruban").textContent === "1/5");
   set("v_masse", "0.312");
   chk("alerte unité affichée",    $("fix_masse").textContent.indexOf("kilogrammes") >= 0);

@@ -43,7 +43,7 @@ function proche(a,b){if(b==null)assert.equal(a??null,null);else assert.ok(Math.a
  await post(ancien);
  for(const g of ['complet','synthese']){
   const r=await p.request.post(url+'/api/dossiers/'+doc.dossier+'/cr',{data:{gabarit:g}});assert.equal(r.status(),200,await r.text());
-  const cr=await r.json();assert.ok(cr.texte.includes('P50,00'));assert.ok(cr.texte.includes('GC'));
+  const cr=await r.json();assert.ok(cr.texte.includes('P50,00'));assert.ok(cr.texte.includes(g==='complet'?'Guihard-Costa':'GC'));
  }
  const stats=await(await p.request.get(url+'/api/dossiers/'+doc.dossier+'/percentiles-organes')).json();
  assert.equal(stats.neuropath.lignes[0].percentile,50);assert.ok(stats.autopsie.html.includes('Cambria'));

@@ -553,12 +553,16 @@ def adapt_plat(cx, sid, dossier, d):
 
 # Les grilles de microscopie, telles que leurs fichiers se nomment. Elles
 # comptent pour un seul module attendu — voir SLOT ci-dessous.
+MODULES_MICRO_PLACENTA = frozenset({
+    "grille_placenta", "grille_placenta_cordon", "grille_placenta_membranes",
+    "grille_placenta_parenchyme", "grille_placenta_marges",
+})
 MODULES_MICRO = [
     "grille_cerveau_moelle", "grille_coeur", "grille_digestif", "grille_foie",
     "grille_gonades", "grille_muscle", "grille_oeil", "grille_oreille",
-    "grille_pancreas", "grille_peau", "grille_placenta", "grille_poumon", "grille_rate",
+    "grille_pancreas", "grille_peau", "grille_poumon", "grille_rate",
     "grille_rein", "grille_surrenales", "grille_thymus", "grille_thyroide",
-    "grille_vessie",
+    "grille_vessie", *sorted(MODULES_MICRO_PLACENTA),
 ]
 
 
@@ -736,13 +740,19 @@ def migrer(cx, dossier_migrations: Path, bavard=True):
     cx.execute("""CREATE TABLE IF NOT EXISTS schema_migrations (
                       version INTEGER PRIMARY KEY, nom TEXT NOT NULL,
                       applique_at TEXT NOT NULL DEFAULT (datetime('now')))""")
-    faites = {r[0] for r in cx.execute("SELECT version FROM schema_migrations")}
+    faites = dict(cx.execute("SELECT version, nom FROM schema_migrations").fetchall())
     scripts = sorted(dossier_migrations.glob("[0-9][0-9][0-9][0-9]_*.sql"))
     if not scripts:
         raise SystemExit(f"aucune migration trouvée dans {dossier_migrations}")
     appliquees = []
     for s in scripts:
         v = int(s.name[:4])
+        # Deux historiques ont publié une migration 0008 différente.
+        # Le nom enregistré permet de reconnaître une macro déjà migrée.
+        if s.name == "0010_macro_refaite.sql" and faites.get(8) == "0008_macro_refaite.sql":
+            continue
+        if s.name == "0008_conclusions_cliniques.sql" and faites.get(8) == "0008_macro_refaite.sql":
+            v = 11
         if v in faites:
             continue
         # Le script et sa ligne de version partent dans la même transaction :
@@ -765,6 +775,7 @@ def migrer(cx, dossier_migrations: Path, bavard=True):
                 cx.execute("ROLLBACK")
             raise SystemExit(f"migration {s.name} refusée par SQLite, base laissée "
                              f"telle qu'avant : {e}")
+        faites[v] = s.name
         appliquees.append(s.name)
         if bavard:
             print(f"  migration {s.name} appliquée")
@@ -829,6 +840,16 @@ def sans_base64(d: dict) -> dict:
     return out
 
 
+def instant_export(valeur):
+    if not valeur:
+        return None
+    try:
+        instant = dt.datetime.fromisoformat(valeur.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return instant if instant.tzinfo is not None else instant.replace(tzinfo=dt.timezone.utc)
+
+
 def ingerer(cx, racine: Path, brut: bytes, nom: str, provenance="telephone", dry=False,
             archive_rel=None):
     """Ingère un document JSON déjà en mémoire. Renvoie (etat, message, saisie_id).
@@ -859,16 +880,31 @@ def ingerer(cx, racine: Path, brut: bytes, nom: str, provenance="telephone", dry
     # L'empreinte dans le nom : deux versions reprises dans la même seconde
     # (enregistrer deux fois de suite depuis un module) ne s'écrasent pas.
     cx.execute("INSERT OR IGNORE INTO dossiers (numero) VALUES (?)", (dossier,))
-    cx.execute("UPDATE saisies SET courant=0 WHERE dossier=? AND module=?", (dossier, module))
+    # Le téléphone exporte parfois deux fois (« x.json », « x (1).json »), et les
+    # fichiers n'arrivent pas dans l'ordre : c'est la date d'export qui décide. Le
+    # poste, lui, enregistre en direct — une horloge en retard ne doit pas l'écarter.
+    courante = cx.execute("SELECT id, schema_version, exported_at, donnees_json FROM saisies "
+                          "WHERE dossier=? AND module=? AND courant=1", (dossier, module)).fetchone()
+    exporte = txt(d.get("exported_at"))
+    instant = instant_export(exporte)
+    instant_courant = instant_export(courante["exported_at"]) if courante else None
+    retard = (provenance == "telephone" and instant is not None and instant_courant is not None
+              and instant < instant_courant)
+    if not retard:
+        cx.execute("UPDATE saisies SET courant=0 WHERE dossier=? AND module=?", (dossier, module))
     sid = ins(cx, "saisies",
               dossier=dossier, module=module,
               schema_version=d["schema_version"], module_version=d["module_version"],
-              operateur=txt(d.get("operateur")), exported_at=txt(d.get("exported_at")),
+              operateur=txt(d.get("operateur")), exported_at=exporte,
               fichier=nom, archive=rel_archive, sha256=empreinte,
-              octets=len(brut), courant=1, provenance=provenance,
+              octets=len(brut), courant=0 if retard else 1, provenance=provenance,
               donnees_json=json.dumps(sans_base64(d), ensure_ascii=False))
 
     indexer(cx, sid, dossier, module, d["schema_version"], d)
+    if retard:   # la fiche du dossier (terme, sexe…) reste celle de la saisie courante
+        vieux = json.loads(courante["donnees_json"] or "{}")
+        if vieux and (module, courante["schema_version"]) in ADAPTATEURS:
+            indexer(cx, courante["id"], dossier, module, courante["schema_version"], vieux)
 
     n_photos = ecrire_photos(cx, racine, sid, dossier, module, d)
     majuscule_statut(cx, dossier)
@@ -881,6 +917,8 @@ def ingerer(cx, racine: Path, brut: bytes, nom: str, provenance="telephone", dry
     msg = f"{module} v{d['module_version']} → {dossier}" + (f", {n_photos} cliché(s)" if n_photos else "")
     if d.get("_avertissement_nom"):
         msg += f" [{d['_avertissement_nom']}]"
+    if retard:
+        msg += f" [plus ancien que la saisie courante, exportée le {courante['exported_at'][:16]} : rangé à l'historique]"
     return "info", msg, sid
 
 
@@ -991,7 +1029,7 @@ def reindexer(cx, bavard=True):
     ajoute une colonne à un module.
     """
     lignes = cx.execute("""SELECT id, dossier, module, schema_version, donnees_json
-                             FROM saisies ORDER BY id""").fetchall()
+                             FROM saisies ORDER BY courant, id""").fetchall()   # les courantes écrivent la fiche en dernier
     faites = sans_adaptateur = sans_document = 0
     for r in lignes:
         try:

@@ -57,6 +57,8 @@ function verifierExport(doc, d){
 
 (async()=>{
   const executablePath = process.env.MONOLITHE_CHROMIUM || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined);
+  const renvois = {GC:'*', MA:'**', MB:'***'};
+  const dsAffiche = z => zTexte(z).replace(/ DS$/, '');
   const browser = await chromium.launch({headless: true, executablePath});
   // Le Chromium géré bloque file://. Servir les fichiers sans modification ni
   // injection du hub, et sans aucune dépendance réseau extérieure.
@@ -84,8 +86,8 @@ function verifierExport(doc, d){
         assert.equal(await page.locator(`#z_${cle} tbody tr`).count(), Object.keys(sources).length);
         for(const [src, r] of Object.entries(sources)){
           const ligne = page.locator(`#z_${cle} [data-reference="${src}"]`);
-          assert.equal(await ligne.locator('[data-valeur="percentile"]').textContent(), pTexte(r.p));
-          assert.equal(await ligne.locator('[data-valeur="z"]').textContent(), (r.z >= 0 ? '+' : '') + r.z.toFixed(2));
+          assert.equal(await ligne.locator('[data-valeur="percentile"]').textContent(), pTexte(r.p) + renvois[src]);
+          assert.equal(await ligne.locator('[data-valeur="z"]').textContent(), dsAffiche(r.z) + renvois[src]);
           compteur.percentilesSaisie++;
         }
       }
@@ -108,26 +110,23 @@ function verifierExport(doc, d){
         const rendu = await context.newPage();
         if(gabarit === 'complet') await rendu.setContent(rapport.texte);
         for(const [cle, sources] of Object.entries(d.attendus)){
-          let cellules;
-          if(gabarit === 'complet'){
-            const key = {vt:'VT', vc:'VC', pc:'PC'}[cle] || cle;
-            cellules = await rendu.locator(`[data-mesure="${key}"] td`).allTextContents();
-            assert.ok(cellules.length >= 2, `Ligne finale manquante : ${cle}`);
-            const headers = await rendu.locator(`[data-mesure="${key}"]`).locator('xpath=ancestor::table').locator('th').allTextContents();
-            cellules = Object.fromEntries(headers.map((h,i)=>[h,cellules[i]]));
-          }
-          const ligneTexte = rapport.texte.split('\n').find(l=>l.includes('· ' + doc.libelles[cle] + ' :')) || '';
-          for(const [src, i] of [['GC',3], ['MA',5], ['MB',7]]){
-            if(sources[src]){
-              const r = sources[src];
-              if(cellules){
-                assert.equal(cellules['Percentile ' + src], pTexte(r.p), `CR ${d.dossier}/${cle}/${src}`);
-                assert.equal(cellules['Z-score ' + src], zTexte(r.z));
-              } else {
-                assert.ok(ligneTexte.includes(src + ' ' + zTexte(r.z) + ' · ' + pTexte(r.p)), ligneTexte);
-              }
+          if (gabarit === 'complet') {
+            const ligne = rendu.getByRole('row').filter({
+              has: rendu.getByRole('rowheader', {name: doc.libelles[cle], exact:true})
+            });
+            const refs = Object.keys(renvois).filter(src => sources[src]);
+            assert.equal(await ligne.count(), 1, `Ligne finale manquante : ${cle}`);
+            const pct = await ligne.locator('td').nth(1).locator('span').allTextContents();
+            const ds = await ligne.locator('td').nth(2).locator('span').allTextContents();
+            assert.deepEqual(pct, refs.map(src=>pTexte(sources[src].p)+renvois[src]));
+            assert.deepEqual(ds, refs.map(src=>dsAffiche(sources[src].z)+renvois[src]));
+            compteur.percentilesCR += refs.length;
+          } else {
+            const ligne = rapport.texte.split('\n').find(l=>l.includes('· ' + doc.libelles[cle] + ' :')) || '';
+            for (const [src, r] of Object.entries(sources)){
+              assert.ok(ligne.includes(src + ' ' + zTexte(r.z) + ' · ' + pTexte(r.p)), ligne);
               compteur.percentilesCR++;
-            } else if(cellules) assert.ok(cellules['Percentile ' + src] == null || cellules['Percentile ' + src] === '—', `Percentile hors domaine : ${cle}/${src}`);
+            }
           }
         }
         await rendu.close();
@@ -231,7 +230,7 @@ function verifierExport(doc, d){
     await pageHub.waitForFunction(v=>document.getElementById('v_bip').value === String(v), reluHub.mesures.bip);
     for(const [cle,sources] of Object.entries(reluHub.attendus)){
       for(const [src,r] of Object.entries(sources)){
-        assert.equal(await pageHub.locator(`#z_${cle} [data-reference="${src}"] [data-valeur="percentile"]`).textContent(),pTexte(r.p));
+        assert.equal(await pageHub.locator(`#z_${cle} [data-reference="${src}"] [data-valeur="percentile"]`).textContent(),pTexte(r.p)+renvois[src]);
       }
     }
     await cHub.close();

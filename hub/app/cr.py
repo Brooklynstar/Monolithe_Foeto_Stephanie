@@ -30,6 +30,7 @@ import json
 import re
 from pathlib import Path
 
+import ingest
 import biometrie
 import cr_complet
 import cr_lumi
@@ -552,7 +553,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "grilles": grilles,
         "grille_placenta": next((g for g in grilles
                                  if g["module"] == "grille_placenta"), None),
-        "grilles_foetales": [g for g in grilles if g["module"] != "grille_placenta"],
+        "grilles_foetales": [g for g in grilles if g["module"] not in ingest.MODULES_MICRO_PLACENTA],
         "neuropath": {"etapes": _trame(neu), "masses": masses_neuro, "terme_percentiles":sa_neuro},
         "z": z,
         "z_divergences": divergences,

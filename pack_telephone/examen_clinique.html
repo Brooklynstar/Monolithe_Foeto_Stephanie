@@ -116,6 +116,12 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
         border-left:2px solid var(--alert);border-radius:0 2px 2px 0}
 .item[data-etat=a] .detail{display:block}
 .detail{display:none}
+.item[data-volet] .detail{display:none}
+.item[data-volet=a] .detail{display:block}
+.options-normales[hidden]{display:none}
+.options-normales{margin:8px 0}
+.commentaire-item{display:block;margin-top:8px}
+.commentaire-item + textarea{display:block;width:100%;box-sizing:border-box}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{appearance:none;font-family:var(--sans);font-size:14px;color:var(--ink);
       background:var(--card);border:1px solid var(--rule);border-radius:2px;
@@ -448,7 +454,8 @@ function chipAjouter(id, hpo, label){
     c = chipTrouver(id, hpo);
   }
   c.setAttribute("aria-pressed", "true");
-  if (etatDe(id) !== "a") poserEtat(id, "a");
+  if (ciblesNormales.has(id)) majEtatMixte(id);
+  else if (etatDe(id) !== "a") poserEtat(id, "a");
   majTallies(); enregistrer();
 }
 function attRendre(id){
@@ -510,6 +517,8 @@ function rechercher(id, q){
                '<button type="button" class="mini" data-add="' + e.id + '" data-item="' + i.id + '">📷 Cliché de l\'anomalie</button>' +
                '<div class="grid" id="phi_' + i.id + '"></div>' +
              '</div>' +
+             '<label class="commentaire-item" for="commentaire_' + i.id + '">Commentaire</label>' +
+             '<textarea aria-label="Commentaire — ' + esc(i.l) + '" id="commentaire_' + i.id + '" rows="2"></textarea>' +
            '</div>';
     });
     return h + '</section>';
@@ -550,10 +559,140 @@ function verrouiller(ouvert){
 }
 
 /* ── Items ────────────────────────────────────────────────────────────────── */
+var trameNormale = new Map(), ciblesNormales = new Set(), cochesNormales = new Map();
+var anomaliesSansDetail = new Set();
+
+function afficherNormal(id){
+  if (!ciblesNormales.has(id)) return;
+  var item = $("it_" + id);
+  var options = trameNormale.get(id) || [];
+  var liste = item.querySelector(".options-normales");
+  if (!liste) {
+    liste = document.createElement("div");
+    liste.className = "options-normales";
+    item.querySelector(".tete").after(liste);
+  }
+  liste.hidden = item.dataset.volet !== "n";
+  liste.replaceChildren();
+  if (!options.length) {
+    liste.textContent = "Aucune constatation normale dans la trame actuelle.";
+    return;
+  }
+  const selection = cochesNormales.get(id) || [];
+  const cadres = document.createElement("div");
+  cadres.className = "chips";
+  for (const option of options) {
+    const bouton = document.createElement("button");
+    bouton.type = "button";
+    bouton.className = "chip";
+    bouton.dataset.normalItem = option.id;
+    bouton.textContent = option.phrase;
+    bouton.setAttribute("aria-pressed", String(selection.includes(option.id)));
+    bouton.addEventListener("click", function(e){
+      e.stopPropagation();
+      if (item.closest("section").classList.contains("off")) return;
+      const valeurs = new Set(cochesNormales.get(id) || []);
+      const ajout = !valeurs.has(option.id);
+      if (ajout) {
+        if (option.groupe) {
+          for (const autre of options)
+            if (autre.groupe === option.groupe) valeurs.delete(autre.id);
+        }
+        valeurs.add(option.id);
+      } else valeurs.delete(option.id);
+      cochesNormales.set(id, Array.from(valeurs));
+      cadres.querySelectorAll("button").forEach(c =>
+        c.setAttribute("aria-pressed", String(valeurs.has(c.dataset.normalItem))));
+      majEtatMixte(id);
+      majTallies(); enregistrer();
+    });
+    cadres.append(bouton);
+  }
+  liste.append(cadres);
+}
+function anomalieDocumentee(id){
+  return anomaliesSansDetail.has(id) || chipsCodees(id).length > 0 || Boolean($("tx_" + id).value.trim());
+}
+function majEtatMixte(id){
+  if (!ciblesNormales.has(id)) return;
+  const normal = (cochesNormales.get(id) || []).length > 0;
+  $("it_" + id).dataset.etat = anomalieDocumentee(id) ? "a" : normal ? "n" : "";
+}
+function ouvrirVolet(id, volet){
+  const item = $("it_" + id);
+  item.dataset.volet = volet;
+  item.querySelectorAll(".tog button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.e === volet)));
+  afficherNormal(id);
+}
+function poserNormaux(id){
+  const options = trameNormale.get(id) || [];
+  const selection = cochesNormales.get(id) || [];
+  cochesNormales.set(id, options.filter(o => !o.groupe || selection.includes(o.id)).map(o => o.id));
+  majEtatMixte(id);
+  ouvrirVolet(id, "n");
+}
+function chargerTrameNormale(){
+  if (!/^https?:$/.test(location.protocol)) return;
+  return fetch("/api/trame-normale/examen-clinique").then(function(r){
+    if (!r.ok) throw new Error("Trame Normal indisponible.");
+    return r.json();
+  }).then(function(doc){
+    ciblesNormales = new Set(ETAGES.flatMap(e => e.items.map(i => i.id)));
+    for (const o of doc.items) {
+      if (!ciblesNormales.has(o.cible)) continue;
+      if (!trameNormale.has(o.cible)) trameNormale.set(o.cible, []);
+      trameNormale.get(o.cible).push(o);
+    }
+    ciblesNormales.forEach(function(id){
+      ouvrirVolet(id, etatDe(id) || "");
+      const detail = $("it_" + id).querySelector(".detail");
+      const retirer = document.createElement("button");
+      retirer.type = "button";
+      retirer.textContent = "Retirer l’anomalie sans précision";
+      retirer.hidden = !anomaliesSansDetail.has(id);
+      retirer.onclick = function(){
+        anomaliesSansDetail.delete(id);
+        retirer.hidden = true;
+        majEtatMixte(id); majTallies(); enregistrer();
+      };
+      retirer.className = "retirer-anomalie";
+      detail.append(retirer);
+    });
+    ETAGES.forEach(function(e){
+      if (e.id === "cou_thorax") return;
+      var cibles = e.items.filter(function(i){ return trameNormale.has(i.id); });
+      if (!cibles.length) return;
+      var bouton = document.createElement("button");
+      bouton.type = "button";
+      bouton.textContent = "Normal — toute la rubrique";
+      bouton.addEventListener("click", function(){
+        if ($("sec_" + e.id).classList.contains("off")) return;
+        cibles.forEach(function(i){ poserNormaux(i.id); });
+        majTallies(); enregistrer();
+      });
+      const effacer = document.createElement("button");
+      effacer.type = "button";
+      effacer.textContent = "Décocher les constatations normales";
+      effacer.addEventListener("click", function(){
+        if ($("sec_" + e.id).classList.contains("off")) return;
+        cibles.forEach(function(i){
+          cochesNormales.set(i.id, []);
+          majEtatMixte(i.id);
+          afficherNormal(i.id);
+        });
+        majTallies(); enregistrer();
+      });
+      $("sec_" + e.id).querySelector("h2").after(bouton, effacer);
+    });
+  }).catch(function(e){ flash(e.message); });
+}
+const chargementTrameNormale = chargerTrameNormale();
+
 function etatDe(id){ return $("it_" + id).dataset.etat || null; }
 function poserEtat(id, v){
   var el = $("it_" + id);
   el.dataset.etat = v || "";
+  if (ciblesNormales.has(id)) { ouvrirVolet(id, v || ""); return; }
   Array.prototype.forEach.call(el.querySelector(".tog").children, function(b){
     b.setAttribute("aria-pressed", b.dataset.e === v ? "true" : "false");
   });
@@ -589,7 +728,12 @@ document.addEventListener("click", function(ev){
   if (tog){
     var it = tog.closest(".item"), id = it.dataset.item;
     /* un second appui sur l'état actif le retire : l'item redevient non évalué */
-    poserEtat(id, etatDe(id) === tog.dataset.e ? null : tog.dataset.e);
+    if (ciblesNormales.has(id)) {
+      ouvrirVolet(id, it.dataset.volet === tog.dataset.e ? "" : tog.dataset.e);
+      return;
+    } else {
+      poserEtat(id, etatDe(id) === tog.dataset.e ? null : tog.dataset.e);
+    }
     majTallies(); enregistrer();
     return;
   }
@@ -606,7 +750,9 @@ document.addEventListener("click", function(ev){
   var chip = t.closest(".chip");
   if (chip){
     chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
-    enregistrer();
+    const item = chip.closest("[data-item]");
+    if (item) majEtatMixte(item.dataset.item);
+    majTallies(); enregistrer();
     return;
   }
   var add = t.closest("[data-add]");
@@ -622,7 +768,11 @@ document.addEventListener("keydown", function(ev){
   if (s && !s.closest("section").classList.contains("off")){ ev.preventDefault(); ouvrirSlot(s.dataset.k); }
 });
 document.addEventListener("input", function(ev){
-  if (ev.target.tagName === "TEXTAREA") enregistrer();
+  if (ev.target.tagName === "TEXTAREA") {
+    const item = ev.target.closest("[data-item]");
+    if (item) majEtatMixte(item.dataset.item);
+    majTallies(); enregistrer();
+  }
   if (ev.target.dataset && ev.target.dataset.rech) rechercher(ev.target.dataset.rech, ev.target.value);
 });
 
@@ -825,13 +975,15 @@ function collecter(){
           var et = etatDe(i.id);
           return {
             id: i.id, label: i.l,
+            ...(cochesNormales.has(i.id) ? {normal_items: cochesNormales.get(i.id)} : {}),
+            commentaire: $("commentaire_" + i.id).value.trim() || null,
             etat: et === "n" ? "normal" : et === "a" ? "anormal" : null,
             /* 0.2.0 : chaque anomalie porte son hpo_id (null si vocabulaire non codé) ;
                un item vu normal exporte ses ancres HPO — c'est l'information qu'aucune
                extraction de texte ne produit : « regardé, et normal » */
-            anomalies: et === "a" ? chipsCodees(i.id) : [],
+            anomalies: et === "a" || ciblesNormales.has(i.id) ? chipsCodees(i.id) : [],
             vu_normal: et === "n" ? signesDe(i.id).ancres : [],
-            precisions: et === "a" ? ($("tx_" + i.id).value.trim() || null) : null
+            precisions: et === "a" || ciblesNormales.has(i.id) ? ($("tx_" + i.id).value.trim() || null) : null
           };
         })
       };
@@ -842,13 +994,20 @@ function collecter(){
   };
 }
 function appliquer(o){
+  cochesNormales.clear();
+  anomaliesSansDetail.clear();
   poserRetention(o.retention);
   (o.etages || []).forEach(function(e){
     (e.items || []).forEach(function(i){
       if (!$("it_" + i.id)) return;
+      if (Array.isArray(i.normal_items)) cochesNormales.set(i.id, i.normal_items);
+      if (i.etat === "anormal" && !i.anomalies?.length && !i.precisions?.trim()) anomaliesSansDetail.add(i.id);
+      const retrait = $("it_" + i.id).querySelector(".retirer-anomalie");
+      if (retrait) retrait.hidden = !anomaliesSansDetail.has(i.id);
       poserEtat(i.id, i.etat === "normal" ? "n" : i.etat === "anormal" ? "a" : null);
       poserChips(i.id, i.anomalies);
       $("tx_" + i.id).value = i.precisions || "";
+      $("commentaire_" + i.id).value = i.commentaire || "";
     });
   });
   (o.cliches_libres || []).forEach(function(c){
@@ -857,9 +1016,12 @@ function appliquer(o){
   rendreCliches();
 }
 function vider(){
+  cochesNormales.clear();
+  anomaliesSansDetail.clear();
+  document.querySelectorAll(".retirer-anomalie").forEach(b => { b.hidden = true; });
   ETAGES.forEach(function(e){
     e.items.forEach(function(i){
-      poserEtat(i.id, null); poserChips(i.id, []); $("tx_" + i.id).value = "";
+      poserEtat(i.id, null); poserChips(i.id, []); $("tx_" + i.id).value = ""; $("commentaire_" + i.id).value = "";
     });
   });
   poserRetention(null);
@@ -1142,11 +1304,24 @@ async function autotest(){
   chk("export activé",           !$("btnExport").disabled);
   chk("version en entête",        $("ver").textContent === "v" + VERSION);
 
+  await chargementTrameNormale;
   var it = $("it_yeux"), tg = it.querySelector(".tog");
-  clic(tg.children[0]); chk("bascule normal",  etatDe("yeux") === "n");
-  clic(tg.children[1]); chk("bascule anormal", etatDe("yeux") === "a");
-  clic(tg.children[1]); chk("second appui remet à vide", etatDe("yeux") === null);
-  clic(tg.children[1]);
+  if (ciblesNormales.has("yeux")){
+    clic(tg.children[0]);
+    clic(it.querySelector("[data-normal-item]"));
+    chk("bascule normal", etatDe("yeux") === "n");
+    clic(tg.children[1]);
+    chk("bascule anormal conserve la sélection", it.dataset.volet === "a" && etatDe("yeux") === "n");
+    clic(tg.children[0]);
+    clic(it.querySelector("[data-normal-item]"));
+    chk("retrait du constat remet à vide", etatDe("yeux") === null);
+    clic(tg.children[1]);
+  } else {
+    clic(tg.children[0]); chk("bascule normal", etatDe("yeux") === "n");
+    clic(tg.children[1]); chk("bascule anormal", etatDe("yeux") === "a");
+    clic(tg.children[1]); chk("second appui remet à vide", etatDe("yeux") === null);
+    clic(tg.children[1]);
+  }
 
   var ch = $("ch_yeux");
   clic(ch.children[2]); clic(ch.children[3]);
@@ -1154,6 +1329,7 @@ async function autotest(){
   chk("chip télécanthus",         chipsDe("yeux").indexOf("Télécanthus") >= 0);
   set("tx_yeux", "fentes courtes");
   clic($("it_crane").querySelector(".tog").children[0]);
+  if (ciblesNormales.has("crane")) clic($("it_crane").querySelector("[data-normal-item]"));
   chk("tally de l'étage",         $("tal_tete").textContent.indexOf("2/7") >= 0);
   chk("un anormal compté",        $("tal_tete").textContent.indexOf("1 anormal") >= 0);
 

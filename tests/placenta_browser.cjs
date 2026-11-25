@@ -8,6 +8,7 @@ const cas=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),url=process.argv[3
  const resultats=await p.evaluate(cas=>cas.map(c=>PlacentaPercentiles.calculer(c.sa,c.masse,c.conditions)),cas);
  for(let i=0;i<cas.length;i++)assert.deepEqual(resultats[i],cas[i].attendu);
  await p.locator('#dossier').fill('TEST-PLACENTA');await p.locator('#operateur').fill('TEST');await p.waitForFunction(()=>dossier==='TEST-PLACENTA');
+ await p.getByRole('button',{name:'Activer la saisie'}).click();
  await p.locator('#f_terme_sa').fill('28');await p.locator('#f_masse').fill('214');await p.locator('#conditions_masse').selectOption('fraiche_paree');
  await p.waitForFunction(()=>document.getElementById('resultatsPercentilesPlacenta').textContent.includes('P50'));
  assert.ok((await p.locator('#resultatsPercentilesPlacenta').textContent()).includes('P50'));
@@ -22,7 +23,7 @@ const cas=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),url=process.argv[3
  await post(ancien);
  for(const g of ['complet','synthese','placenta']){
   const r=await p.request.post(url+'/api/dossiers/'+doc.dossier+'/cr',{data:{gabarit:g}});assert.equal(r.status(),200,await r.text());
-  const cr=await r.json();assert.ok(cr.texte.includes('P50'),g);
+  const cr=await r.json();assert.equal(cr.texte.includes('P50'),g!=='complet',g);
   assert.equal(cr.format,g==='synthese'?'texte':'html');
  }
  const stats=await(await p.request.get(url+'/api/dossiers/'+doc.dossier+'/percentiles-placenta')).json();
@@ -31,7 +32,7 @@ const cas=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),url=process.argv[3
  await p.locator('#conditions_masse').selectOption('fixe');
  assert.ok(!(await p.locator('#resultatsPercentilesPlacenta').textContent()).includes('Position percentile'));
  await p.goto(url);await p.waitForFunction(()=>INDEX&&INDEX.dossiers.length);
- await p.locator('.cas[data-num="TEST-PLACENTA"]').click();await p.evaluate(()=>{ONGLET='m_macro_placenta';ouvrir('TEST-PLACENTA',true);});
+ await p.locator('.cas[data-num="TEST-PLACENTA"]').click();await p.locator('#panneau [data-acces-macro]').click();await p.locator('[data-o=m_macro_placenta]').click();
  await p.locator('#percentilesPlacentaHub table').waitFor();assert.ok((await p.locator('#percentilesPlacentaHub').textContent()).includes('P50'));
  const root=path.resolve(__dirname,'..'),statique=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end(fs.readFileSync(path.join(root,'hub/calculateur-unifie.html')));});
  await new Promise(resolve=>statique.listen(0,'127.0.0.1',resolve));

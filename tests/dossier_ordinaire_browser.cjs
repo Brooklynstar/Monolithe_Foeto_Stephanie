@@ -16,6 +16,7 @@ const {chromium}=require('playwright');
   await page.goto(url+'/modules/'+mod+'?dossier=DEMO_SLO_001&operateur=Codex');
   await page.locator('#hubRelire').click();
   await page.waitForFunction(()=>document.getElementById('hubMsg')?.textContent.includes('restituée'));
+  if(mod==='macro_placenta') await page.getByRole('button',{name:'Activer la saisie'}).click();
   const doc=await page.evaluate(()=>collecter());
   assert.equal(doc.dossier,'DEMO_SLO_001');
   if(mod==='micro') assert.equal(doc.sections.length,6);
