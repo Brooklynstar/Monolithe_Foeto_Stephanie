@@ -58,6 +58,7 @@ import cr as compte_rendu
 import ingest
 import perinatal
 import placenta_liaison
+import trame_normale
 import percentiles_placenta
 from ingest import (ADAPTATEURS, MODULES_FACULTATIFS, MODULES_MICRO,
                     ORDRE_MODULES, Refus, slot, arborescence, construire_index,
@@ -675,9 +676,51 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
         return jsonify({"repris": cible.name})
 
     # ── Modules servis ─────────────────────────────────────────────────────
+    @app.get('/configuration-normale')
+    def page_trame_normale():
+        return send_file(ICI / 'web' / 'trame_normale.html')
+
+    @app.route('/api/trame-normale', methods=['GET', 'PUT'])
+    def api_trame_normale():
+        cx = base()
+        try:
+            if request.method == 'GET':
+                return jsonify(trame_normale.lire(cx))
+            cx.execute('BEGIN IMMEDIATE')
+            doc = trame_normale.sauvegarder(cx, request.get_json(silent=True))
+            cx.commit()
+            return jsonify(doc)
+        except (ValueError, TypeError, AttributeError) as e:
+            return erreur(str(e), 422)
+        finally:
+            cx.close()
+
+    @app.get('/api/trame-normale/examen-clinique')
+    def api_normaux_externes():
+        cx = base()
+        try:
+            trame = trame_normale.lire(cx)
+            items = trame_normale.constatations_externes(trame)
+            return jsonify({'items': list(items.values()),
+                            'cibles': sorted({i['cible'] for i in items.values()} | set(trame.get('cibles', [])))})
+        finally:
+            cx.close()
+
+    @app.get('/api/trame-normale/autopsie')
+    def api_normaux_autopsie():
+        cx = base()
+        try:
+            return jsonify(list(trame_normale.constatations_autopsie(trame_normale.lire(cx)).values()))
+        finally:
+            cx.close()
+
     @app.get("/api/modules")
     def api_modules():
         return jsonify(modules_disponibles(depot))
+
+    @app.get("/api/trame-placenta-gemellaire")
+    def api_trame_placenta_gemellaire():
+        return jsonify(placenta_liaison.DEFINITION)
 
     @app.get("/modules/<slug>")
     def page_module(slug):
@@ -1079,7 +1122,9 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
             ctx = compte_rendu.contexte(cx, numero, refs, ORDRE_MODULES)
             return jsonify({"propositions": ctx["propositions"],
                             "ecartees": compte_rendu.ecartees_precedentes(cx, numero),
-                            "terme": ctx["terme"]["texte"]})
+                            "terme": ctx["terme"]["texte"],
+                            "alertes": ctx["alertes_relecture"],
+                            "conclusion_clinique": ctx["conclusion_clinique"]})
         except ValueError as e:
             return erreur(str(e), 404)
         finally:
@@ -1100,11 +1145,20 @@ def creer_app(racine: Path, depot: Path = None, hotes=None):
         corps = request.get_json(silent=True) or {}
         gabarit = corps.get("gabarit") or "complet"
         ecartees = corps.get("ecartees")
+        conclusion = corps.get('conclusion_clinique')
+        if conclusion is not None and (not isinstance(conclusion, str) or len(conclusion) > 20000):
+            return erreur("Conclusion clinique : texte de 20 000 caractères au maximum attendu.")
         if ecartees is not None and not (isinstance(ecartees, list)
                                          and all(isinstance(x, str) for x in ecartees)):
             return erreur("ecartees : liste d'identifiants attendue")
         cx = base()
         try:
+            if gabarit == 'complet' and conclusion is not None:
+                if not cx.execute('SELECT 1 FROM dossiers WHERE numero=?', (numero,)).fetchone():
+                    return erreur(f'Dossier {numero} inconnu', 404)
+                cx.execute('INSERT INTO conclusions_cliniques (dossier, texte) VALUES (?, ?) '
+                           'ON CONFLICT(dossier) DO UPDATE SET texte=excluded.texte',
+                           (numero, conclusion.strip()))
             i, texte, fmt = compte_rendu.rendre(
                 cx, numero, gabarit, refs, ORDRE_MODULES,
                 operateur=(corps.get("operateur") or "").strip() or None, ecartees=ecartees)

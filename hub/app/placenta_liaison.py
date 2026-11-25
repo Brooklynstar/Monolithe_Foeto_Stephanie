@@ -9,6 +9,7 @@ from pathlib import Path
 
 import ingest
 import percentiles_placenta as pp
+import placenta_redaction
 
 PARTAGES = {'macro_01': ('paree', 'masse'), 'macro_03': ('galette', 'grand_axe'),
             'macro_04': ('galette', 'petit_axe'), 'macro_05': ('galette', 'epaisseur')}
@@ -137,18 +138,18 @@ def enregistrer(cx, racine, document):
     return etat, message, sid
 
 
+OPTIONS = {c['id']: c['choix'] for s in DEFINITION for c in s['champs'] if c['choix']}
+
+
 def compte_rendu(cx, numero, doc):
     if not doc:
         return None
     valeurs = champs(doc)
-    sections = []
-    for s in DEFINITION:
-        faits = []
-        for c in s['champs']:
-            v = valeurs.get(c['id'])
-            if isinstance(v, dict):
-                v = v.get('texte') if v.get('choix') == 'Autre + texte libre' else v.get('choix')
-            if v not in (None, ''):
-                faits.append({'label': c['label'], 'valeur': v})
-        sections.append({'titre': s['titre'], 'champs': faits})
-    return {'sections': sections, 'percentiles': resultat(cx, numero, doc)}
+    position = resultat(cx, numero, doc)['position_percentile']
+    conditions = doc.get('conditions_masse')
+    return {'sections': [
+        {'titre': 'Macroscopie', 'lignes': placenta_redaction.macroscopie(
+            valeurs, position, nombre, paree=conditions == 'fraiche_paree')},
+        {'titre': 'Microscopie', 'lignes': placenta_redaction.microscopie(valeurs, OPTIONS)},
+        {'titre': 'Conclusion', 'lignes': placenta_redaction.conclusion(valeurs)},
+    ]}

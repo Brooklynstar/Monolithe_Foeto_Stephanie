@@ -125,20 +125,11 @@ SAISIES = [
 
 # (gabarit, ce qui doit s'y trouver, ce qui ne doit pas y être)
 ATTENDU = {
-    "complet": (["PLACENTA — EXAMEN MACROSCOPIQUE",
-                 "Galette ovale de 17 × 14 cm",
-                 "Rapport fœto-placentaire 5.0",
-                 "insertion marginale, 48 cm",
-                 "cassette K3",
-                 "MICROSCOPIE",
-                 "Stade de développement : ANORMAL — retard de maturation",
-                 "GRILLES DE LECTURE",
-                 "zone néphrogène amincie — ANORMAL",
-                 "Rein — glomérules · zone néphrogène amincie",
-                 "Hypoplasie rénale [FOETO:0042]",
-                 "Éléments retenus pour la conclusion",
-                 "<table", "−5,73 DS", "Percentile GC", "Attendu (moy. ± ET)"],
-                ["Axe non regardé"]),
+    "complet": (["Compte rendu d’examen fœtopathologique",
+                 ">Microscopie</h3>", "Stade de développement : retard de maturation",
+                 "zone néphrogène amincie", "<table", ">Percentile</th>", ">DS</th>", "−5,73"],
+                [">Placenta</h2>", "17 × 14 cm", "Cassette K3", "Axe non regardé", "[FOETO:0042]", "Éléments retenus pour la conclusion",
+                 "Propositions écartées à la validation", "Modules repris", ">Terme attendu</th>"]),
     "placenta": (["COMPTE RENDU D'EXAMEN PLACENTAIRE",
                   "Galette ovale de 17 × 14 cm, épaisse de 2.5 cm, masse parée 300 g",
                   "Insertion circumvallée sur 40 % de la circonférence",
@@ -276,9 +267,8 @@ def main():
     _, texte, fmt = compte_rendu.rendre(cx, DOSSIER, "complet", refs, ingest.ORDRE_MODULES,
                                         ecartees=[foeto])
     t("complet en html", fmt == "html")
-    t("écartée : hors conclusion, nommée en pied",
-      "Propositions écartées à la validation : Hypoplasie rénale" in texte
-      and texte.count("[FOETO:0042]") == 1, "")        # reste celle du texte de grille
+    t("propositions et codes exclus du compte rendu complet",
+      "Propositions écartées à la validation" not in texte and "[FOETO:0042]" not in texte, "")
     t("écartées reprises au brouillon suivant",
       compte_rendu.ecartees_precedentes(cx, DOSSIER) == [foeto])
     _, texte, _ = compte_rendu.rendre(cx, DOSSIER, "synthese", refs, ingest.ORDRE_MODULES)

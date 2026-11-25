@@ -33,13 +33,17 @@ def schema_releve():
     for line in macro.splitlines():
         if line.startswith('| ') and not line.startswith('| Champ'):
             label, typ, choix = [v.strip() for v in line.strip('|').split('|')]
-            champs.append((label, 'texte' if typ == 'Réponse courte' else 'unique', choix.split(' / ') if choix else []))
+            if label == 'Thrombose sous-choriale épaisseur max en cm':
+                champs.append((label, 'nombre', []))
+            else:
+                champs.append((label, 'texte' if typ == 'Réponse courte' else 'multiple',
+                               choix.split(' / ') if choix else []))
     sections.append(('Macroscopie', champs))
     for titre, texte in [('Microscopie', micro), ('Conclusion', conclusion)]:
         champs = []
         for line in texte.splitlines():
             if line.startswith('### '):
-                champs.append((line[4:], 'unique', []))
+                champs.append((line[4:], 'multiple', []))
             elif line.startswith('- '):
                 champs[-1][2].append(line[2:])
         sections.append((titre, champs))
@@ -55,6 +59,7 @@ def enveloppe(module, schema, **payload):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--chromium')
+    ap.add_argument('--port', type=int, default=5005)
     args = ap.parse_args()
     with tempfile.TemporaryDirectory(prefix='monolithe-placenta-') as td:
         source, base = Path(td) / 'source_fictive', Path(td) / 'copie_test'
@@ -69,7 +74,9 @@ def main():
         ancien = enveloppe('macro_placenta', '0.2.0',
                            sections=[{'id': 'paree', 'champs': {'masse': 110}}])
         initial = enveloppe('placenta', '0.1.0', note_existante='à conserver', sections=[
-            {'id': 'macroscopie', 'titre': 'Macroscopie', 'champs': {'macro_02': '10', 'champ_futur': 'conservé'}},
+            {'id': 'macroscopie', 'titre': 'Macroscopie', 'champs': {'macro_02': '10', 'champ_futur': 'conservé',
+                'macro_08': {'choix': 'Autre + texte libre', 'texte': 'Ancienne mention'},
+                'macro_16': 'Option 1'}},
             {'id': 'microscopie', 'titre': 'Microscopie', 'champs': {'micro_01': 'aplati'}},
             {'id': 'conclusion', 'titre': 'Conclusion', 'champs': {'conclusion_01': 'eutrophique'}}])
         for doc in [admin, ancien, initial]:
@@ -85,7 +92,7 @@ def main():
         cx.close()
         ingest.arborescence(base)
         app = creer_app(base, ROOT)
-        serveur = make_server('127.0.0.1', 5005, app)
+        serveur = make_server('127.0.0.1', args.port, app)
         thread = threading.Thread(target=serveur.serve_forever, daemon=True)
         thread.start()
         try:
@@ -99,10 +106,10 @@ def main():
                 page = context.new_page()
                 erreurs = []
                 page.on('pageerror', lambda e: erreurs.append(str(e)))
-                url = 'http://127.0.0.1:5005'
+                url = f'http://127.0.0.1:{serveur.server_port}'
                 module = context.request.get(url + '/api/modules').json()['placenta']
                 assert module['ingerable'] is True
-                assert (module['module'], module['schema_version'], module['module_version']) == ('placenta', '0.1.0', '1.1.0')
+                assert (module['module'], module['schema_version'], module['module_version']) == ('placenta', '0.1.0', '1.2.0')
                 page.goto(url + '/?dossier=DEMO_SLO_001')
                 page.locator('[data-o="m_placenta"]').wait_for()
                 assert page.locator('[data-o="m_placenta"]').inner_text().strip() == 'Placenta'
@@ -116,12 +123,15 @@ def main():
                 assert page.locator('#macro_02').input_value() == '10'
                 assert page.locator('input[name=micro_01]:checked').input_value() == 'aplati'
                 assert page.locator('input[name=conclusion_01]:checked').input_value() == 'eutrophique'
+                assert page.locator('#macro_08_4').is_checked()
+                assert page.locator('#macro_08_autre').input_value() == 'Ancienne mention'
+                assert page.locator('#macro_16').input_value() == ''
                 print('OK navigation dossier et ouverture des trois sections déjà renseignées')
                 rendu = page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
                 attendu = json.loads(json.dumps(schema_releve(), ensure_ascii=False))
                 assert rendu == attendu, 'Divergence du relevé'
                 assert page.locator('fieldset').count() == 32
-                assert page.locator('input[type=radio]').count() == 155
+                assert page.locator('label.chip input').count() == 154
                 assert page.locator('[required]').count() == 0
                 for s, champs in attendu:
                     for label, typ, choix in champs:
@@ -129,17 +139,19 @@ def main():
                         assert group.count() == 1
                         if typ == 'texte':
                             assert group.locator('input[type=text]').count() == 1
+                        elif typ == 'nombre':
+                            assert group.locator('input[type=number]').count() == 1
                         else:
-                            assert group.locator('input[type=radio]').evaluate_all('(rs)=>rs.map(r=>r.value)') == choix
-                            assert group.locator('input[type=radio]:checked').count() <= 1
-                print('OK comparaison intégrale : 32 champs, 155 choix, ordre, types, intitulés et facultativité')
+                            controle = 'checkbox' if typ == 'multiple' else 'radio'
+                            assert group.locator(f'input[type={controle}]').evaluate_all('(rs)=>rs.map(r=>r.value)') == choix
+                print('OK comparaison intégrale : 32 champs, 154 choix, ordre, types, intitulés et facultativité')
                 # Un effacement précoce ne doit pas être annulé par une seconde reprise différée.
                 page.locator('#macro_02').fill('')
                 page.wait_for_timeout(900)
                 assert page.locator('#macro_02').input_value() == ''
                 page.locator('#macro_02').fill('10')
                 print('OK effacement après ouverture sans reprise différée des anciennes valeurs')
-                # Vérifier unicité, effacement, option fixe « autre » vs Other natif.
+                # Vérifier les coches indépendantes, leur effacement et le texte libre.
                 cordon = page.get_by_role('group', name='Cordon', exact=True)
                 cordon.get_by_label('Autre + texte libre', exact=True).check()
                 cordon.get_by_role('textbox').fill('Insertion fictive — test libre')
@@ -148,18 +160,24 @@ def main():
                 amnios = page.get_by_role('group', name='Amnios', exact=True)
                 amnios.get_by_label('cubique', exact=True).check()
                 amnios.get_by_label('exfolié', exact=True).check()
-                assert amnios.locator('input:checked').count() == 1
+                assert amnios.locator('input:checked').count() == 3
+                amnios.get_by_label('cubique', exact=True).uncheck()
+                assert amnios.locator('input:checked').count() == 2
                 amnios.get_by_role('button', name='Effacer : Amnios', exact=True).click()
                 assert amnios.locator('input:checked').count() == 0
                 amnios.get_by_label('aplati', exact=True).check()
                 page.locator('#macro_01').fill('125,5')
                 page.locator('#micro_02_0').check()
                 page.locator('#conclusion_01_0').check()
+                assert page.locator('#conclusion_01_1').is_checked()
+                page.locator('#conclusion_01_1').uncheck()
+                assert page.locator('#conclusion_01_0').is_checked()
+                page.locator('#conclusion_01_4').check()
                 with page.expect_response(lambda r: r.url.endswith('/api/saisie') and r.request.method == 'POST') as r:
                     page.locator('#hubSave').click()
                 assert r.value.status == 200, r.value.text()
                 sauvegarde = context.request.get(url + '/api/saisie/DEMO_SLO_001/placenta').json()
-                assert sauvegarde['sections'][0]['champs']['macro_08'] == {'choix': 'Autre + texte libre', 'texte': 'Insertion fictive — test libre'}
+                assert sauvegarde['sections'][0]['champs']['macro_08'] == {'choix': ['Autre + texte libre'], 'texte': 'Insertion fictive — test libre'}
                 assert sauvegarde['sections'][0]['champs']['macro_02'] == '10'
                 assert sauvegarde['sections'][0]['champs']['champ_futur'] == 'conservé'
                 assert sauvegarde['note_existante'] == 'à conserver'
@@ -179,6 +197,8 @@ def main():
                 assert page.locator('#micro_01_0').is_checked()
                 assert page.locator('#micro_02_0').is_checked()
                 assert page.locator('#conclusion_01_0').is_checked()
+                assert page.locator('#conclusion_01_4').is_checked()
+                assert not page.locator('#conclusion_01_1').is_checked()
                 print('OK sauvegarde puis fermeture et réouverture sans stockage navigateur : trois sections et texte Other retrouvés')
                 # Les autres modules n'ont subi aucune réécriture.
                 assert context.request.get(url + '/api/saisie/DEMO_SLO_001/administratif').json() == admin
@@ -194,7 +214,7 @@ def main():
                 page.goto(url + '/modules/placenta?dossier=DEMO_AUTRE&operateur=TEST')
                 page.wait_for_function('numeroCharge === "DEMO_AUTRE" && !charge')
                 assert page.locator('#macro_01').input_value() == ''
-                assert page.locator('input[type=radio]:checked').count() == 0
+                assert page.locator('label.chip input:checked').count() == 0
                 with page.expect_response(lambda r: r.url.endswith('/api/saisie') and r.request.method == 'POST') as r:
                     page.locator('#hubSave').click()
                 assert r.value.status == 200

@@ -126,6 +126,7 @@ td{padding:8px;border-bottom:1px solid var(--rule);vertical-align:top}
         color:var(--ink-soft);border-bottom:2px solid transparent;white-space:nowrap;
         font-family:inherit}
 .onglet:hover{color:var(--ink)}
+.onglet:disabled,.macro-grise{opacity:.55;cursor:default}
 .onglet.on{color:var(--ink);border-bottom-color:var(--drape);font-weight:600}
 .onglet .pt{display:inline-block;width:6px;height:6px;border-radius:50%;
             background:var(--rule);margin-left:6px;vertical-align:middle}
@@ -318,6 +319,13 @@ body.theme-cli figure img{opacity:.9}
   .noprint{display:none!important}
   .appli{display:block} .colonne{display:none} .volet{border:none}
   .onglets{display:none} .panneau{padding:0} .ruban{display:none}
+  #crPre{max-height:none!important;overflow:visible!important;border:0!important;padding:0!important}
+  #crListe{display:none}
+  body:has(#crPre) .wrap > header, body:has(#crPre) #fiche > .tete, #flash{display:none!important}
+  body:has(#crPre) .wrap{max-width:none;padding:0;margin:0}
+  body:has(#crPre) .volet{min-height:0}
+  body:has(#crImpression:not([hidden])) > .wrap{display:none!important}
+  #crImpression{background:#fff;padding:0;margin:0}
 }
 </style>
 </head>
@@ -380,6 +388,7 @@ try {
 </header>
 
 <nav class="ruban noprint" id="ruban"></nav>
+<p class="noprint" id="lienTrameNormale" hidden><a href="/configuration-normale">Configurer la trame Normal</a></p>
 
 <div class="page" id="pg_dossiers">
 
@@ -510,7 +519,7 @@ try {
 
 <div class="page" id="pg_modules" hidden>
   <main class="volet"><div class="tete"><h2>Modules servis</h2>
-    <span class="actions noprint"><button class="btn ghost" id="btnModules" type="button">Rafraîchir</button></span>
+    <span class="actions noprint"><button class="btn ghost" type="button" data-acces-macro>Autoriser l’accès à Macro placenta</button> <button class="btn ghost" id="btnModules" type="button">Rafraîchir</button></span>
   </div><div class="panneau" id="panModules"></div></main>
 </div>
 
@@ -528,6 +537,7 @@ try {
 
 <input type="file" id="pick" accept="application/json,.json" hidden>
 <div class="flash" id="flash" role="status" aria-live="polite"></div>
+<div class="crDoc" id="crImpression" hidden></div>
 
 <script>
 "use strict";
@@ -885,14 +895,30 @@ function rendreModule(s){
 }
 
 /* ── Onglets ──────────────────────────────────────────────────────────────── */
+if (location.protocol !== "file:") $("lienTrameNormale").hidden = false;
+
+var accesMacroPlacenta = false;
+function macroGrisee(module){ return module === "macro_placenta" && !accesMacroPlacenta; }
+function libelleAccesMacro(){
+  return accesMacroPlacenta ? "Griser Macro placenta" : "Autoriser l’accès à Macro placenta";
+}
+document.addEventListener("click", function(e){
+  if (!e.target.closest("[data-acces-macro]")) return;
+  accesMacroPlacenta = !accesMacroPlacenta;
+  if (!accesMacroPlacenta && ONGLET === "m_macro_placenta") ONGLET = "dossier";
+  if (!$("pg_modules").hidden) pageModules();
+  else if (COURANT) ouvrir(COURANT, true);
+});
+
 function ongletsDe(d){
   var l = [{id:"dossier", t:"Dossier"}];
   INDEX.modules_attendus.forEach(function(m){
     var ls = saisiesDe(d, m), s = ls[0];
-    var titre = m === "placenta" ? "Placenta" : m.replace(/_/g, " ");
+    var titres = {macro_placenta: "Macro placenta", placenta: "Placenta", placenta_gemellaire: "Placenta gémellaire"};
+    var titre = titres[m] || m.replace(/_/g, " ");
     if (m === "microscopie" && ls.length) titre += " (" + ls.length + ")";
     l.push({id:"m_" + m, t:titre, recu:!!s,
-            poste: !!(s && s.provenance === "poste"), facultatif: facultatif(m)});
+            poste: !!(s && s.provenance === "poste"), facultatif: facultatif(m), bloque: macroGrisee(m)});
   });
   if ((d.photos || []).length) l.push({id:"cliches", t:"Clichés (" + d.photos.length + ")"});
   if (SERVI) l.push({id:"cr", t:"Compte rendu" + (d.comptes_rendus ? " (" + d.comptes_rendus + ")" : "")});
@@ -902,13 +928,13 @@ function ongletsDe(d){
 }
 function rendreOnglets(d){
   var l = ongletsDe(d);
-  if (!l.filter(function(o){ return o.id === ONGLET; }).length) ONGLET = "dossier";
+  if (!l.filter(function(o){ return o.id === ONGLET && !o.bloque; }).length) ONGLET = "dossier";
   $("onglets").innerHTML = l.map(function(o){
     var pt = o.id.indexOf("m_") === 0
       ? '<span class="pt' + (o.recu ? (o.poste ? " poste" : " on") : "") + '"></span>' : "";
     if (o.facultatif && !o.recu) pt = "";
     return '<button type="button" class="onglet' + (ONGLET === o.id ? " on" : "") +
-      '" data-o="' + esc(o.id) + '">' + esc(o.t) + pt + "</button>";
+      '" data-o="' + esc(o.id) + '"' + (o.bloque ? ' disabled' : '') + '>' + esc(o.t) + pt + "</button>";
   }).join("");
 }
 $("onglets").addEventListener("click", function(e){
@@ -997,14 +1023,17 @@ function panneauDossier(d, slugs){
   }
 
   h += "<h3>Modules</h3>" +
+    (INDEX.modules_attendus.includes("macro_placenta") ? '<p class="noprint"><button type="button" class="btn ghost mini" data-acces-macro>' +
+      libelleAccesMacro() + '</button></p>' : "") +
     '<div class="scroll"><table><thead><tr><th>Module</th><th>Version</th><th>Schéma</th>' +
     "<th>Entrée</th><th>Opérateur</th><th>Exporté</th><th>Repris</th>" +
     (SERVI ? '<th class="noprint"></th>' : "") + "</tr></thead><tbody>";
   INDEX.modules_attendus.forEach(function(m){
     var s = saisieDe(d, m), sl = slugs[m];
-    h += "<tr>" +
-      '<td><a href="#" onclick="ONGLET=' + js("m_" + m) + ";ouvrir(" + js(d.numero) +
-        ',true);return false">' + esc(m.replace(/_/g, " ")) + "</a>" +
+    var bloque = macroGrisee(m);
+    h += (bloque ? '<tr class="macro-grise">' : "<tr>") +
+      "<td>" + (bloque ? "Macro placenta" : '<a href="#" onclick="ONGLET=' + js("m_" + m) + ";ouvrir(" + js(d.numero) +
+        ',true);return false">' + esc(m.replace(/_/g, " ")) + "</a>") +
         (s ? "" : ' <span class="pastille att">attendu</span>') + "</td>" +
       '<td class="mono">' + esc(s ? s.module_version : "—") + "</td>" +
       '<td class="mono">' + esc(s ? s.schema_version : "—") + "</td>" +
@@ -1013,7 +1042,7 @@ function panneauDossier(d, slugs){
       "<td>" + esc(s ? (s.operateur || "—") : "—") + "</td>" +
       "<td>" + esc(s ? dateCourte(s.exported_at) : "—") + "</td>" +
       "<td>" + esc(s ? dateCourte(s.ingere_at) : "—") + "</td>" +
-      (SERVI ? '<td class="noprint">' + (sl
+      (SERVI ? '<td class="noprint">' + (bloque ? '<button class="btn ghost mini" disabled>Ouvrir</button>' : sl
         ? '<a class="btn ghost mini" target="_blank" rel="noopener" href="/modules/' + esc(sl) +
           "?dossier=" + encodeURIComponent(d.numero) + operateurUrl() + '">' +
           (s ? "Rouvrir" : "Saisir") + "</a>" : "") + "</td>" : "") + "</tr>";
@@ -1058,13 +1087,20 @@ function panneauMicroscopie(d, slugs){
       esc(slugs["microscopie"]) + "?dossier=" + encodeURIComponent(d.numero) +
       operateurUrl() + '">' + (ls.length ? "Ouvrir les grilles" : "Lire au microscope") + "</a>"
     : "";
+  var multiOrganes = SERVI && slugs.micro
+    ? '<a class="btn" target="_blank" rel="noopener" href="/modules/' + esc(slugs.micro) +
+      "?dossier=" + encodeURIComponent(d.numero) + operateurUrl() + '">Ouvrir Microscopie multi-organes</a>'
+    : "";
+  var acces = multiOrganes
+    ? '<p class="noprint">' + multiOrganes + ' <span class="note">Sélectionner un organe pour afficher ses cadres Normal et Anormal.</span></p>'
+    : "";
   if (!ls.length)
-    return '<p class="vide">Aucune grille de lecture pour ce dossier.<br>' +
+    return acces + '<p class="vide">Aucune grille de lecture pour ce dossier.<br>' +
            '<span class="note">La microscopie n\'est pas attendue sur tous les ' +
            'dossiers : son absence ne rend pas la fiche incomplète.</span>' +
            (lien ? "<br><br>" + lien : "") + "</p>";
 
-  var h = '<div class="grille" style="margin-bottom:16px">' +
+  var h = acces + '<div class="grille" style="margin-bottom:16px">' +
     tuile("organes lus", ls.length) +
     tuile("valeurs posées", ls.reduce(function(n, s){
       return n + (s.donnees.grille ? compterFeuilles(s.donnees.grille) : 0); }, 0)) +
@@ -1138,6 +1174,7 @@ var CR_AFFICHE = {numero: null, entete: null, texte: null, format: null};
 
 function panneauCr(d){
   var h = '<div class="noprint"><h3>Synthèse et alertes</h3>' +
+    '<ul id="crAlertes" hidden></ul>' +
     '<div class="crProps" id="crProps"><p class="note" style="margin:0">Relecture du dossier…</p></div>' +
     '<div class="crProps" id="crPistes" hidden></div></div>' +
     '<div class="row noprint" style="margin-bottom:12px">' +
@@ -1147,6 +1184,9 @@ function panneauCr(d){
     '<button class="btn" onclick="genererCr(' + js(d.numero) + ')">Produire un brouillon</button>' +
     "</div>" +
     '<div class="field"><p class="note" id="crNote" style="margin:0"></p></div></div>' +
+    '<div class="field noprint" id="crConclusionChamp" style="margin:0 0 12px" hidden>' +
+    '<label for="crConclusion">Conclusion clinique du compte rendu complet</label>' +
+    '<textarea id="crConclusion" rows="3" maxlength="20000" placeholder="À compléter" disabled></textarea></div>' +
     '<div id="crTexte"></div><div id="crListe"></div>';
   setTimeout(function(){
     chargerCr(d.numero);
@@ -1156,12 +1196,19 @@ function panneauCr(d){
   }, 0);
   return h;
 }
-/* L'anormal du dossier, à valider avant le brouillon : ce qui est décoché
-   n'entre pas dans la conclusion. Le choix est gardé avec le brouillon et
-   repris au suivant ; un constat apparu depuis arrive coché. */
+/* Propositions et alertes restent visibles pendant la relecture. */
 function chargerPropositions(numero){
   api("/api/dossiers/" + encodeURIComponent(numero) + "/propositions").then(function(o){
-    if (!$("crProps")) return;
+    if (!$("crProps") || COURANT !== numero) return;
+    var alertes = o.alertes || [];
+    $("crAlertes").innerHTML = alertes.map(function(a){ return "<li>" + esc(a) + "</li>"; }).join("");
+    $("crAlertes").hidden = !alertes.length;
+    var conclusion = $("crConclusion");
+    if (conclusion.disabled){
+      conclusion.value = o.conclusion_clinique || "";
+      conclusion.dataset.initial = conclusion.value;
+      conclusion.disabled = false;
+    }
     var ps = o.propositions || [], ec = o.ecartees || [], groupe = null;
     if (!ps.length){
       $("crProps").innerHTML = '<p class="note" style="margin:0">Rien d\'anormal parmi ce qui a été saisi' +
@@ -1169,7 +1216,7 @@ function chargerPropositions(numero){
       return;
     }
     $("crProps").innerHTML = '<p class="note" style="margin:0 0 4px">' + ps.length +
-      " constat(s) anormal(aux) — décocher ce qui ne doit pas entrer dans la conclusion.</p>" +
+      " proposition(s) à relire. Le compte rendu complet reprend la conclusion clinique saisie ci-dessous.</p>" +
       ps.map(function(p){
         var off = ec.indexOf(p.id) >= 0;
         var t = (p.groupe !== groupe ? '<div class="groupe">' + esc(p.groupe) + "</div>" : "");
@@ -1259,6 +1306,10 @@ function chargerCr(numero){
           return '<option value="' + esc(k) + '">' + esc(g[k].titre) + " (v" + esc(g[k].version) + ")</option>";
         }).join("")
       : "<option>aucun gabarit</option>";
+    var selecteur = $("crGabarit");
+    function actualiserConclusion(){ $("crConclusionChamp").hidden = selecteur.value !== "complet"; }
+    selecteur.onchange = actualiserConclusion;
+    actualiserConclusion();
     $("crNote").innerHTML = o.jinja === false
       ? '<span style="color:var(--alert)">Jinja2 absent — le rendu est impossible.</span>'
       : (o.references && o.references.dispo
@@ -1288,7 +1339,7 @@ function afficherCr(texte, entete, format, id){
   if (!$("crTexte")) return;
   var cadre = "border:1px solid var(--rule);border-radius:3px;padding:14px;margin:0;" +
     "max-height:70vh;overflow:auto";
-  $("crTexte").innerHTML = (entete ? '<h3>' + esc(entete) + "</h3>" : "") +
+  $("crTexte").innerHTML = (entete ? '<h3 class="noprint">' + esc(entete) + "</h3>" : "") +
     '<div class="row noprint" style="margin-bottom:8px"><div class="field" style="flex:0 0 auto">' +
     '<button class="btn ghost mini" onclick="copierCr()">Copier</button></div>' +
     '<div class="field" style="flex:0 0 auto">' +
@@ -1348,13 +1399,29 @@ function copierCr(){
     })]).then(ok).catch(ko);
   } else navigator.clipboard.writeText(el.textContent).then(ok).catch(ko);
 }
+window.addEventListener("beforeprint", function(){
+  var source = $("crPre");
+  if (!source) return;
+  var impression = $("crImpression");
+  impression.replaceChildren(...Array.from(source.childNodes, function(n){ return n.cloneNode(true); }));
+  impression.style.whiteSpace = CR_AFFICHE.format === "html" ? "normal" : "pre-wrap";
+  impression.hidden = false;
+});
+window.addEventListener("afterprint", function(){
+  var impression = $("crImpression");
+  impression.hidden = true;
+  impression.replaceChildren();
+});
 function genererCr(numero){
   var g = $("crGabarit").value;
   $("crNote").textContent = "Rendu en cours…";
+  var corps = {gabarit:g, operateur: ($("operateur") || {}).value || null, ecartees: ecarteesCr()};
+  var conclusion = $("crConclusion");
+  if (g === "complet" && conclusion && !conclusion.disabled && conclusion.value !== conclusion.dataset.initial)
+    corps.conclusion_clinique = conclusion.value;
   api("/api/dossiers/" + encodeURIComponent(numero) + "/cr", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({gabarit:g, operateur: ($("operateur") || {}).value || null,
-                          ecartees: ecarteesCr()})
+    body: JSON.stringify(corps)
   }).then(function(o){
     afficherCr(o.texte, "Brouillon — " + o.gabarit, o.format, o.id);
     flash("Brouillon produit.");
@@ -2265,6 +2332,7 @@ $("btnPaquet").onclick = function(){ $("pickPaquet").click(); };
 $("pickPaquet").addEventListener("change", function(){ var l = Array.prototype.slice.call(this.files); this.value = ""; deposerPaquet(l); });
 
 function pageModules(){
+  $("pg_modules").querySelector("[data-acces-macro]").textContent = libelleAccesMacro();
   $("panModules").innerHTML = vide("Lecture du dépôt…");
   api("/api/modules").then(function(o){
     var noms = Object.keys(o).sort();
@@ -2275,13 +2343,14 @@ function pageModules(){
       noms.map(function(n){
         var m = o[n];
         var url = "/modules/" + encodeURIComponent(n) + (ini ? "?operateur=" + encodeURIComponent(ini) : "");
-        return '<tr' + (m.ingerable ? "" : ' class="gris"') + '><td class="mono">' + esc(n) +
+        var bloque = macroGrisee(m.module || n);
+        return '<tr' + (bloque ? ' class="macro-grise"' : m.ingerable ? "" : ' class="gris"') + '><td class="mono">' + esc(n) +
                "</td><td>" + esc(m.titre || "—") + "</td><td>" + esc(m.module_version || "—") +
                "</td><td>" + esc(m.schema_version || "—") + "</td><td>" + esc(m.groupe || "") +
                "</td><td>" + (m.ingerable ? "oui" :
                  '<span class="note" style="margin:0">pas d\'adaptateur</span>') +
-               '</td><td><a class="btn ghost mini" ' +
-               'href="' + url + '" target="_blank" rel="noopener">ouvrir</a></td></tr>';
+               '</td><td>' + (bloque ? '<button class="btn ghost mini" disabled>ouvrir</button>' :
+               '<a class="btn ghost mini" href="' + url + '" target="_blank" rel="noopener">ouvrir</a>') + '</td></tr>';
       }).join("") + "</tbody></table></div>" +
       '<p class="note">« Repris » dit si le hub sait ranger ce module en base : un ' +
       "module sans adaptateur s'ouvre et s'exporte, mais son JSON serait rejeté à " +

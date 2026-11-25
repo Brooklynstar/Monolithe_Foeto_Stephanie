@@ -31,10 +31,13 @@ import re
 from pathlib import Path
 
 import biometrie
+import cr_complet
+import cr_lumi
 import percentiles_organes
 import percentiles_placenta
-import cr_lumi
+import placenta_gemellaire
 import placenta_liaison
+import trame_normale
 
 ICI = Path(__file__).resolve().parent
 GABARITS = ICI / "gabarits"
@@ -125,6 +128,8 @@ def ds3(r, externes=False):
 
 def rempli(c):
     """Un champ de trame porte-t-il quelque chose ?"""
+    if c.get("presence") or (c.get("commentaire") or "").strip():
+        return True
     if c.get("type") == "chips":
         return bool(c.get("valeurs"))
     if c.get("type") == "axe":
@@ -362,6 +367,16 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     bio = (s.get("biometrie_clinique") or {}).get("donnees", {})
     rad = (s.get("radio") or {}).get("donnees", {})
     aut = (s.get("autopsie") or {}).get("donnees", {})
+    etapes_autopsie = _trame(aut)
+    organes = next((e['champs'] for e in etapes_autopsie if e['id'] == 'en_place'), [])
+    digestif = next((e['champs'] for e in etapes_autopsie if e['id'] == 'digestif'), None)
+    vesicule = next((c for c in organes if c.get('id') == 'vb'), None)
+    if vesicule and digestif is not None:
+        organes.remove(vesicule)
+        if not any(c.get('id') == 'vb' for c in digestif):
+            i = next((i for i, c in enumerate(digestif) if c.get('id') == 'estomac'), len(digestif))
+            digestif.insert(i, vesicule)
+
     neu = (s.get("neuropath") or {}).get("donnees", {})
     plac = (s.get("macro_placenta") or {}).get("donnees", {})
     mic = (s.get("micro") or {}).get("donnees", {})
@@ -438,6 +453,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
                 lignes_masses.append({
                     "id": c["id"], "label": c.get("label"), "valeur": masses[c["id"]],
                     "detail": valeur_champ(c),
+                    "terme_attendu": c.get('terme_attendu'),
                     "z_gc": r.get("z_gc"), "z_ma": r.get("z_ma"), "z_mb": r.get("z_mb"),
                     "attendu_gc": r.get("attendu_gc"), "attendu_ma": r.get("attendu_ma"),
                     "alerte": r.get("alerte", False),
@@ -467,6 +483,7 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         lignes_bio.append({
             "cle": cle, "label": (bio.get("libelles") or {}).get(cle) or (ref_mes.get(cle) or {}).get("libelle") or cle, "valeur": v,
             "unite": (bio.get("unites") or {}).get(cle) or (ref_mes.get(cle) or {}).get("unite") or "",
+            "terme_attendu": (bio.get("termes_attendus") or {}).get(cle),
             "z_gc": r.get("z_gc"), "z_ma": r.get("z_ma"), "z_mb": r.get("z_mb"),
             **{k: r.get(k) for src in ("gc", "ma", "mb")
                for k in ("z_brut_" + src, "percentile_" + src)},
@@ -525,10 +542,11 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
         "biometrie": {"mesures": mesures, "lignes": lignes_bio, "sexe": bio.get("sexe"),
                       "terme_sa": sa_bio, "terme_source": "administratif" if sa is not None else "saisie"},
         "radio": rad,
-        "autopsie": {"etapes": _trame(aut), "masses": lignes_masses, "terme_percentiles":sa_organes,
+        "autopsie": {"etapes": etapes_autopsie, "masses": lignes_masses, "terme_percentiles":sa_organes,
                      "maceration": maceration,
                      "ouverture_at": aut.get("ouverture_at")},
         "placenta_formulaire": placenta_liaison.compte_rendu(cx, numero, (s.get("placenta") or {}).get("donnees", {})),
+        "placenta_gemellaire": placenta_gemellaire.compte_rendu((s.get("placenta_gemellaire") or {}).get("donnees", {})),
         "placenta": {**_placenta(plac), "percentiles":percentiles_placenta.document(plac,sa)},
         "micro": _micro(mic),
         "grilles": grilles,
@@ -554,6 +572,22 @@ def contexte(cx, numero, refs: biometrie.References, modules_attendus):
     ctx['z_masse_texte'] = __import__('percentiles').zt
     ctx['table_percentiles_placenta'] = lambda: percentiles_placenta.tableau(ctx['placenta']['percentiles'])
     ctx['texte_percentiles_placenta'] = percentiles_placenta.texte(ctx['placenta']['percentiles'])
+    donnees_placenta = (s.get('placenta') or {}).get('donnees', {})
+    ctx['alertes_relecture'], ctx['polydactylie_niee'] = cr_complet.alertes(ctx, donnees_placenta)
+    ctx['demonstration'] = (numero == 'DEMO_SLO_001' and admin.get('fictif') is True)
+    clinique = cx.execute('SELECT texte FROM conclusions_cliniques WHERE dossier=?', (numero,)).fetchone()
+    ctx['conclusion_clinique'] = clinique[0] if clinique else (
+        cr_complet.texte(admin.get('conclusion_clinique')) or cr_complet.texte(issue.get('conclusion_clinique'))
+        or cr_complet.texte(aut.get('conclusion_clinique')))
+    trame = trame_normale.lire(cx)
+    options_autopsie = trame_normale.constatations_autopsie(trame)
+    selections_autopsie = set(aut.get('normal_items') or ())
+    if {'pdf-q137-place', 'pdf-q137-aspect'} <= selections_autopsie:
+        selections_autopsie.add('pdf-q137-thymus')
+    ctx_complet = dict(ctx, items_normaux=trame_normale.constatations_externes(trame),
+                       normaux_autopsie=[o for k, o in options_autopsie.items()
+                                         if k in selections_autopsie])
+    ctx['complet_sections'] = lambda: cr_complet.composition(ctx_complet)
     ctx["propositions"] = propositions(ctx)
     ctx["retenues"], ctx["ecartees"] = ctx["propositions"], []
     return ctx
@@ -594,6 +628,8 @@ def propositions(ctx):
                   f"{e['titre']} — {c.get('label')}", h.get("hpo_id"))
     rad = ctx["radio"]
     for h in rad.get("hpo") or []:
+        if h.get('code') == 'HP:0001161' and ctx['polydactylie_niee']:
+            continue
         p(f"radio:{h.get('code')}", "Imagerie", h.get("term_fr") or h.get("code"),
           None, h.get("code"))
     for nom, o in ((rad.get("biometries") or {}).get("os_longs") or {}).items():

@@ -89,7 +89,7 @@ class ReunionPlacenta(unittest.TestCase):
                         rendu = page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
                         self.assertEqual(rendu, json.loads(json.dumps(schema_releve())))
                         self.assertEqual(page.locator('fieldset').count(), 32)
-                        self.assertEqual(page.locator('input[type=radio]').count(), 155)
+                        self.assertEqual(page.locator('label.chip input').count(), 154)
                         page.locator('#macro_01').fill('90')
                         page.locator('#macro_08_4').check()
                         page.locator('#macro_08_autre').fill('Essai de fusion — fictif')
@@ -100,7 +100,7 @@ class ReunionPlacenta(unittest.TestCase):
                             page.locator('#hubSave').click()
                         self.assertEqual(response.value.status, 200, response.value.text())
                         saved = context.request.get(URL + '/api/saisie/DEMO_SLO_001/placenta').json()
-                        print('OK deux onglets accessibles ; 32 champs et 155 choix conformes ; trois sections enregistrées')
+                        print('OK deux onglets accessibles ; 32 champs et 154 choix conformes ; trois sections enregistrées')
                         # Fermeture du navigateur et arrêt du vrai processus : relire uniquement depuis SQLite.
                         context.close()
                         browser.close()

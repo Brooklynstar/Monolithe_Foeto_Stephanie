@@ -1,0 +1,287 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Placenta gémellaire</title>
+  <style>
+    :root {
+      --paper:#edefee; --card:#fff; --ink:#161d1c; --ink-soft:#5a6462;
+      --rule:#cbd2d0; --drape:#0e6b62; --drape-soft:#e2efec;
+      --alert:#9c3a28; --amber:#8a6a18; --grey18:#7a7e7c;
+      --mono:ui-monospace,monospace; --sans:system-ui,sans-serif;
+    }
+    * { box-sizing:border-box }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 var(--sans) }
+    main { max-width:1100px; margin:auto; padding:24px 16px 72px }
+    header { border-bottom:2px solid var(--ink); margin-bottom:20px; padding-bottom:12px }
+    h1, h2, h3 { margin:0 0 12px }
+    h3 { font-size:1.05rem }
+    section, .identification { padding:16px; margin-block:16px; border:1px solid var(--rule); background:var(--card) }
+    .identification, .mesures { display:flex; flex-wrap:wrap; gap:12px }
+    .identification > label, .mesures > label { flex:1 1 180px }
+    label { display:block }
+    input:not([type=checkbox]), select { display:block; width:100%; padding:8px; border:1px solid var(--rule); background:var(--saisie,var(--paper)); color:var(--ink); font:inherit }
+    input[type=checkbox] { accent-color:var(--drape) }
+    :focus-visible { outline:2px solid var(--drape); outline-offset:2px }
+    .bloc { padding:12px 0; border-top:1px solid var(--rule) }
+    fieldset { min-width:0; margin:0 0 1em; padding:8px; border:1px solid var(--rule) }
+    legend { font-weight:600; max-width:100%; padding-inline:4px; overflow-wrap:anywhere }
+    .choix { display:flex; flex-wrap:wrap; gap:6px }
+    .choix label { padding:4px 8px; border:1px solid var(--rule); overflow-wrap:anywhere }
+    .choix label:has(:checked) { background:var(--drape-soft) }
+    .choix .bichoriale { color:var(--drape); border-color:var(--drape); font-weight:600 }
+    .autre { margin-top:8px }
+    .autre[hidden] { display:none }
+    .etat { color:var(--ink-soft); min-height:1.5em }
+  </style>
+</head>
+<body>
+<main>
+  <header><h1>Placenta gémellaire</h1></header>
+  <div class="identification">
+    <label>Dossier <input id="dossier" autocomplete="off"></label>
+    <label>Opérateur <input id="operateur" autocomplete="off"></label>
+    <label>Configuration
+      <select id="configuration" disabled>
+        <option value="">Choisir une configuration</option>
+        <option value="bcba_separes">BCBA / PP séparés</option>
+        <option value="bcba_fusionnes">BCBA / PP fusionnés</option>
+        <option value="mcba">MCBA</option>
+        <option value="mcma">MCMA</option>
+      </select>
+    </label>
+  </div>
+  <div id="etat" class="etat" role="status"></div>
+  <section aria-labelledby="titre_macro"><h2 id="titre_macro">Macroscopie</h2><div id="macroscopie"></div></section>
+  <section aria-labelledby="titre_micro"><h2 id="titre_micro">Microscopie</h2><div id="microscopie"></div></section>
+  <section aria-labelledby="titre_conclusion"><h2 id="titre_conclusion">Conclusion</h2><div id="conclusion"></div></section>
+</main>
+<script>
+"use strict";
+var MODULE = "placenta_gemellaire";
+var SCHEMA = "0.1.0";
+var VERSION = "1.0.0";
+var HUB_REPRISE_AUTO = false;
+const el = (id) => document.getElementById(id);
+const mode = el("configuration");
+const sections = ["macroscopie", "microscopie", "conclusion"];
+const params = new URLSearchParams(location.search);
+const etat = el("etat");
+let trame;
+let configurations = {};
+let numeroCharge = "";
+let lecture = 0;
+
+// Les libellés et les options cliniques viennent de la trame Placenta du Hub.
+async function chargerTrame() {
+  const r = await fetch("/api/trame-placenta-gemellaire");
+  if (!r.ok) throw new Error("Lecture de la trame impossible");
+  return r.json();
+}
+
+function element(balise, texte = "") {
+  const noeud = document.createElement(balise);
+  noeud.textContent = texte;
+  return noeud;
+}
+
+function champ(parent, definition, donnees, prefixe) {
+  const {id, label, choix = [], type, autre} = definition;
+  const identifiant = prefixe + "_" + id;
+  if (!choix.length) {
+    const etiquette = element("label", label);
+    const entree = element("input");
+    entree.id = identifiant;
+    entree.type = type === "nombre" ? "number" : "text";
+    if (entree.type === "number") {
+      entree.min = "0";
+      entree.step = "any";
+      if (id === "pourcentage") entree.max = "100";
+    }
+    const texte = (donnees[id] ?? "").toString();
+    entree.value = entree.type === "number" ? texte.replace(",", ".") : texte;
+    entree.addEventListener("input", () => { donnees[id] = entree.value; });
+    etiquette.append(entree);
+    parent.append(etiquette);
+    return;
+  }
+
+  const groupe = element("fieldset");
+  groupe.append(element("legend", label));
+  const options = element("div");
+  options.className = "choix";
+  const valeur = donnees[id];
+  const enregistres = autre ? valeur?.choix : valeur;
+  const coches = new Set(Array.isArray(enregistres) ? enregistres : [enregistres]);
+  const autreValeur = "Autre + texte libre";
+  const texte = element("input");
+  texte.value = valeur?.texte ?? "";
+  const libre = element("label", "Autre — texte libre");
+  libre.className = "autre";
+  libre.append(texte);
+  libre.hidden = !coches.has(autreValeur);
+  function enregistrerChoix() {
+    const selection = choix.filter((v) => coches.has(v));
+    donnees[id] = autre
+      ? {choix: selection, texte: selection.includes(autreValeur) ? texte.value : ""}
+      : selection;
+    libre.hidden = !coches.has(autreValeur);
+  }
+  choix.forEach((v, i) => {
+    const etiquette = element("label");
+    const entree = element("input");
+    entree.type = "checkbox";
+    entree.id = identifiant + "_" + i;
+    entree.checked = coches.has(v);
+    entree.addEventListener("change", () => {
+      if (entree.checked) coches.add(v);
+      else coches.delete(v);
+      enregistrerChoix();
+    });
+    etiquette.append(entree, " " + v);
+    options.append(etiquette);
+  });
+  groupe.append(options);
+  if (autre) {
+    texte.addEventListener("input", enregistrerChoix);
+    groupe.append(libre);
+  }
+  if (mode.value === "bcba_fusionnes" && id === "micro_02") {
+    const etiquette = element("label");
+    etiquette.className = "bichoriale";
+    const entree = element("input");
+    entree.type = "checkbox";
+    entree.id = identifiant + "_bichoriale";
+    entree.checked = donnees.membrane_bichoriale ?? true;
+    donnees.membrane_bichoriale = entree.checked;
+    entree.addEventListener("change", () => { donnees.membrane_bichoriale = entree.checked; });
+    etiquette.append(entree, " (membrane de type bichorial)");
+    options.prepend(etiquette);
+  }
+  parent.append(groupe);
+}
+
+function bloc(parent, titre) {
+  const contenu = element("div");
+  contenu.className = "bloc";
+  if (titre) contenu.append(element("h3", titre));
+  parent.append(contenu);
+  return contenu;
+}
+
+const ensemble = [
+  ["poids", "Poids de l’ensemble placentaire (g)"],
+  ["longueur", "Longueur de l’ensemble placentaire (cm)"],
+  ["largeur", "Largeur de l’ensemble placentaire (cm)"],
+  ["epaisseur", "Épaisseur de l’ensemble placentaire (cm)"],
+];
+
+function afficher() {
+  for (const section of sections) el(section).replaceChildren();
+  if (!trame || !mode.value) return;
+  if (mode.value === "mcba" || mode.value === "mcma") {
+    el("macroscopie").append(element("p", "Les rubriques de cette configuration seront précisées ultérieurement."));
+    return;
+  }
+  const donnees = configurations[mode.value] ??= {};
+  const fusionnes = mode.value === "bcba_fusionnes";
+  if (fusionnes) {
+    const commun = bloc(el("macroscopie"), "Ensemble placentaire");
+    const mesures = element("div");
+    mesures.className = "mesures";
+    commun.append(mesures);
+    donnees.ensemble ??= {};
+    for (const [id, label] of ensemble) {
+      champ(mesures, {id, label, type: "nombre"}, donnees.ensemble, "ensemble");
+    }
+  }
+  for (const section of trame) {
+    const parent = el(section.id);
+    if (section.id === "conclusion") {
+      champ(parent, section.champs[0], donnees.conclusion ??= {}, "conclusion");
+      continue;
+    }
+    for (const numero of [1, 2]) {
+      const placenta = donnees["placenta_" + numero] ??= {};
+      const valeurs = placenta[section.id] ??= {};
+      const contenu = bloc(parent, "Placenta " + numero);
+      const prefixe = "p" + numero;
+      for (const c of section.champs) champ(contenu, c, valeurs, prefixe);
+      if (fusionnes && section.id === "macroscopie") {
+        champ(contenu, {id: "pourcentage", label: "Pourcentage de la galette placentaire",
+                        type: "nombre"}, valeurs, prefixe);
+      }
+    }
+  }
+  if (fusionnes) {
+    champ(bloc(el("macroscopie")), {
+      id: "distance", label: "Distance entre les deux insertions des cordons (cm)", type: "nombre",
+    }, donnees.ensemble, "ensemble");
+  }
+}
+
+async function relire(doc) {
+  if (doc.module !== MODULE || doc.dossier !== numeroCharge)
+    throw new Error("Saisie d’un autre module ou dossier");
+  configurations = doc.configurations ?? {};
+  mode.value = doc.configuration ?? "";
+  if (!el("operateur").value) el("operateur").value = doc.operateur ?? "";
+  afficher();
+}
+
+async function charger() {
+  const numero = el("dossier").value.trim().toUpperCase().replace(/\s/g, "");
+  el("dossier").value = numero;
+  if (numero === numeroCharge && numero) return;
+  const requete = ++lecture;
+  numeroCharge = "";
+  mode.value = "";
+  mode.disabled = true;
+  configurations = {};
+  afficher();
+  if (!/^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(numero)) {
+    etat.textContent = numero ? "Numéro de dossier invalide." : "";
+    return;
+  }
+  etat.textContent = "Lecture du dossier…";
+  try {
+    trame ??= await chargerTrame();
+    const r = await fetch("/api/saisie/" + encodeURIComponent(numero) + "/" + MODULE);
+    const doc = r.status === 404 ? null : await r.json();
+    if (requete !== lecture) return;
+    if (!r.ok && r.status !== 404) throw new Error(doc.erreur || "Lecture impossible");
+    numeroCharge = numero;
+    if (doc) await relire(doc);
+    el("dossier").readOnly = true;
+    mode.disabled = false;
+    if (el("hubRetour")) el("hubRetour").href = "/?dossier=" + encodeURIComponent(numero);
+    etat.textContent = doc ? "Saisie retrouvée." : "Nouvelle saisie.";
+  } catch (e) {
+    if (requete !== lecture) return;
+    numeroCharge = "";
+    etat.textContent = "Lecture impossible : " + e.message;
+  }
+}
+
+function collecter() {
+  if (!numeroCharge || !mode.value) throw new Error("Valider le dossier et choisir une configuration.");
+  const invalide = document.querySelector("main input:invalid");
+  if (invalide) {
+    invalide.reportValidity();
+    throw new Error("Vérifier les mesures saisies.");
+  }
+  return {module: MODULE, schema_version: SCHEMA, module_version: VERSION,
+          dossier: numeroCharge, operateur: el("operateur").value.trim(),
+          exported_at: new Date().toISOString(), configuration: mode.value, configurations};
+}
+
+mode.addEventListener("change", afficher);
+el("dossier").addEventListener("change", charger);
+el("dossier").value = params.get("dossier") ?? "";
+el("operateur").value = params.get("operateur") ?? "";
+if (el("dossier").value) charger();
+</script>
+</body>
+</html>

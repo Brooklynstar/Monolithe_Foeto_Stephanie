@@ -36,7 +36,7 @@
       {
         "id": "macro_06",
         "label": "Forme",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "ronde",
           "bi-partita",
@@ -47,7 +47,7 @@
       {
         "id": "macro_07",
         "label": "Cordon d'insertion",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "centrale",
           "paracentrale",
@@ -60,7 +60,7 @@
       {
         "id": "macro_08",
         "label": "Cordon",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "deux artères une veine",
           "artère ombilicale unique",
@@ -73,7 +73,7 @@
       {
         "id": "macro_09",
         "label": "Plaque choriale macro",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "Amnios noueux",
           "Métaplasie malpighienne",
@@ -119,10 +119,8 @@
       {
         "id": "macro_16",
         "label": "Thrombose sous-choriale épaisseur max en cm",
-        "type": "unique",
-        "choix": [
-          "Option 1"
-        ]
+        "type": "nombre",
+        "choix": []
       },
       {
         "id": "macro_17",
@@ -163,7 +161,7 @@
       {
         "id": "micro_01",
         "label": "Amnios",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "aplati",
           "aplati ou cubique",
@@ -176,7 +174,7 @@
       {
         "id": "micro_02",
         "label": "Membranes",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "absence d'infiltrat inflammatoire",
           "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
@@ -189,7 +187,7 @@
       {
         "id": "micro_03",
         "label": "Cordon micro",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "absence d'anomalie des structures funiculaires,",
           "foyer de dégénérescence myxoïde de la gelée de Wharton,",
@@ -209,7 +207,7 @@
       {
         "id": "micro_04",
         "label": "Plaque choriale amnios",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "aplati,",
           "aplati ou cubigue,",
@@ -225,7 +223,7 @@
       {
         "id": "micro_05",
         "label": "Plaque choriale vaisseaux",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "absence de lésion de la plaque choriale,",
           "lésions de thrombose des vaisseaux chorioallantoidiens,",
@@ -238,7 +236,7 @@
       {
         "id": "micro_06",
         "label": "Plaque choriale inflammation",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
           "chorioamniotite aigue: réponse inflammatoire maternelle (RIM) stade 2 (infiltrat à polynucléaires neutrophiles dans le mésenchyme sous-amniotique)",
@@ -250,7 +248,7 @@
       {
         "id": "micro_07",
         "label": "Plaque basale",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "absence d'anomalie vasculaire ou inflammatoire de la plaque basale,",
           "nécrose fibrinoïde de la paroi des artères,",
@@ -264,7 +262,7 @@
       {
         "id": "micro_08",
         "label": "Villosités",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "sans particularité, maturation en accord avec le terme.",
           "altérations autolytiques vasculaires des villosités tronculaires (aspect de thromboses)",
@@ -299,7 +297,7 @@
       {
         "id": "micro_09",
         "label": "Chambre intervilleuse",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "dépôts de matériel fibrinoïde, sans excès",
           "excès de dépôts de matériel fibrinoïde",
@@ -319,7 +317,7 @@
       {
         "id": "micro_10",
         "label": "Lésions",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "absence de lésion focale microscopique",
           "lésion de nécrose ischémique villositaire (infarctus)",
@@ -341,7 +339,7 @@
       {
         "id": "conclusion_01",
         "label": "Conclusion",
-        "type": "unique",
+        "type": "multiple",
         "choix": [
           "hypotrophique",
           "eutrophique",

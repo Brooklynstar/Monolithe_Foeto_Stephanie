@@ -43,6 +43,8 @@ class SLOPercentilesReunis(unittest.TestCase):
             for g in ('complet','synthese'):
                 r=client.post('/api/dossiers/DEMO_SLO_001/cr',json={'gabarit':g})
                 self.assertEqual(r.status_code,200,r.text);self.assertIn('P50,00',r.json['texte'])
+                if g == 'complet':
+                    self.assertRegex(r.json['texte'], r'Poids des organes</h4>\s*<table align="center" style="width:86%')
             # Seule la copie temporaire du scénario est passée à 28 SA pour un cas positif Redline.
             admin=client.get('/api/saisie/DEMO_SLO_001/administratif').json
             admin['issue']['terme_sa']=28

@@ -177,6 +177,7 @@
      encoder ses clichés, collecter() sinon. Ce qui part au hub est donc, à
      l'octet près, ce que le bouton « Exporter » aurait écrit dans un fichier. */
   el("hubSave").onclick = async function () {
+    if (window.saisieMacroActive === false) return;
     var manque = pret();
     if (manque) { dire(manque, true); (el("operateur") || el("dossier")).focus(); return; }
     var n = numero();
@@ -201,8 +202,9 @@
         if (rd < rh) perte.push(rh + " valeurs au hub, " + rd + " ici");
         if (perte.length && !confirm("La saisie du hub est plus complète que celle-ci (" +
             perte.join(" ; ") + ").\n\nEnregistrer quand même ? L'ancienne reste dans " +
-            "l'historique du dossier.")) { dire("envoi annulé"); this.disabled = false; return; }
+            "l'historique du dossier.")) { dire("envoi annulé"); this.disabled = window.saisieMacroActive === false; return; }
       }
+      if (window.saisieMacroActive === false) return;
       dire("envoi…");
       var r = await fetch(API + "/api/saisie", {
         method: "POST",
@@ -221,7 +223,7 @@
     } catch (e) {
       dire("échec : " + e.message, true);
     }
-    this.disabled = false;
+    this.disabled = window.saisieMacroActive === false;
   };
 
   /* ── Relire ──────────────────────────────────────────────────────────────

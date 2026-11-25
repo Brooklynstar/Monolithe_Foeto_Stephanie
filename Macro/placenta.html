@@ -121,6 +121,13 @@
         flex-wrap: wrap;
         gap: 10px;
       }
+      #macroscopie .row,
+      #microscopie .row {
+        row-gap: 1lh;
+      }
+      #macroscopie > .row + .row {
+        margin-top: 1lh;
+      }
       .field {
         flex: 1 1 180px;
         min-width: 0;
@@ -828,7 +835,7 @@
       "use strict";
 var MODULE = "placenta";
 var SCHEMA = "0.1.0";
-var VERSION = "1.1.0";
+var VERSION = "1.2.0";
       // Ce module attend sa propre lecture avant toute saisie, même sans opérateur dans l’URL.
       var HUB_REPRISE_AUTO = false;
       var SECTIONS = [
@@ -869,13 +876,13 @@ var VERSION = "1.1.0";
             {
               id: "macro_06",
               label: "Forme",
-              type: "unique",
+              type: "multiple",
               choix: ["ronde", "bi-partita", "tripartita", "lobe accessoire"],
             },
             {
               id: "macro_07",
               label: "Cordon d'insertion",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "centrale",
                 "paracentrale",
@@ -888,7 +895,7 @@ var VERSION = "1.1.0";
             {
               id: "macro_08",
               label: "Cordon",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "deux artères une veine",
                 "artère ombilicale unique",
@@ -901,7 +908,7 @@ var VERSION = "1.1.0";
             {
               id: "macro_09",
               label: "Plaque choriale macro",
-              type: "unique",
+              type: "multiple",
               choix: ["Amnios noueux", "Métaplasie malpighienne", "Kystes"],
             },
             {
@@ -943,8 +950,8 @@ var VERSION = "1.1.0";
             {
               id: "macro_16",
               label: "Thrombose sous-choriale épaisseur max en cm",
-              type: "unique",
-              choix: ["Option 1"],
+              type: "nombre",
+              choix: [],
             },
             {
               id: "macro_17",
@@ -985,7 +992,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_01",
               label: "Amnios",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "aplati",
                 "aplati ou cubique",
@@ -998,7 +1005,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_02",
               label: "Membranes",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "absence d'infiltrat inflammatoire",
                 "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
@@ -1011,7 +1018,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_03",
               label: "Cordon micro",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "absence d'anomalie des structures funiculaires,",
                 "foyer de dégénérescence myxoïde de la gelée de Wharton,",
@@ -1031,7 +1038,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_04",
               label: "Plaque choriale amnios",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "aplati,",
                 "aplati ou cubigue,",
@@ -1047,7 +1054,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_05",
               label: "Plaque choriale vaisseaux",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "absence de lésion de la plaque choriale,",
                 "lésions de thrombose des vaisseaux chorioallantoidiens,",
@@ -1060,7 +1067,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_06",
               label: "Plaque choriale inflammation",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "sous-chorionite: réponse inflammatoire maternelle (RIM) stade 1 ( infiltrat à polynucléaires neutrophiles dans la fibrine sous-choriale)",
                 "chorioamniotite aigue: réponse inflammatoire maternelle (RIM) stade 2 (infiltrat à polynucléaires neutrophiles dans le mésenchyme sous-amniotique)",
@@ -1072,7 +1079,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_07",
               label: "Plaque basale",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "absence d'anomalie vasculaire ou inflammatoire de la plaque basale,",
                 "nécrose fibrinoïde de la paroi des artères,",
@@ -1086,7 +1093,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_08",
               label: "Villosités",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "sans particularité, maturation en accord avec le terme.",
                 "altérations autolytiques vasculaires des villosités tronculaires (aspect de thromboses)",
@@ -1121,7 +1128,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_09",
               label: "Chambre intervilleuse",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "dépôts de matériel fibrinoïde, sans excès",
                 "excès de dépôts de matériel fibrinoïde",
@@ -1141,7 +1148,7 @@ var VERSION = "1.1.0";
             {
               id: "micro_10",
               label: "Lésions",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "absence de lésion focale microscopique",
                 "lésion de nécrose ischémique villositaire (infarctus)",
@@ -1163,7 +1170,7 @@ var VERSION = "1.1.0";
             {
               id: "conclusion_01",
               label: "Conclusion",
-              type: "unique",
+              type: "multiple",
               choix: [
                 "hypotrophique",
                 "eutrophique",
@@ -1232,18 +1239,34 @@ var VERSION = "1.1.0";
         row.className = "row";
         section.appendChild(row);
         s.champs.forEach(function (c) {
+          if (["macro_14", "macro_17", "macro_19", "macro_21"].includes(c.id)) {
+            row = element("div");
+            row.className = "row";
+            section.appendChild(row);
+          }
           var f = element("fieldset");
           f.id = "g_" + c.id;
-          f.className = "field" + (c.type === "unique" ? " large" : "");
+          f.className = "field" + (c.choix.length ? " large" : "");
           var legend = element("legend", c.label);
           legend.id = "l_" + c.id;
           f.appendChild(legend);
-          if (c.type === "texte") {
+          if (!c.choix.length) {
             var input = element("input");
-            input.type = "text";
+            input.type = c.type === "nombre" ? "number" : "text";
+            if (c.type === "nombre") input.step = "any";
             input.id = c.id;
             input.setAttribute("aria-labelledby", legend.id);
             f.appendChild(input);
+            if (c.id === "macro_16") {
+              input.min = "0";
+              input.setAttribute("aria-describedby", "alerteEpaisseur");
+              var alerte = element("div");
+              alerte.id = "alerteEpaisseur";
+              alerte.className = "hint";
+              alerte.setAttribute("role", "status");
+              f.appendChild(alerte);
+              input.addEventListener("input", verifierEpaisseur);
+            }
           } else {
             var choices = element("div");
             choices.className = "chips";
@@ -1252,7 +1275,7 @@ var VERSION = "1.1.0";
               var label = element("label");
               label.className = "chip";
               var input = element("input");
-              input.type = "radio";
+              input.type = c.type === "multiple" ? "checkbox" : "radio";
               input.name = c.id;
               input.value = v;
               input.id = c.id + "_" + i;
@@ -1278,7 +1301,7 @@ var VERSION = "1.1.0";
             clear.className = "mini effacer";
             clear.setAttribute("aria-label", "Effacer : " + c.label);
             clear.onclick = function () {
-              f.querySelectorAll("input[type=radio]").forEach(function (r) {
+              choices.querySelectorAll("input").forEach(function (r) {
                 r.checked = false;
               });
               majChoix();
@@ -1297,20 +1320,28 @@ var VERSION = "1.1.0";
           calcul.className = "calcul";
           calcul.innerHTML =
             '<div class="sousTitre">Percentiles du poids placentaire</div><div class="row"><div class="field"><label for="terme_sa">Terme en SA</label><input type="number" id="terme_sa" step="1" min="0"><div class="hint" id="termeOrigine"></div></div><div class="field"><label for="conditions_masse">Conditions de pesée</label><select id="conditions_masse"><option value="non_documentees">Non précisées / pièce non parée</option><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option></select></div></div><div id="resultatsPercentilesPlacenta" aria-live="polite"></div><p class="hint" id="percentileTranscrit"></p><button type="button" class="mini" id="reprendreCalcul">Utiliser le calcul dans le champ Percentile placenta</button><p class="hint">Redline : position parmi P10, P50, P90, sans interpolation. Pas de comparaison des poids fixés ou de protocole inconnu. Le champ « Percentile placenta » reçoit la position calculée ou conserve une transcription manuelle.</p><p class="note" id="liaisonMesures">Les mesures numériques communes (poids, longueur, largeur, épaisseur) sont enregistrées dans les deux modules. Les autres constatations restent propres à chaque module.</p><div id="divergencesMesures" role="status"></div>';
-          row.insertBefore(calcul, row.children[5] || null);
+          var premiereLigne = section.querySelector(".row");
+          premiereLigne.insertBefore(calcul, el("g_macro_06"));
         }
       });
       function majChoix(){document.querySelectorAll("label.chip").forEach(function(l){l.classList.toggle("on",l.querySelector("input").checked);});}
       el("sections").addEventListener("change",majChoix);
       function majAutre(c) {
-        var r = document.querySelector('input[name="' + c.id + '"]:checked');
-        var input = el(c.id + "_autre");
-        input.parentElement.hidden = !r || r.value !== "Autre + texte libre";
+        var autre = el("g_" + c.id).querySelector('input[value="Autre + texte libre"]');
+        el(c.id + "_autre").parentElement.hidden = !autre.checked;
+      }
+      function verifierEpaisseur() {
+        var input = el("macro_16");
+        var negative = input.validity.rangeUnderflow;
+        el("alerteEpaisseur").textContent = negative
+          ? "Épaisseur négative à vérifier. Cette valeur ne figurera pas dans le compte rendu."
+          : "";
+        input.setAttribute("aria-invalid", String(negative));
       }
       function vider() {
         SECTIONS.forEach(function (s) {
           s.champs.forEach(function (c) {
-            if (c.type === "texte") el(c.id).value = "";
+            if (!c.choix.length) el(c.id).value = "";
             else {
               document
                 .querySelectorAll('input[name="' + c.id + '"]')
@@ -1324,6 +1355,7 @@ var VERSION = "1.1.0";
             }
           });
         });
+        verifierEpaisseur();
         documentLu = {};
         percentileAuto = true;
       }
@@ -1344,13 +1376,17 @@ var VERSION = "1.1.0";
           var valeurs = (donnees && donnees.champs) || {};
           s.champs.forEach(function (c) {
             var v = valeurs[c.id];
-            if (c.type === "texte") el(c.id).value = v == null ? "" : v;
+            if (!c.choix.length) {
+              if (c.type === "nombre") v = nombre(v);
+              el(c.id).value = v == null ? "" : v;
+            }
             else {
-              var choix = c.autre && v && typeof v === "object" ? v.choix : v;
+              var choix = c.autre && v && !Array.isArray(v) && typeof v === "object" ? v.choix : v;
+              if (!Array.isArray(choix)) choix = [choix];
               document
                 .querySelectorAll('input[name="' + c.id + '"]')
                 .forEach(function (r) {
-                  r.checked = r.value === choix;
+                  r.checked = choix.includes(r.value);
                 });
               if (c.autre) {
                 el(c.id + "_autre").value = (v && v.texte) || "";
@@ -1359,6 +1395,7 @@ var VERSION = "1.1.0";
             }
           });
         });
+        verifierEpaisseur();
       }
       async function relire(o) {
         if (o.module !== MODULE || o.dossier !== el("dossier").value.trim())
@@ -1411,16 +1448,22 @@ var VERSION = "1.1.0";
           s.champs.forEach(function (c) {
             var v;
             if (c.type === "texte") v = el(c.id).value;
+            else if (c.type === "nombre") {
+              if (el(c.id).validity.badInput)
+                throw new Error("Saisir une épaisseur maximale numérique.");
+              v = el(c.id).value === "" ? null : el(c.id).valueAsNumber;
+            }
             else {
-              var r = document.querySelector(
-                'input[name="' + c.id + '"]:checked',
+              var choix = Array.from(
+                document.querySelectorAll('input[name="' + c.id + '"]:checked'),
+                function (r) { return r.value; },
               );
-              v = r ? r.value : "";
+              v = c.type === "multiple" ? choix : choix[0] || "";
               if (c.autre)
                 v = {
                   choix: v,
                   texte:
-                    v === "Autre + texte libre"
+                    choix.includes("Autre + texte libre")
                       ? el(c.id + "_autre").value
                       : "",
                 };

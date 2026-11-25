@@ -21,7 +21,8 @@ import percentiles_placenta as pp
 from importer_placenta_demo import importer
 from verifier_placenta import schema_releve
 
-URL='http://127.0.0.1:5005'
+PORT = os.environ.get('MONOLITHE_TEST_PORT', '5005')
+URL = 'http://127.0.0.1:' + PORT
 
 
 class ModulePlacenta(unittest.TestCase):
@@ -31,12 +32,12 @@ class ModulePlacenta(unittest.TestCase):
             fixture=(ROOT/'hub/exemples/DEMO_SLO_001.json').read_bytes()
             with (Path(tmp)/'serveur.log').open('w+') as log:
                 def start():
-                    p=subprocess.Popen([sys.executable,'-u',str(ROOT/'hub/app/serveur.py'),'--base',str(base),'--port','5005'],cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
+                    p=subprocess.Popen([sys.executable,'-u',str(ROOT/'hub/app/serveur.py'),'--base',str(base),'--port',PORT],cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
                     for _ in range(150):
                         if p.poll() is not None:break
                         try:
                             with urlopen(URL+'/api/etat',timeout=.3) as r:
-                                if json.load(r)['racine']==str(base):return p
+                                if Path(json.load(r)['racine']).resolve() == base.resolve():return p
                         except OSError:pass
                         time.sleep(.05)
                     if p.poll() is None:p.terminate();p.wait(timeout=5)
@@ -76,12 +77,21 @@ class ModulePlacenta(unittest.TestCase):
                         rendu=page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
                         self.assertEqual(rendu,json.loads(json.dumps(schema_releve())))
                         self.assertEqual(page.locator('fieldset').count(),32)
-                        self.assertEqual(page.locator('input[type=radio]').count(),155)
+                        self.assertEqual(page.locator('label.chip input').count(),154)
                         self.assertEqual(page.locator('[required]').count(),0)
-                        print('OK dossier exact, reprise des quatre mesures et terme administratif ; 32 champs/155 choix inchangés ; limite 19 SA')
+                        print('OK dossier exact, reprise des quatre mesures et terme administratif ; 32 champs/154 constatations ; limite 19 SA')
                         # Compare les styles réellement calculés et les quatre thèmes, pas une simple copie de CSS.
                         macro=context.new_page();macro.goto(URL+'/modules/macro_placenta?dossier=DEMO_SLO_001&operateur=TEST')
                         macro.wait_for_function('document.getElementById("f_masse").value === "90"')
+                        self.assertTrue(macro.locator('#f_masse').is_disabled())
+                        self.assertTrue(macro.locator('#hubSave').is_disabled())
+                        self.assertTrue(macro.locator('#btnWipe').is_disabled())
+                        macro.get_by_role('button', name='Activer la saisie').click()
+                        self.assertTrue(macro.locator('#f_masse').is_enabled())
+                        macro.get_by_role('button', name='Repasser en lecture seule').click()
+                        self.assertTrue(macro.locator('#f_masse').is_disabled())
+                        self.assertEqual(macro.locator('#f_masse').input_value(), '90')
+                        macro.get_by_role('button', name='Activer la saisie').click()
                         def styles(p,selector,props):
                             return p.locator(selector).first.evaluate('(e,ps)=>Object.fromEntries(ps.map(p=>[p,getComputedStyle(e)[p]]))',props)
                         comparaisons=[('body','body',['fontFamily','fontSize','lineHeight','backgroundColor','color']),
@@ -119,6 +129,21 @@ class ModulePlacenta(unittest.TestCase):
                         print('OK 918 cas du moteur existant : Python et JavaScript identiques')
                         page.locator('#micro_01_0').check();page.locator('#micro_02_0').check();page.locator('#conclusion_01_1').check()
                         page.locator('#macro_08_4').check();page.locator('#macro_08_autre').fill('Essai autonome — fictif')
+                        page.locator('#macro_08_2').check()
+                        page.locator('#macro_08_3').check()
+                        page.locator('#macro_08_3').uncheck()
+                        self.assertTrue(page.locator('#macro_08_2').is_checked())
+                        self.assertTrue(page.locator('#macro_08_4').is_checked())
+                        page.locator('#micro_01_5').check()
+                        page.locator('#micro_02_1').check()
+                        page.locator('#macro_15').fill('2,4')
+                        page.locator('#macro_16').fill('0.6')
+                        self.assertGreaterEqual(page.locator('#g_micro_02').bounding_box()['y']
+                                                - page.locator('#g_micro_01').bounding_box()['y']
+                                                - page.locator('#g_micro_01').bounding_box()['height'], 16)
+                        self.assertGreaterEqual(page.locator('#g_micro_03').bounding_box()['y']
+                                                - page.locator('#g_micro_02').bounding_box()['y']
+                                                - page.locator('#g_micro_02').bounding_box()['height'], 16)
                         def save():
                             with page.expect_response(lambda r:r.url.endswith('/api/saisie') and r.request.method=='POST') as response:page.locator('#hubSave').click()
                             self.assertEqual(response.value.status,200,response.value.text())
@@ -129,18 +154,91 @@ class ModulePlacenta(unittest.TestCase):
                         saved=get('/api/saisie/DEMO_SLO_001/placenta')
                         self.assertEqual(saved['resultats_placentaires'],get('/api/dossiers/DEMO_SLO_001/percentiles-placenta-formulaire')['resultats'])
                         for module,doc in avant.items():self.assertEqual(get('/api/saisie/DEMO_SLO_001/'+module),doc,module)
-                        for template in ('complet','synthese','placenta'):
-                            r=context.request.post(URL+'/api/dossiers/DEMO_SLO_001/cr',data={'gabarit':template});self.assertEqual(r.status,200,r.text())
-                            self.assertIn('Essai autonome',r.json()['texte']);self.assertIn('Macroscopie',r.json()['texte'])
                         browser.close();stop(proc);proc=start()
                         browser=pw.chromium.launch(**opts);context=browser.new_context();page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
                         ouvrir()
                         self.assertEqual(page.locator('#macro_08_autre').input_value(),'Essai autonome — fictif')
                         self.assertTrue(page.locator('#micro_01_0').is_checked());self.assertTrue(page.locator('#conclusion_01_1').is_checked())
+                        for field in ('macro_08_2', 'macro_08_4', 'micro_01_5', 'micro_02_1'):
+                            self.assertTrue(page.locator('#' + field).is_checked(), field)
+                        self.assertFalse(page.locator('#macro_08_3').is_checked())
+                        self.assertEqual(page.locator('#macro_15').input_value(), '2,4')
+                        self.assertEqual(page.locator('#macro_16').input_value(), '0.6')
+                        for template in ('complet','synthese','placenta'):
+                            r=context.request.post(URL+'/api/dossiers/DEMO_SLO_001/cr',data={'gabarit':template})
+                            self.assertEqual(r.status,200,r.text())
+                            texte = r.json()['texte']
+                            for mention in ('hyperspiralé', 'Essai autonome', 'aplati', 'exfolié',
+                                            'de 2,4 cm de grand axe sur 0,6 cm d’épaisseur',
+                                            'Le placenta est eutrophique.'):
+                                self.assertIn(mention, texte)
+                            if template == 'complet':
+                                self.assertRegex(texte, r'exfolié\.</p>\s*<p[^>]*>Les membranes')
+                            else:
+                                self.assertRegex(texte, r'exfolié\.\nLes membranes')
                         self.assertEqual(get('/api/saisie/DEMO_SLO_001/placenta'),saved)
                         for module,doc in avant.items():self.assertEqual(get('/api/saisie/DEMO_SLO_001/'+module),doc,module)
                         self.assertEqual(get('/api/dossiers/DEMO_SLO_001/cr')[-2:],cr_avant)
-                        print('OK après fermeture et redémarrage serveur 5005 : trois sections, résultats, huit saisies et CR historiques préservés ; CR actuels intègrent le formulaire')
+                        print('OK après fermeture et redémarrage du serveur : trois sections, résultats, huit saisies et CR historiques préservés ; CR actuels intègrent le formulaire')
+                        for champ, valeur in dict(macro_10='2', macro_11='2', macro_12='0.2',
+                                                  macro_13='1', macro_15='1', macro_16='-16.7').items():
+                            page.locator('#' + champ).fill(valeur)
+                        self.assertIn('Épaisseur négative', page.locator('#alerteEpaisseur').inner_text())
+                        for champ, elements in {
+                            'macro_06': [0], 'macro_07': [1], 'macro_08': [0], 'macro_09': [2], 'micro_01': [2], 'micro_02': [2, 4],
+                            'micro_03': [9, 11], 'micro_09': [10], 'conclusion_01': [26],
+                        }.items():
+                            page.locator('#g_' + champ + ' .effacer').click()
+                            for index in elements:
+                                page.locator(f'#{champ}_{index}').check()
+                        save()
+                        ouvrir()
+                        self.assertEqual(page.locator('#macro_16').input_value(), '-16.7')
+                        self.assertIn('Épaisseur négative', page.locator('#alerteEpaisseur').inner_text())
+                        page.goto(URL+'/?dossier=DEMO_SLO_001')
+                        page.locator('[data-o=cr]').click()
+                        page.locator('#crGabarit option[value=placenta]').wait_for(state='attached')
+                        page.locator('#crGabarit').select_option('placenta')
+                        page.get_by_role('button', name='Produire un brouillon').click()
+                        page.locator('#crPre').wait_for()
+                        affiche = page.locator('#crPre').inner_text().strip()
+                        self.assertNotIn('\n\n', affiche)
+                        self.assertNotIn('FORMULAIRE STRUCTURÉ', affiche.upper())
+                        self.assertNotRegex(affiche, r'[-−]16[,.]7')
+                        for ligne in (
+                            'PLACENTA\nMacroscopie',
+                            'La galette placentaire, de forme ronde, pèse 90 g, sans les membranes ni le cordon, et mesure 9 × 8 cm sur 1,2 cm d’épaisseur.',
+                            'Le cordon, d’insertion paracentrale, comporte trois vaisseaux.',
+                            'À la coupe, on observe deux infarctus représentant 2 % de la surface de la galette placentaire et mesurant de 0,2 à 1 cm de grand axe.',
+                            'On observe aussi une thrombose sous-choriale de 1 cm de grand axe.',
+                            'Microscopie\nL’amnios est cubique.',
+                            'chorioamniotite aiguë avec réponse inflammatoire maternelle (RIM) de stade 2',
+                            'vasculite ombilicale avec réponse inflammatoire fœtale (RIF) de stade 2',
+                            'de grade 1, légère à modérée',
+                            'Conclusion\nIntervillite chronique d’étiologie indéterminée II (10–50 %)',
+                            'À relire : la microscopie indique un grade 1 pour l’intervillite chronique, alors que la conclusion indique II.',
+                        ):
+                            self.assertIn(ligne, affiche)
+                        page.locator('#crGabarit').select_option('complet')
+                        with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/cr')):
+                            page.get_by_role('button', name='Produire un brouillon').click()
+                        complet = page.locator('#crPre').inner_text()
+                        self.assertIn('Le cordon, d’insertion paracentrale, comporte trois vaisseaux.', complet)
+                        self.assertNotIn('22 cm', complet)
+                        self.assertIn('La plaque choriale présente des kystes.', complet)
+                        self.assertNotIn('Longueur du cordon', complet)
+                        self.assertNotIn('sans lésion focale', complet)
+                        ouvrir()
+                        page.locator('#macro_16').fill('0.3')
+                        save()
+                        page.goto(URL+'/?dossier=DEMO_SLO_001')
+                        page.locator('[data-o=cr]').click()
+                        page.locator('#crGabarit').select_option('complet')
+                        with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/cr')):
+                            page.get_by_role('button', name='Produire un brouillon').click()
+                        self.assertIn('une thrombose sous-choriale de 1 cm de grand axe sur 0,3 cm d’épaisseur.',
+                                      page.locator('#crPre').inner_text())
+                        print('OK rédaction affichée dans Chrome, épaisseur négative écartée et discordance de grade signalée')
                         # Nouveau cas positif ; ne jamais changer le terme du SLO.
                         admin={'module':'administratif','schema_version':'0.3.0','module_version':'2.1.0','dossier':'TEST-PCT-028','operateur':'TEST','issue':{'terme_sa':28}}
                         self.assertEqual(post(admin).status,200)
@@ -152,6 +250,8 @@ class ModulePlacenta(unittest.TestCase):
                         self.assertEqual(page.evaluate('calculer().position_percentile'),'P50')
                         save();pos=get('/api/saisie/TEST-PCT-028/placenta')
                         self.assertEqual(pos['resultats_placentaires']['position_percentile'],'P50')
+                        rapport = context.request.post(URL+'/api/dossiers/TEST-PCT-028/cr',data={'gabarit':'placenta'})
+                        self.assertIn('pèse 214 g (P50, Redline)', rapport.json()['texte'])
                         self.assertIsNone(pos['resultats_placentaires']['percentile_exact'])
                         m2=get('/api/saisie/TEST-PCT-028/macro_placenta')
                         self.assertEqual(next(s for s in m2['sections'] if s['id']=='paree')['champs']['masse'],214)

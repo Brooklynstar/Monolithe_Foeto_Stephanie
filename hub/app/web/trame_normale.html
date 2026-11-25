@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configuration de la trame Normal</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;background:#edefee;color:#172321;margin:24px auto;padding:0 16px;max-width:950px}
+section,fieldset{background:white;border:1px solid #cbd2d0;padding:12px;margin:10px 0}
+input,button{font:inherit;padding:6px;margin:4px}label{display:block}input[type=text]{min-width:60%}
+details pre{overflow:auto} [hidden]{display:none}
+.reponses{margin:6px 0 12px}
+.reponses label{width:fit-content;cursor:pointer}
+.reponses .case-reponse{display:inline-flex;align-items:center;gap:5px;border:1px solid #cbd2d0;padding:3px 8px;margin:2px 5px 2px 0;max-width:100%;box-sizing:border-box}
+.reponses .case-reponse:has(:checked){background:#d9eee6;border-color:#0e6b62}
+.reponses .commentaire{width:100%;margin-top:6px}
+.reponses textarea,.commentaire textarea{display:block;width:100%;box-sizing:border-box;font:inherit}
+.reponses input[type=number]{width:8rem;box-sizing:border-box}
+.reponses .compact{display:flex;gap:4px 12px;flex-wrap:wrap}
+.reponses .ligne-cases,.reponses .ligne-serologie{margin:3px 0;padding:3px 6px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.reponses .ligne-serologie{display:flex;align-items:center;gap:0 12px;flex-wrap:wrap}
+.reponses .ligne-serologie .ligne-cases{border:0}
+.ligne-cases strong{min-width:3em}
+.mesure{background:white;border:1px solid #cbd2d0;padding:5px 10px;margin:5px 0}
+.mesure-ligne{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px}
+.mesure-ligne .reponses,.mesure-ligne input{margin:0}
+.reponses .choix-long{display:flex;width:100%}
+.normal-long{text-align:justify}
+.reponses .choix-long input{position:absolute;width:1px;height:1px;opacity:0}
+.reponses .choix-long:has(:focus-visible){outline:2px solid #0e6b62;outline-offset:2px}
+.mesure-ligne>.reponses{flex:1 1 auto}
+.ligne-serologie strong{min-width:7em}
+.reponses .commentaire-court{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%}
+.reponses .commentaire-court textarea{flex:1 1 18rem;width:auto}
+.bloc-fusion{margin:8px 0}
+.bloc-fusion h3{margin:0 0 4px}
+.case-reponse small{display:block;color:#435a52}
+.reponses input{min-width:0}
+.enregistrement{position:sticky;top:0;z-index:2;background:#edefee;padding:8px 0;border-bottom:1px solid #cbd2d0}
+</style>
+<a href="/">Retour au Hub</a>
+<h1>Configuration de la trame Normal</h1>
+<form id="importation" hidden>
+  <label>JSON du formulaire <input id="source" type="file" accept=".json,application/json" required></label>
+  <button>Importer comme brouillon</button>
+</form>
+<div class="enregistrement">
+  <button type="button" id="sauverHaut" hidden>Enregistrer la trame</button>
+  <span id="etat" role="status"></span>
+</div>
+<div id="blocs"></div>
+<button type="button" id="sauver" hidden>Enregistrer la trame</button>
+<script>
+"use strict";
+const el = id => document.getElementById(id);
+let trame;
+let enCours = false;
+let aEnregistrer = false;
+const essais = new Map();
+const issues = [["MF", "Mort fœtale"], ["IMG", "Interruption médicale de grossesse"],
+                ["Avortement spontané", "Avortement spontané"], ["Fausse couche tardive", "Fausse couche tardive"]];
+function apercuIssue() {
+  const sortie = el("apercu-issue");
+  if (!sortie) return;
+  const choix = essais.get("pdf-q11");
+  const libelle = choix === "" || choix == null ? "" : issues[Number(choix)]?.[1];
+  const sa = essais.get("pdf-q6");
+  const jours = Number(essais.get("pdf-q7") || "");
+  const terme = sa ? " à " + sa + " SA" + (jours ? " + " + jours + (jours === 1 ? " jour" : " jours") : "") : "";
+  sortie.textContent = libelle ? libelle + terme + "." : "Aucun mode d’interruption sélectionné.";
+}
+const echos = new Map([
+  ["pdf-section-25", {titre:"Écho T1", debut:24, id:"t1"}],
+  ["pdf-section-41", {titre:"Écho T2", debut:38, id:"t2"}],
+  ["pdf-section-54", {titre:"Écho T3", debut:50, id:"t3"}],
+  ["pdf-section-67", {titre:"Écho complémentaire", debut:62, id:"sup1"}]
+]);
+// Correspondances avec les libellés de MATURATION dans Radio/radio.html.
+// Une ligne de Radio peut regrouper plusieurs points distingués dans le PDF.
+const pointsRadio = {
+  "Clavicule":"Clavicules, mandibule", "Mandibule":"Clavicules, mandibule",
+  "Os long":"Os longs des membres, maxillaire supérieur", "Maxillaire":"Os longs des membres, maxillaire supérieur",
+  "Ilion":"Ilions, côtes, omoplates, phalanges distales des mains",
+  "Omoplate":"Ilions, côtes, omoplates, phalanges distales des mains",
+  "Métacarpien/P3 main":"Métacarpiens / phalanges distales des mains",
+  "Voute du crâne":"Métatarsiens, voûte crânienne, os propres du nez",
+  "Métatarsiens":"Métatarsiens, voûte crânienne, os propres du nez",
+  "Corps vertébraux dorso-lombaires":"Corps vertébraux (à partir de la charnière thoraco-lombaire)",
+  "Phalanges moyennes des mains sauf 5D":"Phalanges moyennes des mains (sauf 5e doigt)",
+  "Phalange moyenne 5ème doigt":"Phalange moyenne du 5e doigt",
+  "Phalange proximale des orteils":"Phalanges proximales des orteils",
+  "Ischion":"Ischions", "Corps vertébral axis":"Base du corps vertébral de C2 (axis)",
+  "Branche pubienne":"Branches pubiennes (inconstantes)", "Incisive supérieure":"Incisives supérieures",
+  "Odontoïde":"Apophyse odontoïde", "Canal semi-circulaire":"Canaux semi-circulaires supérieurs",
+  "Canine inférieure":"Canines inférieures", "Incisive inférieure":"Incisives inférieures",
+  "1ère molaire inf":"Pointes de la 1ère molaire inférieure",
+  "Epiphyse fémorale inférieure":"Point fémoral inférieur (de Béclard)",
+  "2ème molaire":"Pointes de la 2e molaire inférieure",
+  "Epiphyse tibiale supérieure":"Point tibial supérieur (de Todt)",
+  "Humérus supérieur":"Point huméral supérieur"
+};
+const pointsIdentiques = new Set(["Petites ailes du sphénoïde", "Calcanéum", "Talus",
+                                 "Premier aileron sacré", "Deuxième aileron sacré", "Cuboïde"]);
+const sansAutre = new Set([16, 76, 103, 114, 117, 118, 119, 120, 121,
+  ...Array.from({length:27}, (_,i)=>135+i), 162,163,164,165,166,167,168,
+  175,176,177,178,179,180,182,183,184,185,186,187,188,189,196,197]);
+const commentaires = new Set([8,9,10,13,14,15,16,18,20,21,23,74,75,76,102,103,104,
+  114,116,117,118,119,120,121,135,136,137,138,139,140,141,142,
+  ...Array.from({length:25}, (_,i)=>144+i), ...Array.from({length:15}, (_,i)=>175+i),
+  195,196,197,198, ...Array.from({length:11}, (_,i)=>211+i)]);
+const enLigne = new Set([8,10,11,13,14,15,16,119,121,136,145]);
+const groupesFusion = [
+  ["Reins", [153,154]], ["Infarctus", [199,200,201,202]], ["Thrombose sous-choriale", [203,204,205]],
+  ["Hématome décidual basal", [206,207]], ["Kyste trophoblastique", [208,209]]
+];
+const titresLocaux = {5:"DDR — Date des dernières règles",9:"Antécédents maternels",18:"Antécédents maternels",
+  23:"Commentaires — Antécédents paternels", 133:"Aspect général", 153:"Rangées de glomérules", 154:"Constatations rénales",
+  169:"Poids de l’encéphale après fixation (g)", 181:"Prélèvements effectués et nombre de blocs",
+  199:"Nombre",200:"Pourcentage de la galette placentaire (%)",201:"Taille minimale (cm)",202:"Taille maximale (cm)",
+  203:"Nombre",204:"Taille maximale (cm)",205:"Épaisseur maximale (cm)",
+  206:"Taille maximale (cm)",207:"Épaisseur maximale (cm)",208:"Nombre",209:"Taille maximale (cm)",
+  210:"Thrombose intervilleuse"};
+function estNumerique(n) {
+  return (n >= 77 && n <= 101) || (n >= 122 && n <= 132) ||
+    (n >= 169 && n <= 174) || (n >= 190 && n <= 194) || (n >= 199 && n <= 209) || [134,153].includes(n);
+}
+function textePDF(i) {
+  return (i.source?.lignes_pdf || []).slice(2).map(r => r[2]);
+}
+function paragraphesSource(i, debutApres) {
+  const texte = textePDF(i);
+  const fin = texte.findIndex(l => l === debutApres);
+  return fin < 0 ? "" : texte.slice(0, fin).join(" ");
+}
+function choixTrame(i) {
+  const n = i.numero_pdf;
+  const lignes = () => (i.source?.lignes_pdf || []).slice(2).map(r => r[2]);
+  if (n === 11) return issues.map(([choix]) => choix);
+  if (n === 10) return ["1", "2", "Autre"];
+  if (n === 74) {
+    const [debut, suite, ...constatations] = lignes();
+    return [debut + " " + suite.replace(/ On retrouve :$/, ""), ...constatations.map(l => l.replace(/^- /, ""))];
+  }
+  if (n === 75) return lignes();
+  if (n === 104) {
+    const texte = paragraphesSource(i, "Normal").replace("),.", ").");
+    return texte ? texte.match(/[^.]+\.?/g).map(s => s.trim()).filter(Boolean) : ["Normal"];
+  }
+  if (n >= 105 && n <= 113) {
+    const conserver = /^(Normal(?:e|es|s|aux)?(?:,.*)?|Choanes perméables|Conduits auditifs externes perméables)$/i;
+    return i.choix.filter(c => conserver.test(c));
+  }
+  if ([114,118,120].includes(n)) {
+    const texte = paragraphesSource(i, {114:"Normal",118:"Normaux",120:"Anomalie de longueur"}[n]);
+    return texte ? [texte.replace(/normale\.Il/g, "normale. Il")] : [];
+  }
+  if (n === 116) return [];
+  if (n === 119 || n === 121) return ["Normaux"];
+  if (n === 136) return ["Aspect normal"];
+  if (n === 140) return ["Les poumons sont bien lobulés. Le rapport poids pulmonaire total / poids fœtal est normal : pas d’hypoplasie pulmonaire."];
+  if (n === 145) return ["Sans anomalie"];
+  if (n === 154) return ["Architecture normale", "Blastème métanéphrogène présent et continu",
+                         "Tubules bien différenciés", "Pas de kyste", "Pas de cylindre", "Pas de dysplasie"];
+  if (n === 205) return [];
+  return i.choix.filter(c => !(sansAutre.has(n) && /^autre\s*:?$/i.test(c)) &&
+    !(n === 137 && c === "Anomalies") && !(n === 138 && ["Atrésie","Fistule"].includes(c)) &&
+    !(n === 187 && c === "Option 4") && !(n === 188 && c === "Option 3"));
+}
+function apercuBloc(b, modele, sortie) {
+  const val = n => b.items.some(i => i.numero_pdf === n) ? essais.get("pdf-q" + n) || "" : "";
+  if (!modele) {
+    const marqueurs = [val(36) && "PAPP-A " + val(36).replace(".", ",") + " MoM",
+                       val(37) && "β-hCG " + val(37).replace(".", ",") + " MoM"].filter(Boolean);
+    sortie.textContent = marqueurs.length ? "Marqueurs sériques : " + marqueurs.join(", ") + "." : "Aucune donnée d’essai saisie.";
+    return;
+  }
+  const date = val(modele.debut).split("-").reverse().join("/");
+  const sa = val(modele.debut + 2);
+  const jours = val(modele.debut + 3);
+  const terme = [sa && sa + " SA", jours && jours + " j"].filter(Boolean).join(" + ");
+  const medecin = String(essais.get("echo-" + modele.id + "-medecin") || "").trim();
+  const contexte = [[date, terme].filter(Boolean).join(" · "), medecin].filter(Boolean).join(", ");
+  const titre = modele.titre + (contexte ? " (" + contexte + ")" : "");
+  const mesures = ["LCC", "BIP", "LF", "DAT", "CN"].map((nom, index) => {
+    const mesure = val(modele.debut + 4 + index);
+    return mesure ? nom + " " + mesure.replace(".", ",") + " mm" : "";
+  }).filter(Boolean);
+  const complement = (offset, nom) => {
+    const n = modele.debut + offset;
+    const item = b.items.find(i => i.numero_pdf === n);
+    if (!item) return "";
+    const index = val(n);
+    const choix = index === "" ? "" : item.choix[Number(index)];
+    const commentaire = (essais.get(item.id + "-libre") || "").trim();
+    const contenu = [choix, commentaire].filter(Boolean).join(" — ");
+    return contenu ? nom + " : " + contenu : "";
+  };
+  const details = [mesures.join(", "), complement(9, "Liquide amniotique"),
+                   complement(10, "Conclusion"), complement(11, "Anomalies")].filter(Boolean).join(". ");
+  sortie.textContent = contexte || details ? titre + (details ? " : " + details : ".") : "Aucune donnée d’essai saisie.";
+}
+function creer(type, texte) {
+  const n = document.createElement(type);
+  n.textContent = texte ?? "";
+  return n;
+}
+function retirer(texte, action) {
+  const b = creer("button", texte);
+  b.type = "button";
+  b.onclick = action;
+  return b;
+}
+function texteLibre(parent, libelle, cle, maj, enLigne = false) {
+  const label = creer("label", libelle);
+  label.className = "commentaire";
+  if (enLigne) label.classList.add("commentaire-court");
+  const libre = creer("textarea");
+  libre.rows = 2;
+  libre.value = essais.get(cle) || "";
+  libre.oninput = () => { essais.set(cle, libre.value); maj(); };
+  label.append(libre);
+  parent.append(label);
+}
+function ligneCases(parent, titre, options, cle) {
+  const ligne = creer("div");
+  ligne.className = "ligne-cases";
+  ligne.setAttribute("role", "group");
+  ligne.setAttribute("aria-label", titre);
+  ligne.append(creer("strong", titre));
+  for (const option of options) {
+    const etiquette = creer("label");
+    etiquette.className = "case-reponse";
+    const entree = creer("input");
+    entree.type = "checkbox";
+    entree.checked = essais.get(cle) === option;
+    entree.onchange = () => {
+      if (entree.checked)
+        ligne.querySelectorAll("input").forEach(c => { if (c !== entree) c.checked = false; });
+      essais.set(cle, entree.checked ? option : "");
+    };
+    etiquette.append(entree, option);
+    ligne.append(etiquette);
+  }
+  parent.append(ligne);
+}
+async function api(corps) {
+  const r = await fetch("/api/trame-normale", corps ? {
+    method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corps)
+  } : {});
+  const doc = await r.json();
+  if (!r.ok) throw new Error(doc.erreur);
+  return doc;
+}
+function afficherReponses(item, i, mode, maj, liquide) {
+  const n = i.numero_pdf;
+  const question = i.source?.questionItem?.question;
+  const type = question?.choiceQuestion?.type;
+  const tout = [104, 141, 142].includes(n);
+  const multiple = tout || (n >= 212 && n <= 220) || n === 154 ||
+    type === "CHECKBOX" || i.source?.mode_pdf?.startsWith("Plusieurs réponses") || [74, 75].includes(n);
+  const deroulant = i.numero_pdf !== 11 && (type === "DROP_DOWN" || i.source?.menu_deroulant);
+  const choixVisibles = choixTrame(i);
+  const courant = essais.get(i.id) ?? (multiple ? new Set() : "");
+  const groupe = creer("div");
+  groupe.className = "reponses";
+  if (i.numero_pdf === 8) {
+    const compact = creer("div");
+    compact.className = "compact";
+    for (const titre of ["G", "P"]) {
+      const label = creer("label", titre);
+      const entree = creer("input");
+      entree.type = "number"; entree.min = "0"; entree.step = "1";
+      const cle = i.id + "-" + titre;
+      entree.value = essais.get(cle) || "";
+      entree.oninput = () => essais.set(cle, entree.value);
+      label.append(entree); compact.append(label);
+    }
+    groupe.append(compact);
+  } else if (i.numero_pdf === 9 || i.numero_pdf === 18) {
+    const premier = i.numero_pdf === 9;
+    const antecedents = premier ? ["HTA", "Diabète"] : ["Thrombophilie", "Pathologie thyroïdienne", "SAPL", "Néphropathie"];
+    const reponses = premier ? ["Non", "Préexistant", "Gestationnel"] : ["Oui", "Non"];
+    for (const antecedent of antecedents) ligneCases(groupe, antecedent, reponses, i.id + "-" + antecedent);
+  } else if (i.numero_pdf === 20) {
+    for (const infection of ["Toxoplasmose", "Rubéole", "CMV", "Syphilis"]) {
+      const bloc = creer("div");
+      bloc.className = "ligne-serologie";
+      bloc.setAttribute("role", "group");
+      bloc.setAttribute("aria-label", infection);
+      bloc.append(creer("strong", infection));
+      for (const test of infection === "Syphilis" ? ["VDRL", "TPHA"] : ["IgM", "IgG"])
+        ligneCases(bloc, test, ["+", "−"], i.id + "-" + infection + "-" + test);
+      groupe.append(bloc);
+    }
+    for (const infection of ["Hépatite B", "Hépatite C"])
+      texteLibre(groupe, infection, i.id + "-" + infection, maj, true);
+  } else if (n === 102 || n === 133) {
+    for (const constat of n === 102 ? ["Macération", "Œdèmes", "Trophicité", "Artéfact/délabrement"]
+      : ["Autolyse", "Congestion", "Ascite", "Pleurésie"])
+      ligneCases(groupe, constat, ["0", "+", "++", "+++"], i.id + "-" + constat);
+  } else if (n === 181 || n === 210) {
+    const champs = n === 181
+      ? ["Mésencéphale", "Vermis sagittal", "Cervelet transversal", "Pont", "Bulbe transversal",
+         "Œil droit", "Œil gauche", "Hypophyse", "Moelle épinière cervicale", "Moelle épinière dorsale",
+         "Moelle épinière lombaire", "Nombre de blocs"]
+      : ["Nombre", "Taille maximale (cm)"];
+    const cadre = creer("div");
+    cadre.className = "compact";
+    for (const titre of champs) {
+      const label = creer("label", titre);
+      const input = creer("input");
+      input.type = "number"; input.min = "0"; input.step = titre.startsWith("Taille") ? "0.01" : "1";
+      const cle = i.id + "-" + titre;
+      input.value = essais.get(cle) || "";
+      input.oninput = () => essais.set(cle, input.value);
+      label.append(input);
+      cadre.append(label);
+    }
+    groupe.append(cadre);
+  } else if (deroulant && i.choix.length) {
+    const selecteur = creer("select");
+    selecteur.setAttribute("aria-label", i.titre || "Réponse");
+    const vide = creer("option", "Choisir une réponse");
+    vide.value = "";
+    selecteur.append(vide);
+    i.choix.forEach((choix, index) => {
+      const option = creer("option", choix);
+      option.value = String(index);
+      selecteur.append(option);
+    });
+    selecteur.value = courant;
+    selecteur.onchange = () => essais.set(i.id, selecteur.value);
+    groupe.append(selecteur);
+  } else if (choixVisibles.length) {
+    let caseToutes;
+    const cases = [];
+    if (tout) {
+      const label = creer("label");
+      label.className = "case-reponse choix-long normal-long";
+      caseToutes = creer("input");
+      caseToutes.type = "checkbox";
+      caseToutes.setAttribute("aria-label", "Tout cocher — " + i.titre);
+      label.append(caseToutes, creer("span", choixVisibles.map(t => t.replace(/[.,;\s]+$/, "") + ".").join(" ")));
+      groupe.append(label);
+    }
+    choixVisibles.forEach((choix, index) => {
+      if ((liquide || [16, 76, 103].includes(i.numero_pdf)) && /^Autre\s*:/i.test(choix)) return;
+      const label = creer("label");
+      label.className = "case-reponse";
+      if ([74, 76, 104, 114, 118, 120, 135, 140].includes(n)) label.classList.add("choix-long");
+      const input = creer("input");
+      input.type = "checkbox";
+      input.name = "essai-" + i.id;
+      input.value = String(index);
+      input.checked = multiple ? courant.has(input.value) : courant === input.value;
+      cases.push(input);
+      input.onchange = () => {
+        if (multiple) {
+          if (input.checked) courant.add(input.value);
+          else courant.delete(input.value);
+          essais.set(i.id, courant);
+        } else {
+          if (input.checked) {
+            groupe.querySelectorAll('input[type=checkbox]').forEach(c => {
+              if (c !== input) c.checked = false;
+            });
+          }
+          essais.set(i.id, input.checked ? input.value : "");
+        }
+        apercuIssue();
+        maj();
+        if (caseToutes) {
+          caseToutes.checked = cases.every(c => c.checked);
+          caseToutes.indeterminate = !caseToutes.checked && cases.some(c => c.checked);
+        }
+      };
+      const libelle = creer("span", choix);
+      if (n === 75) {
+        label.title = pointsRadio[choix] || (pointsIdentiques.has(choix) ? choix : "Pas d’équivalent direct identifié dans Radio.");
+      }
+      label.append(input, libelle);
+      groupe.append(label);
+    });
+    if (caseToutes) {
+      caseToutes.checked = cases.every(c => c.checked);
+      caseToutes.indeterminate = !caseToutes.checked && cases.some(c => c.checked);
+      caseToutes.onchange = () => {
+        courant.clear();
+        for (const c of cases) {
+          c.checked = caseToutes.checked;
+          if (c.checked) courant.add(c.value);
+        }
+        essais.set(i.id, courant);
+      };
+    }
+  } else if (i.numero_pdf === 12 || (mode && mode !== "commentaire")) {
+    const input = creer("input");
+    input.type = mode === "date" ? "date" : "number";
+    if (input.type === "number") {
+      input.min = "0";
+      input.step = "1";
+      if (mode === "jours") input.max = "6";
+      if (mode === "decimal") input.step = "0.01";
+    }
+    input.setAttribute("aria-label", i.titre);
+    input.value = courant;
+    input.oninput = () => { essais.set(i.id, input.value); maj(); apercuIssue(); };
+    groupe.append(input);
+  }
+  if (commentaires.has(n) || liquide || mode === "commentaire")
+    texteLibre(groupe, i.numero_pdf === 20 ? "Commentaires :" : "Commentaire", i.id + "-libre", maj);
+  if (i.numero_pdf === 19) texteLibre(groupe, "Traitement — texte libre", i.id + "-libre", maj);
+  if (groupe.childElementCount) item.append(groupe);
+}
+function afficher() {
+  el("importation").hidden = Boolean(trame.revision);
+  el("sauver").hidden = !trame.revision;
+  el("sauverHaut").hidden = !trame.revision;
+  el("blocs").replaceChildren();
+  if (trame.source_pdf)
+    el("blocs").append(creer("p", "Brouillon transcrit du PDF. Le détail des grilles et les renvois imprimés sont consultables dans les données source."));
+  if (trame.revision)
+    el("blocs").append(creer("p", "Les retraits d’items et de blocs sont enregistrés automatiquement. Les réponses cochées servent à essayer le formulaire."));
+  if (trame.embranchements)
+    el("blocs").append(creer("p", "Embranchements importés. La mise en service attend leur raccordement."));
+  for (const b of trame.blocs) {
+    const bloc = creer("section");
+    bloc.dataset.bloc = b.id;
+    bloc.append(creer("h2", b.titre), retirer("Retirer le bloc", () => {
+      bloc.remove();
+      sauverTrame(b.titre);
+    }));
+    const echo = echos.get(b.id);
+    const marqueurs = b.id === "pdf-section-38";
+    const groupe = echo || marqueurs;
+    const conteneursFusion = new Map();
+    const apercu = creer("output");
+    const maj = () => { if (groupe) apercuBloc(b, echo, apercu); };
+    if (groupe) {
+      bloc.append(creer("p", echo ? "Phrase du bloc : " + echo.titre + " (date · SA + jours, médecin)." : "Phrase du bloc : Marqueurs sériques."));
+      if (echo) {
+        const label = creer("label", "Nom du médecin — " + echo.titre);
+        const medecin = creer("input");
+        medecin.type = "text";
+        const cle = "echo-" + echo.id + "-medecin";
+        medecin.value = essais.get(cle) || "";
+        medecin.oninput = () => { essais.set(cle, medecin.value); maj(); };
+        label.append(medecin);
+        bloc.append(label);
+      }
+      apercu.id = echo ? "apercu-echo-" + echo.id : "apercu-marqueurs";
+      bloc.append(apercu);
+      maj();
+    }
+    for (const i of b.items) {
+      if (i.numero_pdf === 143) continue;
+      const rang = echo ? i.numero_pdf - echo.debut : null;
+      const mode = i.numero_pdf === 5 ? "date" : [6, 22].includes(i.numero_pdf) ? "number"
+        : i.numero_pdf === 7 ? "jours" : i.numero_pdf === 17 ? "decimal"
+        : echo ? ({0:"date", 1:"date", 2:"number", 3:"jours", 4:"decimal", 5:"decimal",
+                   6:"decimal", 7:"decimal", 8:"decimal", 10:"commentaire", 11:"commentaire"})[rang]
+        : [153,199,203,208].includes(i.numero_pdf) ? "number"
+        : marqueurs || estNumerique(i.numero_pdf) ? "decimal" : undefined;
+      const simple = i.numero_pdf === 12 || ["date", "number", "jours", "decimal"].includes(mode);
+      const inline = simple || enLigne.has(i.numero_pdf) || rang === 9;
+      const item = creer(inline ? "div" : "fieldset");
+      item.dataset.item = i.id;
+      const titre = [i.numero_pdf, titresLocaux[i.numero_pdf] || i.titre].filter(Boolean).join(" · ") || "Question sans titre";
+      if (inline) {
+        item.className = "mesure";
+        const ligne = creer("div");
+        ligne.className = "mesure-ligne";
+        const libelle = creer(simple ? "label" : "strong", titre);
+        afficherReponses(ligne, i, mode, maj, rang === 9);
+        const reponse = simple ? ligne.querySelector("input") : null;
+        if (reponse) {
+          reponse.id = "reponse-" + i.id;
+          reponse.removeAttribute("aria-label");
+          libelle.htmlFor = reponse.id;
+        }
+        ligne.prepend(libelle);
+        item.append(ligne);
+        ligne.querySelectorAll(".commentaire").forEach(c => item.append(c));
+      } else {
+        item.append(creer("legend", titre));
+        afficherReponses(item, i, mode, maj, rang === 9);
+      }
+      if (i.numero_pdf === 11) {
+        const sortie = creer("output");
+        sortie.id = "apercu-issue";
+        item.append(sortie);
+      }
+      const details = creer("details");
+      details.append(creer("summary", "Réglages techniques et source"),
+        creer("p", "Réservé au raccordement avec les champs Monolithe. Tu peux laisser ces réglages tels quels pour le tri."),
+        creer("pre", JSON.stringify(i.source, null, 2)));
+      item.append(details);
+      for (const [cle, label] of [["cible", "Identifiant du champ Monolithe dans Examen clinique"], ["phrase", "Phrase médicale validée"]]) {
+        const etiquette = creer("label", label);
+        const input = creer("input");
+        input.type = "text";
+        input.name = cle;
+        input.value = i[cle];
+        etiquette.append(input);
+        etiquette.hidden = Boolean(groupe) || i.numero_pdf === 11;
+        details.append(etiquette);
+      }
+      item.append(retirer("Retirer l’item", () => {
+        item.remove();
+        essais.delete(i.id);
+        maj();
+        apercuIssue();
+        sauverTrame(i.titre || "Question " + i.numero_pdf);
+      }));
+      const fusion = groupesFusion.find(([, numeros]) => numeros.includes(i.numero_pdf));
+      if (fusion) {
+        const [titreFusion] = fusion;
+        if (!conteneursFusion.has(titreFusion)) {
+          const cadre = creer("fieldset");
+          cadre.className = "bloc-fusion";
+          cadre.append(creer("legend", titreFusion));
+          bloc.append(cadre);
+          conteneursFusion.set(titreFusion, cadre);
+        }
+        conteneursFusion.get(titreFusion).append(item);
+        if (i.numero_pdf === 206 && !b.items.some(q => q.numero_pdf === 207)) {
+          const ligne = creer("div");
+          ligne.className = "mesure-ligne";
+          const etiquette = creer("label", "Épaisseur maximale (cm)");
+          afficherReponses(ligne, {id:"pdf-q206-epaisseur", titre:"Épaisseur maximale (cm)", choix:[]}, "decimal", maj, false);
+          const entree = ligne.querySelector("input");
+          entree.id = "reponse-pdf-q206-epaisseur";
+          entree.removeAttribute("aria-label");
+          etiquette.htmlFor = entree.id;
+          ligne.prepend(etiquette);
+          item.append(ligne);
+        }
+      } else {
+        bloc.append(item);
+      }
+    }
+    el("blocs").append(bloc);
+  }
+  apercuIssue();
+}
+async function executer(action, retrait, initialisation = false) {
+  if (enCours) return;
+  enCours = true;
+  const controles = [...document.querySelectorAll("button, input[name=cible], input[name=phrase]")].filter(c => !c.disabled);
+  controles.forEach(c => { c.disabled = true; });
+  el("etat").textContent = "Enregistrement en cours…";
+  try {
+    trame = await action();
+    aEnregistrer = false;
+    if (initialisation) afficher();
+    el("etat").textContent = retrait
+      ? "Retrait enregistré — " + retrait + " (révision " + trame.revision + ")."
+      : "Trame enregistrée (révision " + trame.revision + ").";
+  } catch (e) {
+    el("etat").textContent = "Modification non enregistrée. " + e.message;
+  } finally {
+    enCours = false;
+    controles.forEach(c => { c.disabled = false; });
+  }
+}
+el("importation").onsubmit = event => {
+  event.preventDefault();
+  executer(async () => api({revision:trame.revision, source:JSON.parse(await el("source").files[0].text())}), null, true);
+};
+function sauverTrame(retrait) {
+  aEnregistrer = true;
+  executer(() => api({
+    revision:trame.revision,
+    blocs:Array.from(document.querySelectorAll("#blocs > [data-bloc]"), b => b.dataset.bloc),
+    items:Object.fromEntries(Array.from(document.querySelectorAll("#blocs > [data-bloc] [data-item]"), i => [i.dataset.item, {
+      cible:i.querySelector("[name=cible]").value.trim(),
+      phrase:i.querySelector("[name=phrase]").value.trim()
+    }]))
+  }), retrait);
+}
+el("sauver").onclick = el("sauverHaut").onclick = () => sauverTrame();
+el("blocs").addEventListener("input", e => {
+  if (e.target.matches("input[name=cible], input[name=phrase]")) aEnregistrer = true;
+});
+window.addEventListener("beforeunload", e => {
+  if (aEnregistrer || enCours) { e.preventDefault(); e.returnValue = ""; }
+});
+api().then(doc => { trame = doc; afficher(); }).catch(e => { el("etat").textContent = e.message; });
+</script>
+</html>

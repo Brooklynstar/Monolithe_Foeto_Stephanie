@@ -1,5 +1,5 @@
 {# titre: Synthèse — une page #}
-{# version: 1.4.0 #}
+{# version: 1.5.0 #}
 {#
    De quoi parler d'un dossier en réunion : ce qui a été fait, ce qui manque,
    ce qui sort de la norme. Rien de rédigé, tout en listes.
@@ -92,12 +92,9 @@ CHIFFRES
 Produit le {{ genere_at | dtc }}. Brouillon, à relire.
 
 {% if placenta_formulaire %}
-PLACENTA — FORMULAIRE STRUCTURÉ
-{% for section in placenta_formulaire.sections %}
-  {{ section.titre }}
-{% for champ in section.champs %}
-    {{ champ.label }} : {{ champ.valeur }}
-{% endfor %}
-{% endfor %}
-  {{ placenta_formulaire.percentiles.position_percentile or placenta_formulaire.percentiles.motif }}
+{% include 'placenta_section.inc' %}
+{% endif %}
+
+{% if placenta_gemellaire %}
+{% include 'placenta_gemellaire_section.inc' %}
 {% endif %}

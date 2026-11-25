@@ -39,6 +39,14 @@ section.off input,section.off select,section.off textarea,section.off button{poi
 .row{display:flex;flex-wrap:wrap;gap:10px}
 .field{flex:1 1 180px;min-width:0}
 .field.wide{flex:1 1 100%}
+.echo{margin:0 0 14px;padding:10px;border:1px solid var(--rule);min-width:0}
+.echo legend{color:var(--drape);font-weight:600;padding:0 5px}
+.echo .field.echo-nombre{flex:0 1 125px;display:flex;align-items:center;gap:6px}
+.echo .field.echo-nombre label{margin-bottom:0}
+.echo .echo-nombre input{min-width:0;width:5.2em;padding-inline:6px}
+.echo .echo-choix{flex-basis:100%}
+.echo .chk[aria-pressed=true]{border-color:var(--drape);color:var(--drape);background:var(--drape-soft)}
+.echo .chk[aria-pressed=false]:hover{border-color:var(--drape)}
 label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
       text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px}
 input[type=text],input[type=number],select,textarea{
@@ -253,9 +261,10 @@ function fmtSA(s){
    et restent purement locales : à null, jamais forcées dans un code voisin. */
 var ISSUES = [
   ["IVG",               "IVG"],
-  ["FCS",               "FCS"],
+  ["FCS",               "Avortement spontané"],
+  ["FCT",               "Fausse couche tardive"],
   ["IMG",               "IMG"],
-  ["MFIU",              "MFIU"],
+  ["MFIU",              "Mort fœtale"],
   ["GEU",               "GEU"],
   ["ISG",               "ISG — interruption sélective"],
   ["MPN",               "Mort per-natale"],
@@ -263,6 +272,7 @@ var ISSUES = [
   ["NAISSANCE_VIVANTE", "Naissance vivante"],
   ["AUTRE",             "Autre"]
 ];
+var MODES_INTERRUPTION = [["MFIU","MF"],["IMG","IMG"],["FCS","Avortement spontané"],["FCT","Fausse couche tardive"]];
 var BAM_ISSUE = {
   IMG:               { birth:false, termination_type:"IMG", stp_type:null },
   ISG:               { birth:false, termination_type:"ISG", stp_type:null },
@@ -289,6 +299,33 @@ var TYPES_EVT = [
 
 /* ── Trame de saisie ──────────────────────────────────────────────────────────
    t : text | num | dat | sel | txt | chks.  w : champ pleine largeur.        */
+const ECHOGRAPHIES = [
+  ["t1", "Échographie T1"], ["t2", "Échographie T2"],
+  ["t3", "Échographie T3"], ["sup1", "Échographie complémentaire"]
+];
+const CHAMPS_T1_HISTORIQUES = ["lcc", "cn", "pappa", "bhcg"];
+function champsEcho(cle){
+  const prefixe = "echo_" + cle;
+  return [
+    { k:prefixe+"_date", l:"Date", t:"dat" },
+    { k:prefixe+"_ddg", l:"DDG", t:"dat" },
+    { k:prefixe+"_sa", l:"Terme (SA)", t:"num", min:0, max:45 },
+    { k:prefixe+"_jours", l:"Jours", t:"num", min:0, max:6 },
+    { k:prefixe+"_medecin", l:"Nom du médecin" },
+    ...(cle === "t1" ? ["BIP", "LF", "DAT"] : ["LCC", "BIP", "LF", "DAT", "CN"]).map(m => ({
+      k:prefixe+"_"+m.toLowerCase(), l:m+" (mm)", t:"num", min:0, step:"any", compact:true
+    })),
+    { k:prefixe+"_liquide", l:"Liquide amniotique", t:"sel", cadre:true,
+      o:[["NORMAL","Quantité normale"],["HYDRAMNIOS","Hydramnios"],["OLIGOAMNIOS","Oligoamnios"]] },
+    { k:prefixe+"_liquide_commentaire", l:"Commentaire — Liquide amniotique", t:"txt", w:true },
+    { k:prefixe, l:"Conclusion", t:"sel", cadre:true, o:[
+      ["GROSSESSE_MONO_EVOLUTIVE","Grossesse intra-utérine monofœtale normalement évolutive"],
+      ["ANOMALIE","Présence d’anomalie(s)"], ...ECHO.filter(([code]) => code !== "ANOMALIE")
+    ]},
+    { k:prefixe+"_commentaire", l:"Commentaire — Conclusion", t:"txt", w:true },
+    { k:prefixe+"_details", l:"Conclusion anomalies — texte libre", t:"txt", w:true }
+  ];
+}
 var TRAME = [
   { id:"identite", titre:"Identité", champs:[
     { k:"nom_mere",       l:"Nom utilisé — mère",    t:"text" },
@@ -330,9 +367,11 @@ var TRAME = [
   { id:"atcd_mat", titre:"Antécédents maternels", champs:[
     { k:"profession_mere",l:"Profession",            t:"text" },
     { k:"groupe_sanguin", l:"Groupe sanguin",        t:"sel", o:[["A","A"],["B","B"],["AB","AB"],["O","O"]] },
+    { k:"groupe_sanguin_detail", l:"Groupe sanguin — texte libre", t:"txt", w:true },
     { k:"rhesus",         l:"Rhésus",                t:"sel", o:[["POS","Positif"],["NEG","Négatif"]] },
     { k:"consanguinite",  l:"Consanguinité",         t:"sel", o:OUINON,
       hint:"Trois états : « Non » et « Inconnu » ne se valent pas." },
+    { k:"consanguinite_detail", l:"Consanguinité — texte libre", t:"txt", w:true },
     { k:"fdr",            l:"Facteurs de risque",    t:"chks", w:true, o:[
         ["hta","HTA"],["diabete","Diabète"],["tabac","Tabac"],["alcool","Alcool"]
     ]},
@@ -341,6 +380,8 @@ var TRAME = [
   ]},
 
   { id:"atcd_obs", titre:"Grossesses précédentes", rep:true, champs:[
+    { k:"fcs", l:"Antécédents FCS", t:"sel", o:[["1","1"],["2","2"],["autre","Autre"]] },
+    { k:"fcs_detail", l:"Antécédents FCS — texte libre", t:"txt", w:true },
     { k:"gestite",        l:"Gestité",               t:"num", min:1, max:25,
       hint:"Grossesses au total, celle-ci comprise." },
     { k:"parite",         l:"Parité",                t:"num", min:0, max:25,
@@ -368,12 +409,7 @@ var TRAME = [
   ]},
 
   { id:"prenatal", titre:"Examens prénataux", champs:[
-    { k:"echo_t1",         l:"Échographie T1",        t:"sel", o:ECHO },
-    { k:"echo_t1_details", l:"Détail T1",             t:"txt", w:true },
-    { k:"echo_t2",         l:"Échographie T2",        t:"sel", o:ECHO },
-    { k:"echo_t2_details", l:"Détail T2",             t:"txt", w:true },
-    { k:"echo_t3",         l:"Échographie T3",        t:"sel", o:ECHO },
-    { k:"echo_t3_details", l:"Détail T3",             t:"txt", w:true },
+    ...ECHOGRAPHIES.flatMap(([cle]) => champsEcho(cle)),
     { k:"autres_examens",  l:"Autres examens (caryotype, ACPA, sérologies…)", t:"txt", w:true }
   ]}
 ];
@@ -502,6 +538,23 @@ function champHTML(c, pre){
     h = '<select id="' + id + '"><option value="">—</option>' + c.o.map(function(p){
       return '<option value="' + esc(p[0]) + '">' + esc(p[1]) + '</option>';
     }).join("") + '</select>';
+    if (c.cadre){
+      h = h.replace("<select ", "<select hidden ") + '<div class="chks">' + c.o.map(([code, libelle]) =>
+        '<button type="button" class="chk" data-echo-select="' + id + '" data-choix="' + esc(code) +
+        '" aria-pressed="false">' + esc(libelle) + '</button>'
+      ).join("") + '</div>';
+    }
+    if (c.k === "type_issue") {
+      function cases(options){
+        return '<div class="chks">' + options.map(function(p){
+          return '<label class="chk"><input type="checkbox" data-mode-interruption="' + esc(p[0]) + '">'
+            + esc(p[1]) + '</label>';
+        }).join("") + '</div>';
+      }
+      var autres = c.o.filter(function(p){ return !MODES_INTERRUPTION.some(function(m){ return m[0] === p[0]; }); });
+      h = h.replace("<select ", "<select hidden ") + cases(MODES_INTERRUPTION)
+        + '<details id="autresIssues"><summary>Autres issues</summary>' + cases(autres) + '</details>';
+    }
   } else if (c.t === "txt"){
     h = '<textarea id="' + id + '" placeholder="—"></textarea>';
   } else if (c.t === "num"){
@@ -517,20 +570,37 @@ function champHTML(c, pre){
     h = '<input type="text" id="' + id + '" autocomplete="off"'
       + (c.mono ? ' class="mono" spellcheck="false"' : "") + ' placeholder="—">';
   }
-  return '<div class="field' + (c.w ? " wide" : "") + '">'
+  return '<div class="field' + (c.w ? " wide" : "") + (c.compact ? " echo-nombre" : "") +
+       (c.cadre ? " echo-choix" : "") + '">'
        + '<label for="' + id + '">' + esc(c.l) + '</label>' + h
        + (c.hint ? '<div class="hint">' + esc(c.hint) + '</div>' : "")
        + '</div>';
 }
+function champsPrenataux(g){
+  const grossesse = TRAME.find(g => g.id === "grossesse").champs;
+  const historique = cle => ({...grossesse.find(c => c.k === cle), compact:true});
+  return ECHOGRAPHIES.map(([cle, titre]) => {
+    const prefixe = "echo_" + cle;
+    const champs = g.champs.filter(c => c.k === prefixe || c.k.startsWith(prefixe + "_"));
+    if (cle === "t1"){
+      champs.splice(5, 0, historique("lcc"));
+      champs.splice(9, 0, historique("cn"));
+      champs.push(historique("pappa"), historique("bhcg"));
+    }
+    return '<fieldset class="echo" id="bloc_echo_' + cle + '"><legend>' + esc(titre) +
+      '</legend><div class="row">' + champs.map(c => champHTML(c, "f_")).join("") + '</div></fieldset>';
+  }).join("") + '<div class="row">' + champHTML(g.champs.find(c => c.k === "autres_examens"), "f_") + '</div>';
+}
+
 (function batir(){
   var h = "", n = 2;
   TRAME.forEach(function(g){
     h += '<section id="sec_' + g.id + '" class="off">'
        +   '<h2><span class="n">' + ("0" + n).slice(-2) + '</span>' + esc(g.titre)
        +     '<span class="tally" id="t_' + g.id + '">—</span></h2>'
-       +   '<div class="row">'
-       +     g.champs.map(function(c){ return champHTML(c, "f_"); }).join("")
-       +   '</div>';
+       + (g.id === "prenatal" ? champsPrenataux(g) : '<div class="row">' +
+           g.champs.filter(c => g.id !== "grossesse" || !CHAMPS_T1_HISTORIQUES.includes(c.k))
+             .map(c => champHTML(c, "f_")).join("") + '</div>');
     if (g.id === "issue")
       h += '<div class="hint" id="issueHint" style="margin-top:10px"></div>';
     if (g.rep){
@@ -692,6 +762,10 @@ function majChrono(){
 /* ── Retour de la traduction BaMaRa à l'écran ─────────────────────────────── */
 function majIssue(){
   var k = val("f_type_issue"), b = BAM_ISSUE[k], h = $("issueHint");
+  document.querySelectorAll("[data-mode-interruption]").forEach(function(c){
+    c.checked = c.dataset.modeInterruption === k;
+  });
+  if (k && !MODES_INTERRUPTION.some(function(m){ return m[0] === k; })) $("autresIssues").open = true;
   if (!k){ h.className = "hint"; h.textContent = "Issue non renseignée."; return; }
   if (!b){
     h.className = "hint warn";
@@ -714,7 +788,19 @@ function majDat(e){
 }
 
 /* ── Compteurs de remplissage ─────────────────────────────────────────────── */
+document.addEventListener("click", function(e){
+  const bouton = e.target.closest("[data-echo-select]");
+  if (!bouton || bouton.closest("section").classList.contains("off")) return;
+  const selecteur = $(bouton.dataset.echoSelect);
+  selecteur.value = selecteur.value === bouton.dataset.choix ? "" : bouton.dataset.choix;
+  recompter();
+  enregistrer();
+});
+
 function recompter(){
+  document.querySelectorAll("[data-echo-select]").forEach(b => {
+    b.setAttribute("aria-pressed", String(val(b.dataset.echoSelect) === b.dataset.choix));
+  });
   TRAME.forEach(function(g){
     if (g.rep) return;
     var faits = g.champs.filter(function(c){
@@ -777,6 +863,7 @@ function appliquer(o){
         c.o.forEach(function(p){ $("f_" + c.k + "_" + p[0]).checked = !!f[p[0]]; });
       } else {
         var e = $("f_" + c.k), v = bloc[c.k];
+        if (g.id === "prenatal" && c.cadre && v === "ANORMALE") v = "ANOMALIE";
         e.value = v == null ? "" : (c.t === "dat" ? fmtDate(v) : v);
         if (c.t === "dat") majDat(e);
       }
@@ -936,10 +1023,15 @@ async function diagnostic(){
 /* ── Démarrage ────────────────────────────────────────────────────────────── */
 document.addEventListener("input", function(e){
   if (!e.target.closest("#trame")) return;
+  if (e.target.dataset.modeInterruption) return;
   if (e.target.dataset.dat) majDat(e.target);
   recompter(); enregistrer();
 });
 document.addEventListener("change", function(e){
+  if (e.target.dataset.modeInterruption) {
+    $("f_type_issue").value = e.target.checked ? e.target.dataset.modeInterruption : "";
+    majIssue();
+  }
   if (e.target.closest("#trame")){ recompter(); enregistrer(); }
 });
 $("btnAdd").onclick = function(){ ajouterGrossesse(); enregistrer(); };

@@ -123,6 +123,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 .tog button[aria-pressed=true][data-e=normal]{background:var(--drape);color:#fff}
 .tog button[aria-pressed=true][data-e=anormal]{background:var(--alert);color:#fff}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips[hidden],.corps[hidden]{display:none}
 .chip{appearance:none;font-family:var(--sans);font-size:14px;color:var(--ink);
       background:var(--card);border:1px solid var(--rule);border-radius:2px;
       padding:8px 11px;cursor:pointer;min-height:38px}
@@ -6837,12 +6838,15 @@ var sections = [], seq = 0;
 /* ── Construction ─────────────────────────────────────────────────────────── */
 function champHTML(c){
   var h = '<div class="ch" id="ch_wrap_' + c.id + '" data-champ="' + c.id + '">';
+  var commentaire = '<label for="commentaire_' + c.id + '">Commentaire</label>' +
+                    '<textarea id="commentaire_' + c.id + '" rows="2" aria-label="Commentaire — ' +
+                    esc(c.l) + '"></textarea>';
   if (c.t === "bool"){
     return h + '<div class="tete"><div class="lib">' + esc(c.l) + '</div>' +
              '<div class="tog" id="it_' + c.id + '" data-etat="">' +
                '<button type="button" data-e="o" aria-pressed="false">Oui</button>' +
                '<button type="button" data-e="n" aria-pressed="false">Non</button>' +
-             '</div></div></div>';
+             '</div></div>' + commentaire + '</div>';
   }
   if (c.t === "axe"){
     /* Les puces naissent masquées : c'est la recherche ou « afficher la liste »
@@ -6852,7 +6856,12 @@ function champHTML(c){
                '<button type="button" data-e="normal" aria-pressed="false">' + esc(c.n) + '</button>' +
                '<button type="button" data-e="anormal" aria-pressed="false">' + esc(c.a) + '</button>' +
              '</div></div>' +
+           (/^https?:$/.test(location.protocol) ? '<div class="chips" id="norm_' + c.id + '" hidden>'
+             + '<button type="button" class="chip" data-cadre-normal="' + c.id + '" aria-pressed="false">' + esc(c.n)
+             + '</button></div>' : '') +
            '<div class="corps" id="co_' + c.id + '" hidden>' +
+             (/^https?:$/.test(location.protocol) ? '<button type="button" class="chip" data-anomalie-sans-detail="' + c.id
+               + '" aria-pressed="false">Anomalie sans précision</button>' : '') +
              '<div class="cherche">' +
                '<input type="search" id="f_' + c.id + '" data-filtre="' + c.id +
                  '" placeholder="Chercher parmi ' + c.v.length + ' termes — 3 lettres" autocomplete="off">' +
@@ -6867,7 +6876,7 @@ function champHTML(c){
              '</div>' +
              '<input type="text" id="a_' + c.id + '" autocomplete="off" placeholder="Autre — terme absent de la liste">' +
              '<textarea id="t_' + c.id + '" rows="2" placeholder="Quantifier, localiser…"></textarea>' +
-           '</div></div>';
+           '</div>' + commentaire + '</div>';
   }
   h += '<div class="lib">' + esc(c.l) + '</div>';
   if (c.t === "num"){
@@ -6876,7 +6885,7 @@ function champHTML(c){
   } else if (c.t === "txt"){
     h += '<textarea id="t_' + c.id + '" rows="2" placeholder="Précisions…"></textarea>';
   }
-  return h + '</div>';
+  return h + commentaire + '</div>';
 }
 function organeDe(id){ return ETAPES.filter(function(o){ return o.id === id; })[0] || null; }
 /* Le champ d'une section est celui du catalogue, porté à l'identifiant de la
@@ -6965,7 +6974,22 @@ function poserChips(id, vals){
 }
 /* Le corps ne se montre que sur l'anormal, et la liste reste masquée tant
    qu'on n'a pas cherché trois lettres ou demandé à la voir. */
-function majCorps(id){ $("co_" + id).hidden = etatDe(id) !== "anormal"; }
+function majCorps(id){
+  const normal = $("norm_" + id);
+  if (!normal) { $("co_" + id).hidden = etatDe(id) !== "anormal"; return; }
+  const axe = $("it_" + id);
+  normal.hidden = axe.dataset.volet !== "normal";
+  $("co_" + id).hidden = axe.dataset.volet !== "anormal";
+  axe.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.e === axe.dataset.volet)));
+}
+function majEtatAxe(id){
+  const normal = $("norm_" + id);
+  if (!normal) return;
+  const axe = $("it_" + id);
+  const anormal = axe.dataset.anomalie === "1" || chipsDe(id).length ||
+    $("a_" + id).value.trim() || $("t_" + id).value.trim();
+  axe.dataset.etat = anormal ? "anormal" : axe.dataset.normal === "1" ? "normal" : "";
+}
 function majListe(id){
   var b = $("ch_" + id), q = $("f_" + id).value.trim().toLowerCase(), tout = b.dataset.tout === "1";
   Array.prototype.forEach.call(b.children, function(x){
@@ -6976,6 +7000,8 @@ function majListe(id){
 function lire(c){
   switch(c.t){
     case "axe":    return { etat: etatDe(c.id), termes: chipsDe(c.id),
+                            normal_selection: $("norm_" + c.id) ? $("it_" + c.id).dataset.normal === "1" : undefined,
+                            anomalie_sans_detail: $("norm_" + c.id) ? $("it_" + c.id).dataset.anomalie === "1" : undefined,
                             autre: $("a_" + c.id).value.trim() || null,
                             note:  $("t_" + c.id).value.trim() || null };
     case "chips":  return chipsDe(c.id);
@@ -6993,6 +7019,14 @@ function ecrire(c, v){
       poserChips(c.id, v.termes || []);
       $("a_" + c.id).value = v.autre || "";
       $("t_" + c.id).value = v.note || "";
+      if ($("norm_" + c.id)) {
+        const axe = $("it_" + c.id);
+        axe.dataset.volet = v.etat || "";
+        axe.dataset.normal = (v.normal_selection ?? (v.etat === "normal")) ? "1" : "";
+        axe.dataset.anomalie = (v.anomalie_sans_detail ?? (v.etat === "anormal" && !v.termes?.length && !v.autre && !v.note)) ? "1" : "";
+        $("norm_" + c.id).firstElementChild.setAttribute("aria-pressed", String(axe.dataset.normal === "1"));
+        $("co_" + c.id).querySelector("[data-anomalie-sans-detail]").setAttribute("aria-pressed", String(axe.dataset.anomalie === "1"));
+      }
       majCorps(c.id); majListe(c.id);
       break;
     case "chips":  poserChips(c.id, v || []); break;
@@ -7037,10 +7071,27 @@ document.addEventListener("click", function(ev){
   var tog = t.closest(".tog button");
   if (tog){
     var id = tog.parentNode.id.slice(3);
+    if ($("norm_" + id)) {
+      const axe = $("it_" + id);
+      axe.dataset.volet = axe.dataset.volet === tog.dataset.e ? "" : tog.dataset.e;
+      majCorps(id);
+      return;
+    }
     /* un second appui sur l'état actif le retire : le champ redevient non renseigné */
     poserEtat(id, etatDe(id) === tog.dataset.e ? null : tog.dataset.e);
     if ($("co_" + id)) majCorps(id);
     majTallies(); enregistrer();
+    return;
+  }
+  const constat = t.closest("[data-cadre-normal],[data-anomalie-sans-detail]");
+  if (constat) {
+    const id = constat.dataset.cadreNormal || constat.dataset.anomalieSansDetail;
+    const cle = constat.dataset.cadreNormal ? "normal" : "anomalie";
+    const axe = $("it_" + id);
+    const coche = axe.dataset[cle] !== "1";
+    axe.dataset[cle] = coche ? "1" : "";
+    constat.setAttribute("aria-pressed", String(coche));
+    majEtatAxe(id); majTallies(); enregistrer();
     return;
   }
   var chip = t.closest(".chip");
@@ -7051,6 +7102,7 @@ document.addEventListener("click", function(ev){
     }
     chip.setAttribute("aria-pressed", on ? "false" : "true");
     majListe(box.id.slice(3));   /* une puce décochée se referme avec la liste */
+    majEtatAxe(box.id.slice(3));
     majTallies(); enregistrer();
     return;
   }
@@ -7082,6 +7134,7 @@ document.addEventListener("input", function(ev){
   var w = el.closest ? el.closest(".ch") : null;
   if (w){
     var c = champDef(w.dataset.champ);
+    if (c && c.t === "axe") majEtatAxe(c.id);
     majTallies(); enregistrer();
   }
 });
@@ -7236,9 +7289,12 @@ async function retirer(k){
    trame d'étapes de ce document : le regroupement diffère de collectData(). */
 function exportChamp(c){
   var v = lire(c);
-  var o = { id: c.id, label: c.l, type: c.t };
+  var o = { id: c.id, label: c.l, type: c.t,
+            commentaire: $("commentaire_" + c.id).value.trim() || null };
   if (c.t === "axe"){
     o.etat = v.etat; o.termes = v.termes; o.autre = v.autre; o.note = v.note;
+    o.normal_selection = v.normal_selection;
+    o.anomalie_sans_detail = v.anomalie_sans_detail;
   } else if (c.t === "chips") o.valeurs = v;
   else {
     o.valeur = v;
@@ -7280,6 +7336,7 @@ function appliquer(o){
     (e.champs || []).forEach(function(x){
       var c = champDef(x.id);
       if (!c) return;
+      $("commentaire_" + c.id).value = x.commentaire || "";
       if (c.t === "axe") ecrire(c, x);
       else if (c.t === "chips") ecrire(c, x.valeurs);
       else ecrire(c, x.valeur);

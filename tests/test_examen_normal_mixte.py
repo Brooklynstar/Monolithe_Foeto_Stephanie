@@ -1,0 +1,381 @@
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+"""Parcours navigateur de l’examen externe normal et anormal dans une base isolée."""
+import io
+import json
+import os
+from pathlib import Path
+import sys
+from tempfile import TemporaryDirectory
+from threading import Thread
+import unittest
+
+from werkzeug.serving import make_server
+from playwright.sync_api import sync_playwright, expect
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'hub/app'))
+import ingest
+from serveur import creer_app
+
+
+class ExamenNormalMixte(unittest.TestCase):
+    def test_volets_et_compte_rendu(self):
+        with TemporaryDirectory(prefix='monolithe-normal-mixte-') as tmp:
+            base = Path(tmp)
+            ingest.arborescence(base)
+            cx, _ = ingest.ouvrir(base / 'hub.sqlite')
+            try:
+                ingest.migrer(cx, ROOT / 'hub/app/migrations', bavard=False)
+            finally:
+                cx.close()
+            app = creer_app(base, ROOT)
+            source = json.loads((ROOT / 'hub/exemples/trame_normale_google_forms_pdf.json').read_text())
+            with app.test_client() as client:
+                reponse = client.put('/api/trame-normale', json={'revision': 0, 'source': source})
+                self.assertEqual(reponse.status_code, 200, reponse.get_json())
+                original = (ROOT / 'hub/exemples/DEMO_SLO_001.json').read_bytes()
+                reponse = client.post('/api/deposer', data={'fichiers': (io.BytesIO(original), 'DEMO_SLO_001.json')})
+                self.assertEqual(reponse.status_code, 200, reponse.get_json())
+                self.assertEqual(client.post('/api/ingerer').get_json()['ingerees'], 1)
+            serveur = make_server('127.0.0.1', 0, app)
+            thread = Thread(target=serveur.serve_forever, daemon=True)
+            thread.start()
+            try:
+                self.verifier(f'http://127.0.0.1:{serveur.server_port}')
+            finally:
+                serveur.shutdown()
+                thread.join()
+                serveur.server_close()
+
+    def verifier(self, url):
+        with sync_playwright() as p:
+            executable = os.environ.get('MONOLITHE_CHROMIUM')
+            b = p.chromium.launch(**({'executable_path': executable} if executable else {}))
+            for cas in ('NORMAL','ANORMAL','MIXTE'):
+                numero='DEMO-CLINIQUE-'+cas
+                fiche=url+f'/modules/examen_clinique?dossier={numero}&operateur=TEST'
+                page=b.new_page(); page.on('dialog',lambda d:d.accept())
+                page.goto(fiche)
+                page.wait_for_function("ciblesNormales.size > 10 && dossier !== ''")
+                nez=page.locator('#it_nez')
+                normal=nez.get_by_role('button',name='Normal',exact=True)
+                anormal=nez.get_by_role('button',name='Anormal',exact=True)
+                normal.click()
+                nez.get_by_role('button',name='Les narines sont normales.').wait_for()
+                expect(nez.locator('.options-normales button[aria-pressed=true]')).to_have_count(0)
+                if cas != 'ANORMAL':
+                    nez.get_by_role('button',name='Les narines sont normales.').click()
+                    nez.get_by_role('button',name='Les choanes sont perméables.').click()
+                anormal.click()
+                if cas != 'NORMAL':
+                    nez.get_by_role('button',name='Narines antéversées',exact=True).click()
+                    if cas == 'ANORMAL':
+                        nez.get_by_placeholder('Précisions…').fill('Précision clinique d’essai.')
+                normal.click()
+                expect(nez.get_by_role('button',name='Les narines sont normales.')).to_have_attribute('aria-pressed', 'true' if cas != 'ANORMAL' else 'false')
+                anormal.click()
+                expect(nez.get_by_role('button',name='Narines antéversées',exact=True)).to_have_attribute('aria-pressed','true' if cas!='NORMAL' else 'false')
+                normal.click()
+                nez.get_by_role('textbox', name='Commentaire — Nez').fill('Commentaire externe d’essai.')
+                with page.expect_response(lambda r:r.url.endswith('/api/saisie') and r.request.method=='POST') as r:
+                    page.locator('#hubSave').click()
+                assert r.value.ok,r.value.text()
+                page.close();page=b.new_page();page.goto(fiche)
+                page.wait_for_function("ciblesNormales.size > 10 && dossier !== ''")
+                page.wait_for_function("(c)=>etatDe('nez')===(c==='NORMAL'?'n':'a')",arg=cas)
+                nez=page.locator('#it_nez')
+                normal=nez.get_by_role('button',name='Normal',exact=True)
+                if normal.get_attribute('aria-pressed')!='true':normal.click()
+                expect(nez.get_by_role('button',name='Les narines sont normales.')).to_have_attribute('aria-pressed', 'true' if cas != 'ANORMAL' else 'false')
+                expect(nez.get_by_role('textbox', name='Commentaire — Nez')).to_have_value('Commentaire externe d’essai.')
+                doc=page.request.get(url+f'/api/saisie/{numero}/examen_clinique').json()
+                item=next(i for e in doc['etages'] for i in e['items'] if i['id']=='nez')
+                assert len(item.get('normal_items') or []) == (0 if cas=='ANORMAL' else 2),item
+                assert len(item['anomalies']) == (0 if cas=='NORMAL' else 1),item
+                page.goto(url+'/?dossier='+numero)
+                page.locator('[data-o=cr]').click()
+                page.locator('#crGabarit option[value=complet]').wait_for(state='attached')
+                page.locator('#crGabarit').select_option('complet')
+                page.get_by_role('button',name='Produire un brouillon').click()
+                cr=page.locator('#crPre')
+                expect(cr).to_be_visible()
+                sortie=cr.inner_text()
+                assert ('Les narines sont normales.' in sortie)==(cas=='NORMAL'),sortie
+                assert ('Les choanes sont perméables.' in sortie)==(cas!='ANORMAL'),sortie
+                assert ('Narines antéversées' in sortie)==(cas!='NORMAL'),sortie
+                assert ('Précision clinique d’essai.' in sortie)==(cas=='ANORMAL'),sortie
+                assert 'Commentaire externe d’essai.' in sortie,sortie
+                assert 'sans anomalie décrite' not in sortie,sortie
+                print(cas, ': sélection, changement de volet, réouverture et compte rendu vérifiés.')
+                page.close()
+            page = b.new_page()
+            page.goto(url + '/modules/examen_clinique?dossier=DEMO-CADRES&operateur=TEST')
+            page.wait_for_function("ciblesNormales.size > 10 && dossier !== ''")
+            expect(page.locator('#sec_cou_thorax').get_by_role('button', name='Normal — toute la rubrique')).to_have_count(0)
+            for id_champ in ('cheveux', 'fontanelles', 'oge'):
+                cible = page.locator('#it_' + id_champ)
+                cible.get_by_role('button', name='Normal', exact=True).click()
+                expect(cible.locator('.options-normales button.chip').first).to_be_visible()
+            oge = page.locator('#it_oge .options-normales')
+            oge.get_by_role('button', name='Les organes génitaux externes sont de type masculin, bien différenciés.', exact=True).click()
+            oge.get_by_role('button', name='Les organes génitaux externes sont de type féminin, bien différenciés.', exact=True).click()
+            expect(oge.locator('[aria-pressed=true]')).to_have_count(1)
+
+            page.goto(url + '/modules/autopsie?dossier=DEMO-CADRES-AUTOPSIE&operateur=TEST')
+            page.wait_for_function("dossier !== ''")
+            for champ in page.locator('.ch:has([data-volet-autopsie])').all():
+                normal = champ.locator('[data-volet-autopsie=normal]')
+                anormal = champ.locator('[data-volet-autopsie=anormal]')
+                expect(champ.locator('.chips .chip:visible')).to_have_count(0)
+                normal.click()
+                expect(normal).to_have_attribute('aria-expanded', 'true')
+                anormal.click()
+                expect(normal).to_have_attribute('aria-expanded', 'false')
+                expect(anormal).to_have_attribute('aria-expanded', 'true')
+                champ.get_by_role('button', name='Non renseigné', exact=True).click()
+                expect(anormal).to_have_attribute('aria-expanded', 'false')
+            page.get_by_role('button', name='Normal — toute l’autopsie').click()
+            ouverture = page.locator('#sec_ouverture')
+            droite = page.locator('#ch_wrap_ep_pleural_d')
+            expect(droite.get_by_role('button', name='Non', exact=True)).to_have_attribute('aria-pressed', 'true')
+            page.get_by_role('button', name='Décocher tous les normaux de l’autopsie').click()
+            expect(droite.get_by_role('button', name='Non', exact=True)).to_have_attribute('aria-pressed', 'false')
+            ouverture.get_by_role('button', name='Normal — toute la rubrique').click()
+            expect(droite.get_by_role('button', name='Non', exact=True)).to_have_attribute('aria-pressed', 'true')
+            droite.get_by_role('button', name='Oui', exact=True).click()
+            droite.get_by_role('textbox', name='Commentaire — Épanchement pleural droit').fill('Aspect séreux.')
+            ouverture.get_by_role('button', name='Décocher les constatations normales').click()
+            expect(droite.get_by_role('button', name='Oui', exact=True)).to_have_attribute('aria-pressed', 'true')
+            ogi = page.locator('#ch_wrap_ogi')
+            ogi.get_by_role('button', name='Normal', exact=True).click()
+            masculin = ogi.get_by_role('button', name='Bien différenciés de type masculin')
+            masculin.click()
+            expect(masculin).to_have_attribute('aria-pressed', 'true')
+            coeur = page.locator('#sec_coeur')
+            page.locator('#sa').fill('24')
+            poids_table = page.locator('#table_m_coeur_masse')
+            poids_coeur = page.locator('#m_coeur_masse')
+            poids_table.fill('4')
+            expect(poids_coeur).to_have_value('4')
+            expect(page.locator('#table_z_coeur_masse sup').first).to_have_text('*')
+            expect(page.locator('#table_p_coeur_masse sup').first).to_have_text('*')
+            poids_coeur.fill('4,5')
+            expect(poids_table).to_have_value('4,5')
+            page.locator('#table_m_reins_masse_d').fill('2')
+            page.locator('#m_reins_masse_g').fill('3')
+            expect(page.locator('#table_total_reins_masse')).to_have_text('5')
+            coeur_trame = coeur.locator('#normaux_coeur')
+            apex = coeur_trame.locator('[data-constat-normal=pdf-q141-apex]')
+            valve = coeur_trame.get_by_role('button', name='La valve pulmonaire est sans anomalie.', exact=True)
+            mitrale = coeur_trame.locator('[data-constat-normal=pdf-q141-mitrale]')
+            coeur.get_by_role('button', name='Normal — toute la rubrique').click()
+            expect(apex).to_have_attribute('aria-pressed', 'true')
+            expect(coeur.locator('#it_canal_art [data-e=o]')).to_have_attribute('aria-pressed', 'true')
+            expect(coeur.locator('#it_coronaires [data-e=o]')).to_have_attribute('aria-pressed', 'true')
+            expect(coeur.locator('#ch_wrap_pointe').get_by_role('button', name='Normal', exact=True)).to_have_attribute('aria-pressed', 'true')
+            coeur.locator('#ch_wrap_pointe').get_by_role('button', name='Non renseigné').click()
+            expect(coeur.locator('#ch_wrap_pointe .tog button[aria-pressed=true]')).to_have_count(0)
+            poumons = page.locator('#sec_poumons')
+            poumons.get_by_role('button', name='Normal — toute la rubrique').click()
+            expect(poumons.locator('#normaux_poumons').get_by_role('button', name='Le rapport poids pulmonaire', exact=False)).to_have_attribute('aria-pressed', 'true')
+            congelation = page.locator('#ch_wrap_congelation')
+            expect(congelation.get_by_role('button', name='Foie', exact=True)).to_have_count(0)
+            congelation.get_by_role('button', name='Oui', exact=True).click()
+            congelation.get_by_role('button', name='Foie', exact=True).click()
+            congelation.get_by_role('button', name='Cerveau', exact=True).click()
+            congelation.get_by_role('textbox').fill('Deux prélèvements congelés.')
+            expect(apex).to_have_attribute('aria-pressed', 'false')
+            expect(valve).to_have_attribute('aria-pressed', 'true')
+            valves = coeur.locator('#ch_wrap_valves')
+            valves.get_by_role('button', name='Anormal', exact=True).click()
+            valves.get_by_role('button', name='Sténose pulmonaire', exact=True).click()
+            expect(valve).to_have_attribute('aria-pressed', 'false')
+            expect(mitrale).to_have_attribute('aria-pressed', 'true')
+            thorax = page.locator('#sec_thorax')
+            expect(page.locator('#sec_digestif #ch_wrap_vb + #ch_wrap_estomac')).to_have_count(1)
+            thorax.get_by_role('button', name='Normal — toute la rubrique').click()
+            expect(thorax.locator('#normaux_thorax').get_by_role('button', name='Le thymus est en place et d’aspect normal.', exact=True)).to_be_visible()
+            voies = thorax.locator('#ch_wrap_voies_aer')
+            voies.locator('[data-volet-autopsie=normal]').click()
+            trachee = voies.get_by_role('button', name='La trachée est perméable.', exact=True)
+            expect(trachee).to_have_attribute('aria-pressed', 'true')
+            trachee.click()
+            expect(trachee).to_have_attribute('aria-pressed', 'false')
+            expect(voies.get_by_role('button', name='L’œsophage est perméable sans fistule ni atrésie.', exact=True)).to_have_attribute('aria-pressed', 'true')
+            diaphragme = page.locator('#ch_wrap_diaphragme')
+            normal_d = diaphragme.locator('[data-volet-autopsie=normal]')
+            anormal_d = diaphragme.locator('[data-volet-autopsie=anormal]')
+            if normal_d.get_attribute('aria-expanded') != 'true':
+                normal_d.click()
+            diaphragme.locator('.chip[data-v=Normal]').click()
+            anormal_d.click()
+            diaphragme.get_by_role('button', name='Hernie D', exact=True).click()
+            expect(normal_d).to_have_attribute('aria-pressed', 'true')
+            expect(anormal_d).to_have_attribute('aria-pressed', 'true')
+            normal_d.click()
+            expect(anormal_d).to_have_attribute('aria-pressed', 'true')
+            page.on('dialog', lambda d: d.accept())
+            with page.expect_response(lambda r: r.url.endswith('/api/saisie') and r.request.method == 'POST') as reponse:
+                page.locator('#hubSave').click()
+            self.assertTrue(reponse.value.ok, reponse.value.text())
+            page.reload()
+            expect(droite.get_by_role('button', name='Oui', exact=True)).to_have_attribute('aria-pressed', 'true')
+            expect(poids_table).to_have_value('4.5')
+            expect(poids_coeur).to_have_value('4.5')
+            expect(page.locator('#table_total_reins_masse')).to_have_text('5')
+            expect(coeur.locator('#ch_wrap_valves .chips .chip:visible')).to_have_count(0)
+            expect(page.locator('#it_ep_pleural_g button[aria-pressed=true]')).to_have_count(0)
+            expect(apex).to_have_attribute('aria-pressed', 'false')
+            expect(mitrale).to_have_attribute('aria-pressed', 'true')
+            expect(congelation.get_by_role('button', name='Foie', exact=True)).to_have_attribute('aria-pressed', 'true')
+            expect(congelation.get_by_role('button', name='Cerveau', exact=True)).to_have_attribute('aria-pressed', 'true')
+            expect(congelation.get_by_role('textbox')).to_have_value('Deux prélèvements congelés.')
+            page.goto(url + '/?dossier=DEMO-CADRES-AUTOPSIE')
+            page.locator('[data-o=cr]').click()
+            page.locator('#crGabarit').select_option('complet')
+            page.get_by_role('button', name='Produire un brouillon').click()
+            expect(page.locator('#crPre')).to_contain_text('Présence d’un épanchement pleural droit.')
+            expect(page.locator('#crPre')).to_contain_text('Aspect séreux.')
+            expect(page.locator('#crPre')).not_to_contain_text('La trachée est perméable.')
+            expect(page.locator('#crPre')).to_contain_text('Le thymus est en place et d’aspect normal.')
+            expect(page.locator('#crPre')).to_contain_text('Diaphragme : Hernie D.')
+            expect(page.locator('#crPre')).not_to_contain_text('Diaphragme : Normal')
+            expect(page.locator('#crPre')).to_contain_text('Prélèvements congelés : foie, cerveau.')
+            poids = page.locator('#crPre h4:has-text("Poids des organes") + table')
+            expect(poids).to_have_count(1)
+            expect(poids.get_by_role('rowheader', name='Cœur', exact=True)).to_be_visible()
+            expect(poids.locator('sup').first).to_have_text('*')
+            expect(poids.locator('tbody td').first).to_have_css('text-align', 'center')
+            expect(poids.locator('tbody td').first).to_have_css('border-right-width', '1px')
+            expect(page.locator('#crPre')).to_contain_text('La valve mitrale est sans anomalie.')
+            expect(page.locator('#crPre')).to_contain_text('Sténose pulmonaire')
+            expect(page.locator('#crPre')).not_to_contain_text('La valve pulmonaire est sans anomalie.')
+            expect(page.locator('#crPre')).not_to_contain_text('L’apex est orienté à gauche.')
+            expect(page.locator('#crPre')).to_contain_text('Bien différenciés de type masculin')
+
+            page.goto(url + '/?dossier=DEMO-CLINIQUE-MIXTE')
+            page.locator('[data-o=m_microscopie]').click()
+            lien = page.get_by_role('link', name='Ouvrir Microscopie multi-organes')
+            expect(lien).to_have_attribute('href', '/modules/micro?dossier=DEMO-CLINIQUE-MIXTE')
+            fiche_micro = url + '/modules/micro?dossier=DEMO-CADRES-MICRO&operateur=TEST'
+            page.goto(fiche_micro)
+            page.wait_for_function("dossier !== ''")
+            page.locator('[data-org="1"][data-oid=poumon]').click()
+            id_axe = 's1_poumon_maturation'
+            axe = page.locator('#it_' + id_axe)
+            axe.locator('[data-e=normal]').click()
+            normal = page.locator('[data-cadre-normal=' + id_axe + ']')
+            normal.click()
+            axe.locator('[data-e=anormal]').click()
+            page.locator('#t_' + id_axe).fill('Précision histologique d’essai.')
+            axe.locator('[data-e=normal]').click()
+            expect(normal).to_have_attribute('aria-pressed', 'true')
+            donnees = page.evaluate("(id) => collecter().sections[0].champs.find(c => c.id === id)", id_axe)
+            self.assertEqual(donnees['etat'], 'anormal')
+            self.assertTrue(donnees['normal_selection'])
+            self.assertEqual(donnees['note'], 'Précision histologique d’essai.')
+            page.locator('#commentaire_s1_poumon_compte').fill('Commentaire histologique d’essai.')
+            page.on('dialog', lambda d: d.accept())
+            with page.expect_response(lambda r: r.url.endswith('/api/saisie') and r.request.method == 'POST') as reponse:
+                page.locator('#hubSave').click()
+            self.assertTrue(reponse.value.ok, reponse.value.text())
+            page.reload()
+            expect(page.locator('#commentaire_s1_poumon_compte')).to_have_value('Commentaire histologique d’essai.')
+            page.goto(url + '/?dossier=DEMO-CADRES-MICRO')
+            page.locator('[data-o=cr]').click()
+            page.locator('#crGabarit').select_option('complet')
+            page.get_by_role('button', name='Produire un brouillon').click()
+            expect(page.locator('#crPre')).to_contain_text('Commentaire histologique d’essai.')
+            page.close()
+            self.verifier_tableaux_slo(b, url)
+            b.close()
+
+    def verifier_tableaux_slo(self, navigateur, url):
+        page = navigateur.new_page(permissions=['clipboard-read', 'clipboard-write'])
+        page.goto(url + '/?dossier=DEMO_SLO_001')
+        macro = page.locator('[data-o=m_macro_placenta]')
+        expect(macro).to_be_disabled()
+        page.locator('#panneau [data-acces-macro]').click()
+        expect(macro).to_be_enabled()
+        page.locator('#panneau [data-acces-macro]').click()
+        expect(macro).to_be_disabled()
+        page.locator('[data-page=modules]').click()
+        ligne_macro = page.locator('#panModules tr').filter(has=page.get_by_text('macro_placenta', exact=True))
+        expect(ligne_macro.get_by_role('button', name='ouvrir')).to_be_disabled()
+        page.locator('#pg_modules [data-acces-macro]').click()
+        expect(ligne_macro.get_by_role('link', name='ouvrir')).to_be_visible()
+        page.goto(url + '/modules/administratif?dossier=DEMO_SLO_001&operateur=TEST')
+        for identifiant in ('t1', 't2', 't3', 'sup1'):
+            expect(page.locator(f'[id="f_echo_{identifiant}_details"]')).to_be_visible()
+        expect(page.locator('#f_echo_t2_details')).to_have_value(
+            'Petit gabarit fœtal, petit périmètre crânien et anomalie des organes génitaux externes.'
+        )
+        page.goto(url + '/modules/administratif?dossier=DEMO-CLINIQUE-MIXTE&operateur=TEST')
+        t2 = page.get_by_role('group', name='Échographie T2', exact=True)
+        t2.get_by_label('Date', exact=True).fill('15/01/2025')
+        t2.get_by_label('Terme (SA)', exact=True).fill('20')
+        t2.get_by_label('Jours', exact=True).fill('2')
+        t2.get_by_label('Nom du médecin', exact=True).fill('Dr Essai')
+        t2.get_by_label('BIP (mm)', exact=True).fill('49.5')
+        t2.get_by_label('LF (mm)', exact=True).fill('33')
+        t2.get_by_role('button', name='Quantité normale', exact=True).click()
+        t2.get_by_label('Commentaire — Liquide amniotique').fill('Contrôle échographique prévu.')
+        with page.expect_response(lambda r: r.url.endswith('/api/saisie') and r.request.method == 'POST') as reponse:
+            page.locator('#hubSave').click()
+        self.assertTrue(reponse.value.ok, reponse.value.text())
+        page.reload()
+        expect(t2.get_by_label('BIP (mm)', exact=True)).to_have_value('49.5')
+        expect(t2.get_by_role('button', name='Quantité normale', exact=True)).to_have_attribute('aria-pressed', 'true')
+        page.goto(url + '/?dossier=DEMO-CLINIQUE-MIXTE')
+        page.locator('[data-o=cr]').click()
+        page.locator('#crGabarit').select_option('complet')
+        page.get_by_role('button', name='Produire un brouillon').click()
+        expect(page.locator('#crPre')).to_contain_text(
+            'Écho T2 (15/01/2025 · 20 SA + 2 j, Dr Essai) : BIP 49,5 mm, LF 33 mm.'
+        )
+        expect(page.locator('#crPre')).to_contain_text('Quantité de liquide amniotique normale.')
+        expect(page.locator('#crPre')).to_contain_text('Contrôle échographique prévu.')
+        page.goto(url + '/?dossier=DEMO_SLO_001')
+        page.locator('[data-o=cr]').click()
+        page.locator('#crGabarit').select_option('complet')
+        page.get_by_role('button', name='Produire un brouillon').click()
+        cr = page.locator('#crPre')
+        expect(cr.get_by_role('heading', name='Examen externe', exact=True)).to_be_visible()
+        expect(cr).to_contain_text('Guihard-Costa')
+        expect(cr).to_contain_text('Maroun et Graem')
+        expect(cr).to_contain_text('Müller-Brochut')
+        biometries = cr.locator('table').filter(has=page.get_by_role('rowheader', name='Masse fœtale'))
+        masse = biometries.get_by_role('row').filter(has=page.get_by_role('rowheader', name='Masse fœtale'))
+        expect(masse.locator('sup')).to_have_text(['*', '**', '***', '*', '**', '***'])
+        for colonne in (1, 2):
+            cellule = masse.locator('td').nth(colonne)
+            expect(cellule.locator('span')).to_have_count(3)
+            expect(cellule).to_have_css('white-space', 'nowrap')
+            self.assertEqual(len(set(cellule.locator('span').evaluate_all(
+                'elements => elements.map(e => e.getBoundingClientRect().top)'
+            ))), 1)
+        gauche, droite = biometries.evaluate("""table => {
+            const cadre = table.closest('article').getBoundingClientRect();
+            const limites = table.getBoundingClientRect();
+            return [limites.left - cadre.left, cadre.right - limites.right];
+        }""")
+        self.assertGreater(gauche, 0)
+        self.assertAlmostEqual(gauche, droite, delta=1)
+        self.assertEqual(cr.get_by_role('heading', name='Poids des organes', exact=True).count(), 0)
+        expect(biometries.locator('tbody td').first).to_have_css('text-align', 'center')
+        expect(biometries.locator('tbody td').first).to_have_css('border-right-width', '1px')
+        page.get_by_role('button', name='Copier', exact=True).click()
+        expect(page.get_by_text('Compte rendu copié.', exact=True)).to_be_visible()
+        copie = page.evaluate("""
+            async () => {
+              const [item] = await navigator.clipboard.read();
+              return (await item.getType('text/html')).text();
+            }
+        """)
+        self.assertIn('<table', copie)
+        self.assertRegex(copie, r'text-align:\s*center')
+        cible = os.environ.get('MONOLITHE_PDF_ESSAI')
+        pdf = page.pdf(path=cible, format='A4')
+        self.assertTrue(pdf.startswith(b'%PDF'))
+        page.close()
+
