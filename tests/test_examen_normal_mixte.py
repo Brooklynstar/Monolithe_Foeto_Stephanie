@@ -294,8 +294,6 @@ class ExamenNormalMixte(unittest.TestCase):
         page = navigateur.new_page(permissions=['clipboard-read', 'clipboard-write'])
         page.goto(url + '/?dossier=DEMO_SLO_001')
         macro = page.locator('[data-o=m_macro_placenta]')
-        expect(macro).to_be_disabled()
-        page.locator('#panneau [data-acces-macro]').click()
         expect(macro).to_be_enabled()
         page.locator('#panneau [data-acces-macro]').click()
         expect(macro).to_be_disabled()

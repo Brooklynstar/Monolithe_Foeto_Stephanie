@@ -78,7 +78,10 @@ let lecture = 0;
 async function chargerTrame() {
   const r = await fetch("/api/trame-placenta-gemellaire");
   if (!r.ok) throw new Error("Lecture de la trame impossible");
-  return r.json();
+  return (await r.json()).map(section => ({...section,
+    champs: section.champs.filter(champ => !champ.id.startsWith("releve_")).map(champ => ({
+      ...champ, choix: champ.choix.filter((_, index) => !champ.choix_hors_gemellaire?.includes(index))
+    }))}));
 }
 
 function element(balise, texte = "") {

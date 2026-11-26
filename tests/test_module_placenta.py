@@ -19,7 +19,7 @@ sys.path[:0]=[str(ROOT/'hub/app'),str(ROOT/'hub/outils')]
 import ingest
 import percentiles_placenta as pp
 from importer_placenta_demo import importer
-from verifier_placenta import schema_releve
+from verifier_placenta import schema_placenta, verifier_preservation_releve
 
 PORT = os.environ.get('MONOLITHE_TEST_PORT', '5005')
 URL = 'http://127.0.0.1:' + PORT
@@ -75,11 +75,13 @@ class ModulePlacenta(unittest.TestCase):
                         self.assertTrue(page.locator('#terme_sa').get_attribute('readonly') is not None)
                         self.assertIn('22–42 SA',page.locator('#resultatsPercentilesPlacenta').inner_text())
                         rendu=page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
-                        self.assertEqual(rendu,json.loads(json.dumps(schema_releve())))
-                        self.assertEqual(page.locator('fieldset').count(),32)
-                        self.assertEqual(page.locator('label.chip input').count(),154)
+                        verifier_preservation_releve()
+                        self.assertEqual(rendu, schema_placenta())
+                        self.assertEqual(page.locator('fieldset').count(), sum(len(champs) for _, champs in rendu))
+                        self.assertEqual(page.locator('label.chip input').count(),
+                                         sum(len(options) for _, champs in rendu for _, _, options in champs))
                         self.assertEqual(page.locator('[required]').count(),0)
-                        print('OK dossier exact, reprise des quatre mesures et terme administratif ; 32 champs/154 constatations ; limite 19 SA')
+                        print('OK dossier exact, reprise des quatre mesures et terme administratif ; trame étendue ; limite 19 SA')
                         # Compare les styles réellement calculés et les quatre thèmes, pas une simple copie de CSS.
                         macro=context.new_page();macro.goto(URL+'/modules/macro_placenta?dossier=DEMO_SLO_001&operateur=TEST')
                         macro.wait_for_function('document.getElementById("f_masse").value === "90"')
@@ -101,7 +103,7 @@ class ModulePlacenta(unittest.TestCase):
                                       ('section','section',['backgroundColor','borderColor','borderRadius','padding']),
                                       ('#dossier','#dossier',['fontFamily','fontSize','backgroundColor','color','borderRadius','padding']),
                                       ('#macro_01','#f_masse',['fontFamily','fontSize','backgroundColor','borderColor','borderRadius','padding']),
-                                      ('label.chip','button.chip',['fontFamily','fontSize','backgroundColor','borderColor','borderRadius','padding','minHeight','letterSpacing','textTransform'])]
+                                      ('#g_macro_06 label.chip','button.chip',['fontFamily','fontSize','backgroundColor','borderColor','borderRadius','padding','minHeight','letterSpacing','textTransform'])]
                         page.locator('#macro_06_0').check();macro.locator('button.chip').first.click()
                         comparaisons.append(('label.chip.on','button.chip[aria-pressed=true]',['backgroundColor','color','fontWeight','borderColor']))
                         for theme in ('clair','sombre','w98','cli'):
@@ -114,6 +116,55 @@ class ModulePlacenta(unittest.TestCase):
                         macro.screenshot(path=str(sortie/'macro-reference.png'))
                         page.set_viewport_size({'width':390,'height':844})
                         self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+                        for largeur in (390, 1100):
+                            page.set_viewport_size({'width': largeur, 'height': 950})
+                            for groupe in ('.dimensions-placenta', '.tranches-placenta .ligne-macro'):
+                                lignes = page.locator(groupe).evaluate_all(
+                                    "rows => rows.map(row => [...row.querySelectorAll('input:not([type=radio])')]"
+                                    ".map(input => input.getBoundingClientRect().top))"
+                                )
+                                self.assertTrue(all(len(set(ligne)) == 1 for ligne in lignes), lignes)
+                        self.assertEqual(page.locator('.bloc-macro > h3').all_text_contents(), [
+                            'Galette placentaire', 'Membranes', 'Cordon', 'Plaque choriale', 'Plaque basale', 'Tranches de section',
+                        ])
+                        titres = page.locator('.tranches-placenta h4, #l_releve_nidf')
+                        self.assertEqual(titres.all_text_contents(), [
+                            'Infarctus', 'Thrombose sous-choriale',
+                            'Hématome décidual basal', 'Kyste trophoblastique', 'Thrombose intervilleuse', 'NIDF',
+                        ])
+                        self.assertTrue(page.locator('#g_macro_21').is_hidden())
+                        for parent, detail in ((1, 30), (4, 5), (7, 31), (15, 16), (23, 24)):
+                            retrait = page.locator(f'#micro_08_{detail}').evaluate(
+                                '(e, parent) => e.closest(".micro-retrait")?.previousElementSibling'
+                                '.querySelector("input")?.id === parent', f'micro_08_{parent}')
+                            self.assertTrue(retrait, (parent, detail))
+                        self.assertEqual(page.locator('#g_micro_09 h4').all_text_contents(), [
+                            'Calcifications', 'Infiltrat inflammatoire chronique',
+                        ])
+                        plaque = page.locator('#micro-plaque-choriale')
+                        self.assertEqual(plaque.locator('h3').text_content(), 'Plaque choriale')
+                        self.assertEqual(plaque.locator('fieldset > legend').all_text_contents(),
+                                         ['Vaisseaux', 'Amnios', 'Inflammation'])
+                        page.evaluate("""() => {
+                            const ancien = collecter();
+                            ancien.sections.find(s => s.id === 'macroscopie').champs.macro_21 =
+                                'Description historique fictive';
+                            const micro = SECTIONS.find(s => s.id === 'microscopie').champs.find(c => c.id === 'micro_08');
+                            ancien.sections.find(s => s.id === 'microscopie').champs.micro_08 =
+                                [micro.choix[0], micro.choix[1], micro.choix[2], micro.choix[14]];
+                            appliquer(ancien);
+                        }""")
+                        self.assertTrue(page.locator('#g_macro_21').is_visible())
+                        self.assertEqual(page.locator('#macro_21').input_value(), 'Description historique fictive')
+                        self.assertEqual(page.evaluate(
+                            "collecter().sections.find(s => s.id === 'macroscopie').champs.macro_21"
+                        ), 'Description historique fictive')
+                        for i in (2, 28, 29, 31):
+                            self.assertTrue(page.locator(f'#micro_08_{i}').is_checked())
+                        self.assertFalse(page.locator('#micro_08_30').is_checked())
+                        page.locator('#micro_08_30').check()
+                        self.assertFalse(page.locator('#micro_08_2').is_checked())
+                        ouvrir()
                         page.set_viewport_size({'width':1100,'height':950})
                         print('OK styles calculés identiques : corps, largeur, en-tête, titre, cartes, champs et choix ; 4 thèmes ; mobile sans débordement')
                         macro.close()
@@ -172,10 +223,7 @@ class ModulePlacenta(unittest.TestCase):
                                             'de 2,4 cm de grand axe sur 0,6 cm d’épaisseur',
                                             'Le placenta est eutrophique.'):
                                 self.assertIn(mention, texte)
-                            if template == 'complet':
-                                self.assertRegex(texte, r'exfolié\.</p>\s*<p[^>]*>Les membranes')
-                            else:
-                                self.assertRegex(texte, r'exfolié\.\nLes membranes')
+                            self.assertRegex(texte, r'Les membranes[^\n<]* L’amnios est [^\n<]*exfolié\.')
                         self.assertEqual(get('/api/saisie/DEMO_SLO_001/placenta'),saved)
                         for module,doc in avant.items():self.assertEqual(get('/api/saisie/DEMO_SLO_001/'+module),doc,module)
                         self.assertEqual(get('/api/dossiers/DEMO_SLO_001/cr')[-2:],cr_avant)
@@ -186,13 +234,93 @@ class ModulePlacenta(unittest.TestCase):
                         self.assertIn('Épaisseur négative', page.locator('#alerteEpaisseur').inner_text())
                         for champ, elements in {
                             'macro_06': [0], 'macro_07': [1], 'macro_08': [0], 'macro_09': [2], 'micro_01': [2], 'micro_02': [2, 4],
-                            'micro_03': [9, 11], 'micro_09': [10], 'conclusion_01': [26],
+                            'micro_03': [9, 11], 'micro_04': [2], 'micro_05': [1], 'micro_06': [1, 3],
+                            'micro_07': [0], 'micro_09': [10], 'micro_10': [1, 4], 'conclusion_01': [26],
                         }.items():
                             page.locator('#g_' + champ + ' .effacer').click()
                             for index in elements:
                                 page.locator(f'#{champ}_{index}').check()
+                        page.locator('#releve_cordon_longueur').fill('23.5')
+                        page.locator('#releve_cordon_spiralisation_1').check()
+                        page.locator('#releve_cordon_particularites_0').check()
+                        page.locator('#releve_cordon_particularites_2').check()
+                        page.locator('#releve_completude_0').check()
+                        page.locator('#releve_membranes_insertion_2').check()
+                        page.locator('#releve_membranes_marginee_pct').fill('30')
+                        page.locator('#releve_membranes_aspect_0').check()
+                        page.locator('#releve_etat_basale_3').check()
+                        page.locator('#releve_hematome_nombre').fill('2')
+                        page.locator('#macro_17').fill('0.8')
+                        page.locator('#releve_thrombose_intervilleuse_nombre').fill('3')
+                        page.locator('#releve_thrombose_intervilleuse_taille').fill('1.5')
+                        page.locator('#macro_19').fill('1')
+                        page.locator('#macro_20').fill('0.8')
+                        pct_nidf = page.locator('#releve_nidf_pct')
+                        self.assertTrue(pct_nidf.is_disabled())
+                        page.locator('#releve_nidf_1').check()
+                        pct_nidf.fill('101')
+                        self.assertFalse(pct_nidf.evaluate('(e) => e.checkValidity()'))
+                        pct_nidf.fill('12.5')
+                        page.locator('#releve_nidf_0').check()
+                        self.assertTrue(pct_nidf.is_disabled())
+                        sans_nidf = page.evaluate("collecter().sections.find(s => s.id === 'macroscopie').champs")
+                        self.assertEqual(sans_nidf['releve_nidf'], 'Non')
+                        self.assertIsNone(sans_nidf['releve_nidf_pct'])
+                        page.locator('#releve_nidf_1').check()
+                        page.locator('#releve_commentaires_macro').fill('Commentaire macroscopique fictif.')
+                        page.locator('#g_micro_08 .effacer').click()
+                        pct_avasc = page.locator('#releve_villosites_avasculaires_pct')
+                        self.assertTrue(pct_avasc.is_disabled())
+                        for i in (1, 7, 29, 30, 31):
+                            page.locator(f'#micro_08_{i}').check()
+                        self.assertFalse(page.locator('#micro_08_28').is_checked())
+                        pct_avasc.fill('101')
+                        self.assertFalse(pct_avasc.evaluate('(e) => e.checkValidity()'))
+                        pct_avasc.fill('13.5')
+                        commentaires_micro = {
+                            'releve_commentaire_villosites': 'Commentaire villositaire fictif.',
+                            'releve_commentaire_intervilleuse': 'Commentaire intervilleux fictif.',
+                            'releve_commentaire_lesions': 'Commentaire des lésions fictif.',
+                        }
+                        for champ, commentaire in commentaires_micro.items():
+                            page.locator('#' + champ).fill(commentaire)
+                        blocs = page.locator('#releve_inclusion_blocs')
+                        blocs.fill('2.5')
+                        self.assertFalse(blocs.evaluate('(e) => e.checkValidity()'))
+                        blocs.fill('3')
                         save()
                         ouvrir()
+                        self.assertEqual(page.locator('#releve_cordon_longueur').input_value(), '23.5')
+                        doc = get('/api/saisie/DEMO_SLO_001/placenta?cliches=1')
+                        valeurs = next(s['champs'] for s in doc['sections'] if s['id'] == 'macroscopie')
+                        micro = next(s['champs'] for s in doc['sections'] if s['id'] == 'microscopie')
+                        self.assertEqual(micro['releve_villosites_avasculaires_pct'], 13.5)
+                        self.assertEqual(pct_avasc.input_value(), '13.5')
+                        self.assertTrue(page.locator('#micro_08_31').is_checked())
+                        for champ, commentaire in commentaires_micro.items():
+                            self.assertEqual(micro[champ], commentaire)
+                            self.assertEqual(page.locator('#' + champ).input_value(), commentaire)
+                        export = get('/api/dossiers/DEMO_SLO_001/export.json')
+                        self.assertEqual(next(s for s in export['saisies'] if s['module'] == 'placenta'), doc)
+                        self.assertEqual(valeurs['releve_cordon_longueur'], 23.5)
+                        self.assertEqual(valeurs['releve_membranes_marginee_pct'], 30)
+                        self.assertEqual(valeurs['releve_nidf'], 'Oui')
+                        self.assertEqual(valeurs['releve_nidf_pct'], 12.5)
+                        self.assertEqual(valeurs['releve_commentaires_macro'], 'Commentaire macroscopique fictif.')
+                        self.assertEqual(valeurs['releve_inclusion_blocs'], 3)
+                        self.assertEqual(valeurs['releve_hematome_nombre'], 2)
+                        self.assertEqual(valeurs['releve_thrombose_intervilleuse_nombre'], 3)
+                        self.assertEqual(valeurs['releve_thrombose_intervilleuse_taille'], 1.5)
+                        self.assertEqual(page.locator('#releve_hematome_nombre').input_value(), '2')
+                        self.assertEqual(page.locator('#releve_thrombose_intervilleuse_nombre').input_value(), '3')
+                        self.assertEqual(page.locator('#releve_thrombose_intervilleuse_taille').input_value(), '1.5')
+                        self.assertTrue(page.locator('#releve_nidf_1').is_checked())
+                        self.assertEqual(pct_nidf.input_value(), '12.5')
+                        self.assertEqual(blocs.input_value(), '3')
+                        self.assertEqual(page.locator('#releve_commentaires_macro').input_value(),
+                                         'Commentaire macroscopique fictif.')
+                        self.assertTrue(page.locator('#releve_membranes_insertion_2').is_checked())
+                        self.assertTrue(page.locator('#releve_etat_basale_3').is_checked())
                         self.assertEqual(page.locator('#macro_16').input_value(), '-16.7')
                         self.assertIn('Épaisseur négative', page.locator('#alerteEpaisseur').inner_text())
                         page.goto(URL+'/?dossier=DEMO_SLO_001')
@@ -202,16 +330,31 @@ class ModulePlacenta(unittest.TestCase):
                         page.get_by_role('button', name='Produire un brouillon').click()
                         page.locator('#crPre').wait_for()
                         affiche = page.locator('#crPre').inner_text().strip()
-                        self.assertNotIn('\n\n', affiche)
+                        self.assertNotIn('\n\n', affiche.split('Conclusion', 1)[1])
+                        affiche = '\n'.join(ligne for ligne in affiche.splitlines() if ligne.strip())
                         self.assertNotIn('FORMULAIRE STRUCTURÉ', affiche.upper())
                         self.assertNotRegex(affiche, r'[-−]16[,.]7')
                         for ligne in (
-                            'PLACENTA\nMacroscopie',
-                            'La galette placentaire, de forme ronde, pèse 90 g, sans les membranes ni le cordon, et mesure 9 × 8 cm sur 1,2 cm d’épaisseur.',
-                            'Le cordon, d’insertion paracentrale, comporte trois vaisseaux.',
+                            'Placenta\nMacroscopie',
+                            'La galette placentaire, complète et de forme ronde, pèse 90 g, sans les membranes ni le cordon, et mesure 9 × 8 cm sur 1,2 cm d’épaisseur.',
+                            'Le cordon, d’insertion paracentrale, mesure 23,5 cm, comporte trois vaisseaux. Il est hyperspiralé, comportant une palmure amniotique et un nœud vrai.',
+                            'Les membranes sont d’aspect normal, d’insertion circumvallée sur 30 % de la circonférence.',
+                            'Constatations de la plaque basale : calcifications.',
                             'À la coupe, on observe deux infarctus représentant 2 % de la surface de la galette placentaire et mesurant de 0,2 à 1 cm de grand axe.',
                             'On observe aussi une thrombose sous-choriale de 1 cm de grand axe.',
-                            'Microscopie\nL’amnios est cubique.',
+                            'On observe 2 hématomes déciduaux basaux de 0,8 cm de grand axe.',
+                            'Présence d’un kyste trophoblastique de 0,8 cm de grand axe et de 3 thromboses intervilleuses de 1,5 cm de grand axe maximal.',
+                            'Présence de NIDF évaluée à 12,5%.',
+                            'Commentaires : Commentaire macroscopique fictif.',
+                            'Inclusion partielle en 3 blocs.',
+                            'Microscopie\nLes membranes présentent',
+                            'L’amnios est cubique.',
+                            'maturation en accord avec le terme',
+                            'focales (moins de 20 % des villosités)',
+                            'villosités avasculaires sur environ 13,5 % du parenchyme examiné',
+                            'Villosités — commentaire : Commentaire villositaire fictif.',
+                            'Chambre intervilleuse — commentaire : Commentaire intervilleux fictif.',
+                            'Lésions — commentaire : Commentaire des lésions fictif.',
                             'chorioamniotite aiguë avec réponse inflammatoire maternelle (RIM) de stade 2',
                             'vasculite ombilicale avec réponse inflammatoire fœtale (RIF) de stade 2',
                             'de grade 1, légère à modérée',
@@ -219,13 +362,46 @@ class ModulePlacenta(unittest.TestCase):
                             'À relire : la microscopie indique un grade 1 pour l’intervillite chronique, alors que la conclusion indique II.',
                         ):
                             self.assertIn(ligne, affiche)
+                        macro = page.locator('#crPre section').filter(has=page.get_by_role('heading', name='Macroscopie', exact=True))
+                        self.assertEqual(macro.locator('h3').evaluate("(e) => getComputedStyle(e).textDecorationLine"), 'underline')
+                        style_macro = macro.evaluate("(e) => [getComputedStyle(e).fontFamily, getComputedStyle(e).textAlign]")
+                        self.assertEqual(style_macro, ['Calibri, Arial, sans-serif', 'justify'])
+                        paragraphes = macro.locator('p').all_text_contents()
+                        self.assertEqual(len(paragraphes), 9)
+                        for paragraphe, debut in zip(paragraphes, [
+                            'La galette placentaire', 'Les membranes', 'Le cordon', 'La plaque choriale',
+                            'Constatations de la plaque basale', 'À la coupe', 'Présence de NIDF',
+                            'Commentaires', 'Inclusion partielle',
+                        ]):
+                            self.assertTrue(paragraphe.startswith(debut), paragraphe)
+                        microscopie = page.locator('#crPre section').filter(
+                            has=page.get_by_role('heading', name='Microscopie', exact=True))
+                        self.assertEqual(microscopie.locator('h3').evaluate(
+                            '(e) => getComputedStyle(e).textDecorationLine'), 'underline')
+                        self.assertEqual(microscopie.evaluate(
+                            '(e) => [getComputedStyle(e).fontFamily, getComputedStyle(e).textAlign]'),
+                            ['Calibri, Arial, sans-serif', 'justify'])
+                        micro_paragraphes = microscopie.locator('p').all_text_contents()
+                        debuts_micro = [
+                            'Les membranes', 'Au niveau du cordon', 'Au niveau de la plaque choriale',
+                            'L’examen de la plaque basale', 'Les villosités', 'Dans la chambre intervilleuse',
+                            'L’examen microscopique',
+                        ]
+                        self.assertEqual(len(micro_paragraphes), len(debuts_micro))
+                        for paragraphe, debut in zip(micro_paragraphes, debuts_micro):
+                            self.assertTrue(paragraphe.startswith(debut), paragraphe)
+                        self.assertTrue(micro_paragraphes[0].endswith('L’amnios est cubique.'))
+                        choriale = micro_paragraphes[2]
+                        self.assertLess(choriale.index('thrombose'), choriale.index('chorioamniotite'))
+                        self.assertLess(choriale.index('chorioamniotite'), choriale.index('L’amnios'))
                         page.locator('#crGabarit').select_option('complet')
                         with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/cr')):
                             page.get_by_role('button', name='Produire un brouillon').click()
                         complet = page.locator('#crPre').inner_text()
-                        self.assertIn('Le cordon, d’insertion paracentrale, comporte trois vaisseaux.', complet)
+                        self.assertIn('Le cordon, d’insertion paracentrale, mesure 23,5 cm, comporte trois vaisseaux.', complet)
                         self.assertNotIn('22 cm', complet)
                         self.assertIn('La plaque choriale présente des kystes.', complet)
+                        self.assertIn(choriale, complet)
                         self.assertNotIn('Longueur du cordon', complet)
                         self.assertNotIn('sans lésion focale', complet)
                         ouvrir()
@@ -246,15 +422,28 @@ class ModulePlacenta(unittest.TestCase):
                         for s in m['sections']:
                             if 'terme_sa' in s['champs']:s['champs']['terme_sa']=28
                         self.assertEqual(post(m).status,200)
-                        ouvrir('TEST-PCT-028');page.locator('#macro_01').fill('214');page.locator('#conditions_masse').select_option('fraiche_paree')
-                        self.assertEqual(page.evaluate('calculer().position_percentile'),'P50')
+                        ouvrir('TEST-PCT-028');page.locator('#macro_01').fill('180');page.locator('#conditions_masse').select_option('fraiche_paree')
+                        self.assertEqual(page.evaluate('calculer().position_percentile'),'P10–P50')
+                        self.assertEqual(page.locator('#macro_02').input_value(), 'P31,6 estimé')
+                        self.assertEqual(page.locator('#ecartPoidsPlacenta').inner_text(), '−0,65')
+                        self.assertIn('10.1017/9781316848616.039', page.locator('.reference-placenta').inner_text())
                         save();pos=get('/api/saisie/TEST-PCT-028/placenta')
-                        self.assertEqual(pos['resultats_placentaires']['position_percentile'],'P50')
-                        rapport = context.request.post(URL+'/api/dossiers/TEST-PCT-028/cr',data={'gabarit':'placenta'})
-                        self.assertIn('pèse 214 g (P50, Redline)', rapport.json()['texte'])
+                        self.assertEqual(pos['resultats_placentaires']['percentile_numerique'],31.6)
+                        self.assertTrue(pos['resultats_placentaires']['percentile_interpole'])
+                        self.assertEqual(next(s for s in pos['sections'] if s['id']=='macroscopie')['champs']['macro_02'],
+                                         'P31,6 estimé')
+                        ouvrir('TEST-PCT-028')
+                        self.assertEqual(page.locator('#macro_02').input_value(), 'P31,6 estimé')
+                        paquet = get('/api/dossiers/TEST-PCT-028/export.json')
+                        exporte = next(s for s in paquet['saisies'] if s['module'] == 'placenta')
+                        self.assertEqual(exporte['resultats_placentaires'], pos['resultats_placentaires'])
+                        for gabarit in ('placenta', 'complet', 'synthese'):
+                            rapport = context.request.post(URL+'/api/dossiers/TEST-PCT-028/cr',data={'gabarit':gabarit})
+                            self.assertIn('pèse 180 g (P31,6 estimé, −0,65 DS selon Redline)', rapport.json()['texte'])
+                            self.assertNotIn('10.1017/9781316848616.039', rapport.json()['texte'])
                         self.assertIsNone(pos['resultats_placentaires']['percentile_exact'])
                         m2=get('/api/saisie/TEST-PCT-028/macro_placenta')
-                        self.assertEqual(next(s for s in m2['sections'] if s['id']=='paree')['champs']['masse'],214)
+                        self.assertEqual(next(s for s in m2['sections'] if s['id']=='paree')['champs']['masse'],180)
                         self.assertEqual(next(s for s in m2['sections'] if s['id']=='cordon'),next(s for s in m['sections'] if s['id']=='cordon'))
                         # Reverse update must retain all microscopic/conclusion data.
                         for s in m2['sections']:
@@ -268,7 +457,7 @@ class ModulePlacenta(unittest.TestCase):
                         with page.expect_response(lambda r:r.url.endswith('/api/saisie') and r.request.method=='POST') as response:page.locator('#hubSave').click()
                         self.assertEqual(response.value.status,409,response.value.text())
                         self.assertEqual(get('/api/saisie/TEST-PCT-028/placenta'),p90)
-                        print('OK 28 SA/214 g=P50 ; synchronisation inverse P90 ; autres données préservées ; écriture concurrente bloquée (409)')
+                        print('OK 28 SA/180 g = P31,6 estimé ; synchronisation inverse P90 ; autres données préservées ; écriture concurrente bloquée (409)')
                         ouvrir('TEST-PCT-028')
                         for condition in ('fixe','non_documentees'):
                             page.locator('#conditions_masse').select_option(condition)

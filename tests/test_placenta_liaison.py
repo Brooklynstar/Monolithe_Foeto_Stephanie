@@ -14,6 +14,7 @@ from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'hub/app'))
 import ingest
+from placenta_liaison import LIBELLES
 from serveur import creer_app
 
 
@@ -42,9 +43,11 @@ class LiaisonPlacenta(unittest.TestCase):
     def test_application_copiee_reste_importable(self):
         app=self.base/'copie avec espaces'/'hub'/'app'
         shutil.copytree(ROOT/'hub/app',app,ignore=shutil.ignore_patterns('__pycache__','.venv','python'))
-        code='import sys;sys.path.insert(0,'+repr(str(app))+');import serveur,placenta_liaison;assert len(placenta_liaison.LIBELLES)==32'
+        code = (f'import json, sys; sys.path.insert(0, {str(app)!r}); '
+                'import serveur, placenta_liaison; print(json.dumps(placenta_liaison.LIBELLES))')
         r=subprocess.run([sys.executable,'-I','-c',code],capture_output=True,text=True,cwd=self.base)
         self.assertEqual(r.returncode,0,r.stdout+r.stderr)
+        self.assertEqual(json.loads(r.stdout), LIBELLES)
 
     def test_cliches_inconnus_historique_et_conflit_atomique(self):
         before=self.versions();self.doc['liaison_versions']=before

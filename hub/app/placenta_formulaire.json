@@ -34,6 +34,61 @@
         "choix": []
       },
       {
+        "id": "releve_indication",
+        "label": "Indication",
+        "type": "unique",
+        "choix": [
+          "MFIU",
+          "IMG",
+          "Accouchement prématuré",
+          "Naissance vivante",
+          "Fausse couche tardive",
+          "Réduction / gémellaire",
+          "Autre"
+        ]
+      },
+      {
+        "id": "releve_indication_detail",
+        "label": "Indication — précision",
+        "type": "texte",
+        "choix": []
+      },
+      {
+        "id": "releve_terme_jours",
+        "label": "Terme — jours révolus",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "max": 6
+      },
+      {
+        "id": "releve_terme_source",
+        "label": "Datation",
+        "type": "unique",
+        "choix": [
+          "DDR",
+          "Écho T1",
+          "Inconnu"
+        ]
+      },
+      {
+        "id": "releve_masse_foetale",
+        "label": "Masse fœtale (g)",
+        "type": "nombre",
+        "choix": [],
+        "min": 0
+      },
+      {
+        "id": "releve_sexe",
+        "label": "Sexe fœtal",
+        "type": "unique",
+        "choix": [
+          "M",
+          "F",
+          "Ind."
+        ]
+      },
+      {
         "id": "macro_06",
         "label": "Forme",
         "type": "multiple",
@@ -41,7 +96,19 @@
           "ronde",
           "bi-partita",
           "tripartita",
-          "lobe accessoire"
+          "lobe accessoire",
+          "ovale",
+          "réniforme"
+        ]
+      },
+      {
+        "id": "releve_completude",
+        "label": "Complétude de la galette",
+        "type": "multiple",
+        "choix": [
+          "Complète",
+          "Déchirée",
+          "Prélèvement bactério"
         ]
       },
       {
@@ -54,7 +121,8 @@
           "marginale",
           "vélamenteuse",
           "circumvalee",
-          "autre"
+          "autre",
+          "furcata"
         ]
       },
       {
@@ -71,14 +139,113 @@
         "autre": true
       },
       {
+        "id": "releve_cordon_longueur",
+        "label": "Longueur du cordon (cm)",
+        "type": "nombre",
+        "choix": [],
+        "min": 0
+      },
+      {
+        "id": "releve_cordon_spiralisation",
+        "label": "Spiralisation du cordon",
+        "type": "unique",
+        "choix": [
+          "Normo",
+          "Hyper",
+          "Hypo"
+        ]
+      },
+      {
+        "id": "releve_cordon_particularites",
+        "label": "Particularités du cordon",
+        "type": "multiple",
+        "choix": [
+          "Palmure amniotique",
+          "Striction",
+          "Nœud vrai",
+          "Circulaire",
+          "Grêle",
+          "Hématome"
+        ]
+      },
+      {
+        "id": "releve_remarques_cordon",
+        "label": "Remarques sur le cordon",
+        "type": "texte",
+        "choix": []
+      },
+      {
         "id": "macro_09",
         "label": "Plaque choriale macro",
         "type": "multiple",
         "choix": [
           "Amnios noueux",
           "Métaplasie malpighienne",
-          "Kystes"
+          "Kystes",
+          "Normale",
+          "Opaque",
+          "Verdâtre",
+          "Hémorragique",
+          "Nodule(s)"
         ]
+      },
+      {
+        "id": "releve_remarques_choriale",
+        "label": "Remarques sur la plaque choriale",
+        "type": "texte",
+        "choix": []
+      },
+      {
+        "id": "releve_etat_basale",
+        "label": "Aspect de la plaque basale",
+        "type": "multiple",
+        "choix": [
+          "Normale",
+          "Hématome rétroplacentaire",
+          "Infarctus visible(s)",
+          "Calcifications",
+          "Fibrine"
+        ]
+      },
+      {
+        "id": "releve_remarques_basale",
+        "label": "Remarques sur la plaque basale",
+        "type": "texte",
+        "choix": []
+      },
+      {
+        "id": "releve_membranes_insertion",
+        "label": "Insertion des membranes",
+        "type": "unique",
+        "choix": [
+          "Normale",
+          "Marginée",
+          "Circumvallée"
+        ]
+      },
+      {
+        "id": "releve_membranes_marginee_pct",
+        "label": "Marginée ou circumvallée (% de la circonférence)",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "releve_membranes_aspect",
+        "label": "Aspect des membranes",
+        "type": "unique",
+        "choix": [
+          "Normal",
+          "Opaques",
+          "Beiges"
+        ]
+      },
+      {
+        "id": "releve_remarques_membranes",
+        "label": "Remarques sur les membranes",
+        "type": "texte",
+        "choix": []
       },
       {
         "id": "macro_10",
@@ -151,6 +318,67 @@
         "label": "thrombose intervilleuse",
         "type": "texte",
         "choix": []
+      },
+      {
+        "id": "releve_hematome_nombre",
+        "label": "Hématome décidual basal — nombre",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "pas": 1
+      },
+      {
+        "id": "releve_thrombose_intervilleuse_nombre",
+        "label": "Thrombose intervilleuse — nombre",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "pas": 1
+      },
+      {
+        "id": "releve_thrombose_intervilleuse_taille",
+        "label": "Thrombose intervilleuse — taille (cm)",
+        "type": "nombre",
+        "choix": [],
+        "min": 0
+      },
+      {
+        "id": "releve_nidf",
+        "label": "NIDF",
+        "type": "unique",
+        "choix": [
+          "Non",
+          "Oui"
+        ]
+      },
+      {
+        "id": "releve_nidf_pct",
+        "label": "Pourcentage de NIDF (%)",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "releve_remarques_tranches",
+        "label": "Remarques sur les tranches",
+        "type": "texte",
+        "choix": []
+      },
+      {
+        "id": "releve_commentaires_macro",
+        "label": "Commentaires",
+        "type": "texte",
+        "choix": [],
+        "multiligne": true
+      },
+      {
+        "id": "releve_inclusion_blocs",
+        "label": "Inclusion partielle (nombre de blocs)",
+        "type": "nombre",
+        "choix": [],
+        "min": 1,
+        "pas": 1
       }
     ]
   },
@@ -291,8 +519,28 @@
           "focal : avec plus de 30% du parenchyme esamine sur une lame",
           "diffus: avec plus de 30% du parenchyme examiné sur au moins deux lames",
           "lésions de chorangiose (plus de 10 capillaires dans plus de 10 villosités terminales)",
-          "dystrophies villositaires avec villosités de grande taille, anfractueuses, présentant"
-        ]
+          "dystrophies villositaires avec villosités de grande taille, anfractueuses, présentant",
+          "sans particularité",
+          "maturation en accord avec le terme",
+          "focales (moins de 20 % des villosités)",
+          "villosités avasculaires"
+        ],
+        "choix_hors_gemellaire": [28, 29, 30, 31]
+      },
+      {
+        "id": "releve_villosites_avasculaires_pct",
+        "label": "Environ — % du parenchyme examiné",
+        "type": "nombre",
+        "choix": [],
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "releve_commentaire_villosites",
+        "label": "Commentaire — Villosités",
+        "type": "texte",
+        "choix": [],
+        "multiligne": true
       },
       {
         "id": "micro_09",
@@ -315,6 +563,13 @@
         ]
       },
       {
+        "id": "releve_commentaire_intervilleuse",
+        "label": "Commentaire — Chambre intervilleuse",
+        "type": "texte",
+        "choix": [],
+        "multiligne": true
+      },
+      {
         "id": "micro_10",
         "label": "Lésions",
         "type": "multiple",
@@ -329,6 +584,13 @@
           "pseudokystes cytotrophoblastiques intraparenchymateux",
           "chorangiome"
         ]
+      },
+      {
+        "id": "releve_commentaire_lesions",
+        "label": "Commentaire — Lésions",
+        "type": "texte",
+        "choix": [],
+        "multiligne": true
       }
     ]
   },

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'hub/app'))
 import ingest
 from serveur import creer_app
+from placenta_liaison import DEFINITION
 
 
 def schema_releve():
@@ -48,6 +49,19 @@ def schema_releve():
                 champs[-1][2].append(line[2:])
         sections.append((titre, champs))
     return sections
+
+
+def schema_placenta():
+    return [[s['titre'], [[c['label'], c['type'], c['choix']] for c in s['champs']]] for s in DEFINITION]
+
+
+def verifier_preservation_releve():
+    for (titre, original), (titre_actuel, actuel) in zip(schema_releve(), schema_placenta()):
+        assert titre == titre_actuel
+        champs = {c[0]: c for c in actuel}
+        for label, typ, options in original:
+            assert champs[label][1] == typ
+            assert champs[label][2][:len(options)] == options
 
 
 def enveloppe(module, schema, **payload):
@@ -109,7 +123,7 @@ def main():
                 url = f'http://127.0.0.1:{serveur.server_port}'
                 module = context.request.get(url + '/api/modules').json()['placenta']
                 assert module['ingerable'] is True
-                assert (module['module'], module['schema_version'], module['module_version']) == ('placenta', '0.1.0', '1.2.0')
+                assert (module['module'], module['schema_version']) == ('placenta', '0.1.0')
                 page.goto(url + '/?dossier=DEMO_SLO_001')
                 page.locator('[data-o="m_placenta"]').wait_for()
                 assert page.locator('[data-o="m_placenta"]').inner_text().strip() == 'Placenta'
@@ -119,6 +133,7 @@ def main():
                 # Aucune initiale dans l'URL : la saisie doit être relue quand même.
                 page.goto(url + lien.get_attribute('href'))
                 page.wait_for_function('numeroCharge === "DEMO_SLO_001" && !charge')
+                assert module['module_version'] == page.evaluate('VERSION')
                 assert page.locator('#operateur').input_value() == 'TEST'
                 assert page.locator('#macro_02').input_value() == '10'
                 assert page.locator('input[name=micro_01]:checked').input_value() == 'aplati'
@@ -128,23 +143,27 @@ def main():
                 assert page.locator('#macro_16').input_value() == ''
                 print('OK navigation dossier et ouverture des trois sections déjà renseignées')
                 rendu = page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
-                attendu = json.loads(json.dumps(schema_releve(), ensure_ascii=False))
+                verifier_preservation_releve()
+                attendu = schema_placenta()
                 assert rendu == attendu, 'Divergence du relevé'
-                assert page.locator('fieldset').count() == 32
-                assert page.locator('label.chip input').count() == 154
+                assert page.locator('fieldset').count() == sum(len(champs) for _, champs in attendu)
+                assert page.locator('label.chip input').count() == sum(len(options) for _, champs in attendu for _, _, options in champs)
                 assert page.locator('[required]').count() == 0
-                for s, champs in attendu:
-                    for label, typ, choix in champs:
-                        group = page.get_by_role('group', name=label, exact=True)
+                for section in DEFINITION:
+                    for champ in section['champs']:
+                        typ, choix = champ['type'], champ['choix']
+                        group = page.locator('#g_' + champ['id'])
                         assert group.count() == 1
                         if typ == 'texte':
-                            assert group.locator('input[type=text]').count() == 1
+                            assert group.locator('input[type=text], textarea').count() == 1
                         elif typ == 'nombre':
                             assert group.locator('input[type=number]').count() == 1
                         else:
                             controle = 'checkbox' if typ == 'multiple' else 'radio'
-                            assert group.locator(f'input[type={controle}]').evaluate_all('(rs)=>rs.map(r=>r.value)') == choix
-                print('OK comparaison intégrale : 32 champs, 154 choix, ordre, types, intitulés et facultativité')
+                            valeurs = [group.locator(f'input#{champ["id"]}_{i}[type={controle}]').get_attribute('value')
+                                       for i in range(len(choix))]
+                            assert valeurs == choix
+                print('OK comparaison intégrale : trame étendue, relevé historique, ordre, types et facultativité')
                 # Un effacement précoce ne doit pas être annulé par une seconde reprise différée.
                 page.locator('#macro_02').fill('')
                 page.wait_for_timeout(900)
@@ -152,7 +171,7 @@ def main():
                 page.locator('#macro_02').fill('10')
                 print('OK effacement après ouverture sans reprise différée des anciennes valeurs')
                 # Vérifier les coches indépendantes, leur effacement et le texte libre.
-                cordon = page.get_by_role('group', name='Cordon', exact=True)
+                cordon = page.locator('#g_macro_08')
                 cordon.get_by_label('Autre + texte libre', exact=True).check()
                 cordon.get_by_role('textbox').fill('Insertion fictive — test libre')
                 page.get_by_role('group', name="Cordon d'insertion", exact=True).get_by_label('autre', exact=True).check()

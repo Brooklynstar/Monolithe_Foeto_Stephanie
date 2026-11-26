@@ -125,8 +125,89 @@
       #microscopie .row {
         row-gap: 1lh;
       }
-      #macroscopie > .row + .row {
-        margin-top: 1lh;
+      .dimensions-placenta,
+      .bloc-macro,
+      .tranches-placenta {
+        flex: 1 1 100%;
+      }
+      .ligne-macro {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+        align-items: end;
+        gap: 8px;
+      }
+      .ligne-macro input:not([type="radio"]) {
+        padding-inline: 6px;
+      }
+      .ligne-macro legend {
+        overflow-wrap: anywhere;
+      }
+      .tranches-placenta h4 {
+        margin: 12px 0 4px;
+        font-size: 14px;
+      }
+      .ligne-nidf {
+        grid-template-columns: auto minmax(0, 9rem);
+        justify-content: start;
+        margin: 12px 0;
+      }
+      .ligne-nidf .chips {
+        display: inline-flex;
+        vertical-align: middle;
+      }
+      .ligne-nidf .effacer {
+        margin: 0 0 0 6px;
+        min-height: 0;
+        padding: 4px 6px;
+      }
+      #g_releve_inclusion_blocs {
+        flex: 0 1 14rem;
+      }
+      .bloc-macro > h3 {
+        font-size: 12px;
+        color: var(--ink);
+      }
+      .bloc-macro + .bloc-macro {
+        margin-top: 4px;
+      }
+      #ecartPoidsPlacenta {
+        display: block;
+        padding: 9px 10px;
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        min-height: 42px;
+      }
+      .reference-placenta {
+        overflow-wrap: anywhere;
+      }
+      .micro-rubrique {
+        display: grid;
+        gap: 6px;
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+      .micro-rubrique > .chip {
+        justify-self: start;
+      }
+      .micro-retrait {
+        margin-inline-start: 12px;
+        padding-inline-start: 10px;
+        border-inline-start: 1px solid var(--rule);
+      }
+      .micro-rubrique h4 {
+        margin: 5px 0 0;
+        font-size: 14px;
+      }
+      .micro-avasculaires {
+        flex: 1 1 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      #g_releve_villosites_avasculaires_pct {
+        flex: 0 1 13rem;
       }
       .field {
         flex: 1 1 180px;
@@ -463,7 +544,7 @@
     <main class="wrap">
       <header>
         <p class="eyebrow">Fœtopathologie · placenta</p>
-        <h1>Placenta <span class="ver">v1.1.0</span></h1>
+        <h1>Placenta <span class="ver" id="ver"></span></h1>
         <p class="sub">
           Macroscopie, microscopie et conclusion — sections 18 à 20 du
           formulaire.
@@ -510,332 +591,53 @@
       </p>
     </main>
     <!-- BEGIN percentiles_placenta.js -->
-    <script>
-      // SPDX-License-Identifier: CC-BY-NC-SA-4.0
-      var PlacentaPercentiles = (function () {
-        var references =
-          /* BEGIN REFERENCES */
-          {
-            Redline: {
-              18: {
-                moyenne: 107,
-                sd: 23,
-                P10: 52,
-                P50: 89,
-                P90: 181,
-                source: "Extrapol",
-              },
-              19: {
-                moyenne: 113,
-                sd: 25,
-                P10: 56,
-                P50: 94,
-                P90: 196,
-                source: "Extrapol",
-              },
-              20: {
-                moyenne: 130,
-                sd: 26,
-                P10: 82,
-                P50: 110,
-                P90: 214,
-                source: "Extrapol",
-              },
-              21: {
-                moyenne: 150,
-                sd: 25,
-                P10: 95,
-                P50: 130,
-                P90: 230,
-                source: "Extrapol",
-              },
-              22: {
-                moyenne: 189,
-                sd: 89,
-                P10: 107,
-                P50: 166,
-                P90: 285,
-                source: "Redline",
-              },
-              23: {
-                moyenne: 190,
-                sd: 41,
-                P10: 127,
-                P50: 188,
-                P90: 262,
-                source: "Redline",
-              },
-              24: {
-                moyenne: 190,
-                sd: 42,
-                P10: 128,
-                P50: 192,
-                P90: 252,
-                source: "Redline",
-              },
-              25: {
-                moyenne: 197,
-                sd: 70,
-                P10: 128,
-                P50: 184,
-                P90: 299,
-                source: "Redline",
-              },
-              26: {
-                moyenne: 226,
-                sd: 100,
-                P10: 138,
-                P50: 200,
-                P90: 281,
-                source: "Redline",
-              },
-              27: {
-                moyenne: 240,
-                sd: 77,
-                P10: 130,
-                P50: 242,
-                P90: 332,
-                source: "Redline",
-              },
-              28: {
-                moyenne: 223,
-                sd: 66,
-                P10: 140,
-                P50: 214,
-                P90: 321,
-                source: "Redline",
-              },
-              29: {
-                moyenne: 269,
-                sd: 96,
-                P10: 161,
-                P50: 252,
-                P90: 352,
-                source: "Redline",
-              },
-              30: {
-                moyenne: 324,
-                sd: 88,
-                P10: 208,
-                P50: 316,
-                P90: 433,
-                source: "Redline",
-              },
-              31: {
-                moyenne: 314,
-                sd: 105,
-                P10: 175,
-                P50: 313,
-                P90: 417,
-                source: "Redline",
-              },
-              32: {
-                moyenne: 325,
-                sd: 77,
-                P10: 241,
-                P50: 318,
-                P90: 436,
-                source: "Redline",
-              },
-              33: {
-                moyenne: 351,
-                sd: 83,
-                P10: 252,
-                P50: 352,
-                P90: 446,
-                source: "Redline",
-              },
-              34: {
-                moyenne: 381,
-                sd: 84,
-                P10: 283,
-                P50: 382,
-                P90: 479,
-                source: "Redline",
-              },
-              35: {
-                moyenne: 411,
-                sd: 99,
-                P10: 291,
-                P50: 401,
-                P90: 544,
-                source: "Redline",
-              },
-              36: {
-                moyenne: 447,
-                sd: 110,
-                P10: 320,
-                P50: 440,
-                P90: 580,
-                source: "Redline",
-              },
-              37: {
-                moyenne: 467,
-                sd: 107,
-                P10: 349,
-                P50: 452,
-                P90: 607,
-                source: "Redline",
-              },
-              38: {
-                moyenne: 493,
-                sd: 103,
-                P10: 365,
-                P50: 484,
-                P90: 629,
-                source: "Redline",
-              },
-              39: {
-                moyenne: 500,
-                sd: 103,
-                P10: 379,
-                P50: 490,
-                P90: 635,
-                source: "Redline",
-              },
-              40: {
-                moyenne: 510,
-                sd: 100,
-                P10: 390,
-                P50: 501,
-                P90: 643,
-                source: "Redline",
-              },
-              41: {
-                moyenne: 524,
-                sd: 100,
-                P10: 403,
-                P50: 515,
-                P90: 655,
-                source: "Redline",
-              },
-              42: {
-                moyenne: 532,
-                sd: 99,
-                P10: 412,
-                P50: 525,
-                P90: 658,
-                source: "Redline",
-              },
-            },
-          };
-        /* END REFERENCES */ function calculer(sa, masse, conditions) {
-          var out = {
-            terme_sa: sa,
-            masse_g: masse,
-            conditions_masse: conditions,
-            reference: "Redline",
-            z_brut: null,
-            position_percentile: null,
-            percentile_exact: null,
-            seuils: null,
-            motif: null,
-            methode:
-              "position parmi P10, P50, P90 publiés ; pas de loi normale ni interpolation",
-            limite_mb:
-              "Müller-Brochut : moyenne/ET présents dans le calculateur, distribution et protocole non établis ; aucun percentile exact déduit.",
-          };
-          if (!Number.isInteger(sa)) {
-            out.motif =
-              "Terme entier nécessaire, sans arrondi ni extrapolation.";
-            return out;
-          }
-          if (
-            typeof masse !== "number" ||
-            !Number.isFinite(masse) ||
-            masse < 0
-          ) {
-            out.motif = "Masse manquante ou invalide.";
-            return out;
-          }
-          if (conditions !== "fraiche_paree") {
-            out.motif =
-              "Référence non appliquée : préciser un poids frais paré ; poids fixé ou protocole inconnu non comparé.";
-            return out;
-          }
-          var ref = references.Redline[sa];
-          if (!ref || ref.source !== "Redline") {
-            out.motif =
-              "Pas de quantiles publiés exploités à ce terme (22–42 SA) ; valeurs extrapolées 18–21 exclues.";
-            return out;
-          }
-          out.z_brut = (masse - ref.moyenne) / ref.sd;
-          out.seuils = { P10: ref.P10, P50: ref.P50, P90: ref.P90 };
-          out.position_percentile =
-            masse === ref.P10
-              ? "P10"
-              : masse === ref.P50
-                ? "P50"
-                : masse === ref.P90
-                  ? "P90"
-                  : masse < ref.P10
-                    ? "< P10"
-                    : masse < ref.P50
-                      ? "P10–P50"
-                      : masse < ref.P90
-                        ? "P50–P90"
-                        : "> P90";
-          return out;
-        }
-        function html(r) {
-          function e(s) {
-            return String(s)
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;");
-          }
-          var titres = [
-            "Valeur",
-            "Référence",
-            "Z-score",
-            "Position percentile",
-            "Limite",
-          ];
-          var cells = [
-            r.masse_g == null ? null : r.masse_g + " g",
-            r.reference,
-            r.z_brut == null
-              ? null
-              : (r.z_brut >= 0 ? "+" : "") + r.z_brut.toFixed(2) + " DS",
-            r.position_percentile,
-            r.motif,
-          ];
-          var style =
-            "border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none";
-          return (
-            "<table style=\"font:11pt Cambria,'Times New Roman',serif;border-collapse:collapse;width:100%\"><thead><tr>" +
-            titres
-              .map(function (t, i) {
-                return cells[i] == null
-                  ? ""
-                  : '<th style="' +
-                      style +
-                      ';white-space:nowrap">' +
-                      e(t) +
-                      "</th>";
-              })
-              .join("") +
-            "</tr></thead><tbody><tr>" +
-            cells
-              .map(function (c) {
-                return c == null
-                  ? ""
-                  : '<td style="' + style + '">' + e(c) + "</td>";
-              })
-              .join("") +
-            "</tr></tbody></table>"
-          );
-        }
-        return { calculer: calculer, html: html };
-      })();
-    </script>
-    <!-- END percentiles_placenta.js -->
+<script>
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+var PlacentaPercentiles=(function(){
+  var references=/* BEGIN REFERENCES */
+{"Redline":{"18":{"moyenne":107,"sd":23,"P10":52,"P50":89,"P90":181,"source":"Extrapol"},"19":{"moyenne":113,"sd":25,"P10":56,"P50":94,"P90":196,"source":"Extrapol"},"20":{"moyenne":130,"sd":26,"P10":82,"P50":110,"P90":214,"source":"Extrapol"},"21":{"moyenne":150,"sd":25,"P10":95,"P50":130,"P90":230,"source":"Extrapol"},"22":{"moyenne":189,"sd":89,"P10":107,"P50":166,"P90":285,"source":"Redline"},"23":{"moyenne":190,"sd":41,"P10":127,"P50":188,"P90":262,"source":"Redline"},"24":{"moyenne":190,"sd":42,"P10":128,"P50":192,"P90":252,"source":"Redline"},"25":{"moyenne":197,"sd":70,"P10":128,"P50":184,"P90":299,"source":"Redline"},"26":{"moyenne":226,"sd":100,"P10":138,"P50":200,"P90":281,"source":"Redline"},"27":{"moyenne":240,"sd":77,"P10":130,"P50":242,"P90":332,"source":"Redline"},"28":{"moyenne":223,"sd":66,"P10":140,"P50":214,"P90":321,"source":"Redline"},"29":{"moyenne":269,"sd":96,"P10":161,"P50":252,"P90":352,"source":"Redline"},"30":{"moyenne":324,"sd":88,"P10":208,"P50":316,"P90":433,"source":"Redline"},"31":{"moyenne":314,"sd":105,"P10":175,"P50":313,"P90":417,"source":"Redline"},"32":{"moyenne":325,"sd":77,"P10":241,"P50":318,"P90":436,"source":"Redline"},"33":{"moyenne":351,"sd":83,"P10":252,"P50":352,"P90":446,"source":"Redline"},"34":{"moyenne":381,"sd":84,"P10":283,"P50":382,"P90":479,"source":"Redline"},"35":{"moyenne":411,"sd":99,"P10":291,"P50":401,"P90":544,"source":"Redline"},"36":{"moyenne":447,"sd":110,"P10":320,"P50":440,"P90":580,"source":"Redline"},"37":{"moyenne":467,"sd":107,"P10":349,"P50":452,"P90":607,"source":"Redline"},"38":{"moyenne":493,"sd":103,"P10":365,"P50":484,"P90":629,"source":"Redline"},"39":{"moyenne":500,"sd":103,"P10":379,"P50":490,"P90":635,"source":"Redline"},"40":{"moyenne":510,"sd":100,"P10":390,"P50":501,"P90":643,"source":"Redline"},"41":{"moyenne":524,"sd":100,"P10":403,"P50":515,"P90":655,"source":"Redline"},"42":{"moyenne":532,"sd":99,"P10":412,"P50":525,"P90":658,"source":"Redline"}}}
+/* END REFERENCES */;
+  function calculer(sa,masse,conditions){
+    var out={terme_sa:sa,masse_g:masse,conditions_masse:conditions,reference:'Redline',z_brut:null,
+      position_percentile:null,percentile_exact:null,percentile_numerique:null,percentile_interpole:null,seuils:null,motif:null,
+      methode:'Interpolation linéaire entre P10, P50 et P90 ; sans extrapolation ni loi normale.',
+      limite_mb:'Müller-Brochut : moyenne/ET présents dans le calculateur, distribution et protocole non établis ; aucun percentile exact déduit.'};
+    if(!Number.isInteger(sa)){out.motif='Terme entier nécessaire, sans arrondi ni extrapolation.';return out;}
+    if(typeof masse!=='number'||!Number.isFinite(masse)||masse<0){out.motif='Masse manquante ou invalide.';return out;}
+    if(conditions!=='fraiche_paree'){out.motif='Référence non appliquée : préciser un poids frais paré ; poids fixé ou protocole inconnu non comparé.';return out;}
+    var ref=references.Redline[sa];
+    if(!ref||ref.source!=='Redline'){out.motif='Pas de quantiles publiés exploités à ce terme (22–42 SA) ; valeurs extrapolées 18–21 exclues.';return out;}
+    out.z_brut=(masse-ref.moyenne)/ref.sd;
+    out.seuils={P10:ref.P10,P50:ref.P50,P90:ref.P90};
+    out.position_percentile=masse===ref.P10?'P10':masse===ref.P50?'P50':masse===ref.P90?'P90':masse<ref.P10?'< P10':masse<ref.P50?'P10–P50':masse<ref.P90?'P50–P90':'> P90';
+    const {P10, P50, P90} = ref;
+    if (!(P10 < P50 && P50 < P90) || masse < P10 || masse > P90) return out;
+    const [bas, haut, pBas] = masse <= P50 ? [P10, P50, 10] : [P50, P90, 50];
+    const p = pBas + 40 * (masse - bas) / (haut - bas);
+    out.percentile_numerique = Math.floor(p * 10 + 0.5) / 10;
+    out.percentile_interpole = ![P10, P50, P90].includes(masse);
+    return out;
+  }
+  function libellePercentile(r) {
+    if (r.percentile_numerique == null) return r.position_percentile;
+    return 'P' + String(r.percentile_numerique).replace('.', ',') + (r.percentile_interpole ? ' estimé' : '');
+  }
+  function html(r){
+    function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    var titres=['Valeur','Référence','Z-score','Percentile','Limite'];
+    var cells=[r.masse_g==null?null:r.masse_g+' g',r.reference,r.z_brut==null?null:(r.z_brut>=0?'+':'')+r.z_brut.toFixed(2)+' DS',libellePercentile(r),r.motif];
+    var style='border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none';
+    return '<table style="font:11pt Cambria,\'Times New Roman\',serif;border-collapse:collapse;width:100%"><thead><tr>'+titres.map(function(t,i){return cells[i]==null?'':'<th style="'+style+';white-space:nowrap">'+e(t)+'</th>';}).join('')+'</tr></thead><tbody><tr>'+cells.map(function(c){return c==null?'':'<td style="'+style+'">'+e(c)+'</td>';}).join('')+'</tr></tbody></table>';
+  }
+  return {calculer:calculer,html:html,libellePercentile:libellePercentile};
+})();
+</script>
+<!-- END percentiles_placenta.js -->
     <script>
       "use strict";
 var MODULE = "placenta";
 var SCHEMA = "0.1.0";
-var VERSION = "1.2.0";
+var VERSION = "1.7.1";
       // Ce module attend sa propre lecture avant toute saisie, même sans opérateur dans l’URL.
       var HUB_REPRISE_AUTO = false;
       var SECTIONS = [
@@ -844,145 +646,382 @@ var VERSION = "1.2.0";
           titre: "Macroscopie",
           champs: [
             {
-              id: "macro_01",
-              label: "Poids du placenta en g",
-              type: "texte",
-              choix: [],
+              "id": "macro_01",
+              "label": "Poids du placenta en g",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_02",
-              label: "Percentile placenta",
-              type: "texte",
-              choix: [],
+              "id": "macro_02",
+              "label": "Percentile placenta",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_03",
-              label: "Longueur placenta en cm",
-              type: "texte",
-              choix: [],
+              "id": "macro_03",
+              "label": "Longueur placenta en cm",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_04",
-              label: "largeur placenta en cm",
-              type: "texte",
-              choix: [],
+              "id": "macro_04",
+              "label": "largeur placenta en cm",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_05",
-              label: "Epaisseur placenta en cm",
-              type: "texte",
-              choix: [],
+              "id": "macro_05",
+              "label": "Epaisseur placenta en cm",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_06",
-              label: "Forme",
-              type: "multiple",
-              choix: ["ronde", "bi-partita", "tripartita", "lobe accessoire"],
+              "id": "releve_indication",
+              "label": "Indication",
+              "type": "unique",
+              "choix": [
+                "MFIU",
+                "IMG",
+                "Accouchement prématuré",
+                "Naissance vivante",
+                "Fausse couche tardive",
+                "Réduction / gémellaire",
+                "Autre"
+              ]
             },
             {
-              id: "macro_07",
-              label: "Cordon d'insertion",
-              type: "multiple",
-              choix: [
+              "id": "releve_indication_detail",
+              "label": "Indication — précision",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "releve_terme_jours",
+              "label": "Terme — jours révolus",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "max": 6
+            },
+            {
+              "id": "releve_terme_source",
+              "label": "Datation",
+              "type": "unique",
+              "choix": [
+                "DDR",
+                "Écho T1",
+                "Inconnu"
+              ]
+            },
+            {
+              "id": "releve_masse_foetale",
+              "label": "Masse fœtale (g)",
+              "type": "nombre",
+              "choix": [],
+              "min": 0
+            },
+            {
+              "id": "releve_sexe",
+              "label": "Sexe fœtal",
+              "type": "unique",
+              "choix": [
+                "M",
+                "F",
+                "Ind."
+              ]
+            },
+            {
+              "id": "macro_06",
+              "label": "Forme",
+              "type": "multiple",
+              "choix": [
+                "ronde",
+                "bi-partita",
+                "tripartita",
+                "lobe accessoire",
+                "ovale",
+                "réniforme"
+              ]
+            },
+            {
+              "id": "releve_completude",
+              "label": "Complétude de la galette",
+              "type": "multiple",
+              "choix": [
+                "Complète",
+                "Déchirée",
+                "Prélèvement bactério"
+              ]
+            },
+            {
+              "id": "macro_07",
+              "label": "Cordon d'insertion",
+              "type": "multiple",
+              "choix": [
                 "centrale",
                 "paracentrale",
                 "marginale",
                 "vélamenteuse",
                 "circumvalee",
                 "autre",
-              ],
+                "furcata"
+              ]
             },
             {
-              id: "macro_08",
-              label: "Cordon",
-              type: "multiple",
-              choix: [
+              "id": "macro_08",
+              "label": "Cordon",
+              "type": "multiple",
+              "choix": [
                 "deux artères une veine",
                 "artère ombilicale unique",
                 "hyperspiralé",
                 "Thrombose vasculaire",
-                "Autre + texte libre",
+                "Autre + texte libre"
               ],
-              autre: true,
+              "autre": true
             },
             {
-              id: "macro_09",
-              label: "Plaque choriale macro",
-              type: "multiple",
-              choix: ["Amnios noueux", "Métaplasie malpighienne", "Kystes"],
+              "id": "releve_cordon_longueur",
+              "label": "Longueur du cordon (cm)",
+              "type": "nombre",
+              "choix": [],
+              "min": 0
             },
             {
-              id: "macro_10",
-              label: "infarctus nombre",
-              type: "texte",
-              choix: [],
+              "id": "releve_cordon_spiralisation",
+              "label": "Spiralisation du cordon",
+              "type": "unique",
+              "choix": [
+                "Normo",
+                "Hyper",
+                "Hypo"
+              ]
             },
             {
-              id: "macro_11",
-              label: "infarctus pourcentage de la galette en %",
-              type: "texte",
-              choix: [],
+              "id": "releve_cordon_particularites",
+              "label": "Particularités du cordon",
+              "type": "multiple",
+              "choix": [
+                "Palmure amniotique",
+                "Striction",
+                "Nœud vrai",
+                "Circulaire",
+                "Grêle",
+                "Hématome"
+              ]
             },
             {
-              id: "macro_12",
-              label: "infarctus taille minimale en cm",
-              type: "texte",
-              choix: [],
+              "id": "releve_remarques_cordon",
+              "label": "Remarques sur le cordon",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_13",
-              label: "infarctus taille maximale en cm",
-              type: "texte",
-              choix: [],
+              "id": "macro_09",
+              "label": "Plaque choriale macro",
+              "type": "multiple",
+              "choix": [
+                "Amnios noueux",
+                "Métaplasie malpighienne",
+                "Kystes",
+                "Normale",
+                "Opaque",
+                "Verdâtre",
+                "Hémorragique",
+                "Nodule(s)"
+              ]
             },
             {
-              id: "macro_14",
-              label: "Thrombose sous-choriale nombre",
-              type: "texte",
-              choix: [],
+              "id": "releve_remarques_choriale",
+              "label": "Remarques sur la plaque choriale",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_15",
-              label: "Thrombose sous-choriale taille max en cm",
-              type: "texte",
-              choix: [],
+              "id": "releve_etat_basale",
+              "label": "Aspect de la plaque basale",
+              "type": "multiple",
+              "choix": [
+                "Normale",
+                "Hématome rétroplacentaire",
+                "Infarctus visible(s)",
+                "Calcifications",
+                "Fibrine"
+              ]
             },
             {
-              id: "macro_16",
-              label: "Thrombose sous-choriale épaisseur max en cm",
-              type: "nombre",
-              choix: [],
+              "id": "releve_remarques_basale",
+              "label": "Remarques sur la plaque basale",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_17",
-              label: "Hématome décidual basal Taille maximale en cm",
-              type: "texte",
-              choix: [],
+              "id": "releve_membranes_insertion",
+              "label": "Insertion des membranes",
+              "type": "unique",
+              "choix": [
+                "Normale",
+                "Marginée",
+                "Circumvallée"
+              ]
             },
             {
-              id: "macro_18",
-              label: "Hématome décidual basal épaisseur maximale en cm",
-              type: "texte",
-              choix: [],
+              "id": "releve_membranes_marginee_pct",
+              "label": "Marginée ou circumvallée (% de la circonférence)",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "max": 100
             },
             {
-              id: "macro_19",
-              label: "Kyste trophoblastique nombre",
-              type: "texte",
-              choix: [],
+              "id": "releve_membranes_aspect",
+              "label": "Aspect des membranes",
+              "type": "unique",
+              "choix": [
+                "Normal",
+                "Opaques",
+                "Beiges"
+              ]
             },
             {
-              id: "macro_20",
-              label: "Kyste trophoblastique taille maximale en cm",
-              type: "texte",
-              choix: [],
+              "id": "releve_remarques_membranes",
+              "label": "Remarques sur les membranes",
+              "type": "texte",
+              "choix": []
             },
             {
-              id: "macro_21",
-              label: "thrombose intervilleuse",
-              type: "texte",
-              choix: [],
+              "id": "macro_10",
+              "label": "infarctus nombre",
+              "type": "texte",
+              "choix": []
             },
+            {
+              "id": "macro_11",
+              "label": "infarctus pourcentage de la galette en %",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_12",
+              "label": "infarctus taille minimale en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_13",
+              "label": "infarctus taille maximale en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_14",
+              "label": "Thrombose sous-choriale nombre",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_15",
+              "label": "Thrombose sous-choriale taille max en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_16",
+              "label": "Thrombose sous-choriale épaisseur max en cm",
+              "type": "nombre",
+              "choix": []
+            },
+            {
+              "id": "macro_17",
+              "label": "Hématome décidual basal Taille maximale en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_18",
+              "label": "Hématome décidual basal épaisseur maximale en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_19",
+              "label": "Kyste trophoblastique nombre",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_20",
+              "label": "Kyste trophoblastique taille maximale en cm",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "macro_21",
+              "label": "thrombose intervilleuse",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "releve_hematome_nombre",
+              "label": "Hématome décidual basal — nombre",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "pas": 1
+            },
+            {
+              "id": "releve_thrombose_intervilleuse_nombre",
+              "label": "Thrombose intervilleuse — nombre",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "pas": 1
+            },
+            {
+              "id": "releve_thrombose_intervilleuse_taille",
+              "label": "Thrombose intervilleuse — taille (cm)",
+              "type": "nombre",
+              "choix": [],
+              "min": 0
+            },
+            {
+              "id": "releve_nidf",
+              "label": "NIDF",
+              "type": "unique",
+              "choix": [
+                "Non",
+                "Oui"
+              ]
+            },
+            {
+              "id": "releve_nidf_pct",
+              "label": "Pourcentage de NIDF (%)",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "max": 100
+            },
+            {
+              "id": "releve_remarques_tranches",
+              "label": "Remarques sur les tranches",
+              "type": "texte",
+              "choix": []
+            },
+            {
+              "id": "releve_commentaires_macro",
+              "label": "Commentaires",
+              "type": "texte",
+              "choix": [],
+              "multiligne": true
+            },
+            {
+              "id": "releve_inclusion_blocs",
+              "label": "Inclusion partielle (nombre de blocs)",
+              "type": "nombre",
+              "choix": [],
+              "min": 1,
+              "pas": 1
+            }
           ],
         },
         {
@@ -1123,7 +1162,27 @@ var VERSION = "1.2.0";
                 "diffus: avec plus de 30% du parenchyme examiné sur au moins deux lames",
                 "lésions de chorangiose (plus de 10 capillaires dans plus de 10 villosités terminales)",
                 "dystrophies villositaires avec villosités de grande taille, anfractueuses, présentant",
+                "sans particularité",
+                "maturation en accord avec le terme",
+                "focales (moins de 20 % des villosités)",
+                "villosités avasculaires",
               ],
+              choix_hors_gemellaire: [28, 29, 30, 31],
+            },
+            {
+              "id": "releve_villosites_avasculaires_pct",
+              "label": "Environ — % du parenchyme examiné",
+              "type": "nombre",
+              "choix": [],
+              "min": 0,
+              "max": 100
+            },
+            {
+              "id": "releve_commentaire_villosites",
+              "label": "Commentaire — Villosités",
+              "type": "texte",
+              "choix": [],
+              "multiligne": true
             },
             {
               id: "micro_09",
@@ -1146,6 +1205,13 @@ var VERSION = "1.2.0";
               ],
             },
             {
+              "id": "releve_commentaire_intervilleuse",
+              "label": "Commentaire — Chambre intervilleuse",
+              "type": "texte",
+              "choix": [],
+              "multiligne": true
+            },
+            {
               id: "micro_10",
               label: "Lésions",
               type: "multiple",
@@ -1160,6 +1226,13 @@ var VERSION = "1.2.0";
                 "pseudokystes cytotrophoblastiques intraparenchymateux",
                 "chorangiome",
               ],
+            },
+            {
+              "id": "releve_commentaire_lesions",
+              "label": "Commentaire — Lésions",
+              "type": "texte",
+              "choix": [],
+              "multiligne": true
             },
           ],
         },
@@ -1212,6 +1285,10 @@ var VERSION = "1.2.0";
         },
       ];
       var liaison = null;
+      var VILLOSITES = {
+        normalAncien: 0, focalAncien: 2, avasculaireAncien: 14,
+        normal: 28, maturation: 29, focal: 30, avasculaire: 31
+      };
       var percentileAuto = true;
       var documentLu = {},
         charge = false,
@@ -1220,10 +1297,124 @@ var VERSION = "1.2.0";
       var el = function (id) {
         return document.getElementById(id);
       };
+      el("ver").textContent = "v" + VERSION;
       function element(tag, texte) {
         var e = document.createElement(tag);
         if (texte !== undefined) e.textContent = texte;
         return e;
+      }
+      function placerChamps(ligne, champs) {
+        Object.entries(champs).forEach(function ([id, titre]) {
+          var champ = el("g_" + id);
+          champ.setAttribute("aria-label", el("l_" + id).textContent);
+          el(id).setAttribute("aria-label", el("l_" + id).textContent);
+          el(id).removeAttribute("aria-labelledby");
+          el("l_" + id).textContent = titre;
+          ligne.append(champ);
+        });
+      }
+      function mettreEnPageMacroscopie(row, calcul) {
+        function rubrique(nom, champs) {
+          var bloc = element("div");
+          bloc.className = "bloc-macro";
+          var titre = element("h3", nom);
+          titre.className = "sousTitre";
+          var contenu = element("div");
+          contenu.className = "row";
+          contenu.append(...champs.map(id => el("g_" + id)));
+          bloc.append(titre, contenu);
+          row.append(bloc);
+          return contenu;
+        }
+        var galette = rubrique("Galette placentaire", ["macro_01", "macro_02", "macro_06", "releve_completude"]);
+        var ecart = element("div");
+        ecart.className = "field";
+        ecart.innerHTML = '<label for="ecartPoidsPlacenta">Écart à la moyenne selon Redline (DS)</label>' +
+          '<output id="ecartPoidsPlacenta" for="macro_01 terme_sa conditions_masse">—</output>';
+        galette.insertBefore(ecart, el("g_macro_06"));
+        var dimensions = element("div");
+        dimensions.className = "dimensions-placenta ligne-macro";
+        galette.insertBefore(dimensions, el("g_macro_06"));
+        placerChamps(dimensions, {macro_03: "Longueur (cm)", macro_04: "Largeur (cm)", macro_05: "Épaisseur (cm)"});
+        galette.append(calcul, ...["releve_indication", "releve_indication_detail", "releve_terme_jours",
+          "releve_terme_source", "releve_masse_foetale", "releve_sexe"].map(id => el("g_" + id)));
+
+        rubrique("Membranes", ["releve_membranes_insertion", "releve_membranes_marginee_pct",
+          "releve_membranes_aspect", "releve_remarques_membranes"]);
+        rubrique("Cordon", ["macro_07", "releve_cordon_longueur", "macro_08",
+          "releve_cordon_spiralisation", "releve_cordon_particularites", "releve_remarques_cordon"]);
+        el("l_macro_08").textContent = "Vaisseaux et constatations du cordon";
+        rubrique("Plaque choriale", ["macro_09", "releve_remarques_choriale"]);
+        rubrique("Plaque basale", ["releve_etat_basale", "releve_remarques_basale"]);
+        var tranches = rubrique("Tranches de section", []);
+        tranches.className = "tranches-placenta";
+        [
+          ["Infarctus", {macro_10: "Nombre", macro_11: "Galette (%)", macro_12: "Taille min. (cm)", macro_13: "Taille max. (cm)"}],
+          ["Thrombose sous-choriale", {macro_14: "Nombre", macro_15: "Taille max. (cm)", macro_16: "Épaisseur max. (cm)"}],
+          ["Hématome décidual basal", {releve_hematome_nombre: "Nombre", macro_17: "Taille max. (cm)", macro_18: "Épaisseur max. (cm)"}],
+          ["Kyste trophoblastique", {macro_19: "Nombre", macro_20: "Taille max. (cm)"}],
+          ["Thrombose intervilleuse", {releve_thrombose_intervilleuse_nombre: "Nombre", releve_thrombose_intervilleuse_taille: "Taille (cm)"}],
+        ].forEach(function ([nom, champs]) {
+          var ligne = element("div");
+          ligne.className = "ligne-macro";
+          tranches.append(element("h4", nom), ligne);
+          placerChamps(ligne, champs);
+          if (champs.macro_16) tranches.append(el("alerteEpaisseur"));
+        });
+        var nidf = element("div");
+        nidf.className = "ligne-macro ligne-nidf";
+        nidf.append(el("g_releve_nidf"), el("g_releve_nidf_pct"));
+        el("l_macro_21").textContent = "Thrombose intervilleuse — description antérieure";
+        el("g_macro_21").hidden = true;
+        tranches.append(el("g_macro_21"));
+        tranches.append(nidf, el("g_releve_remarques_tranches"));
+        row.append(el("g_releve_commentaires_macro"), el("g_releve_inclusion_blocs"));
+      }
+      function choixMicro(id, index) {
+        return el(id + "_" + index).parentElement;
+      }
+      function grouperMicro(parent, titre, details) {
+        var rubrique = element("div");
+        rubrique.className = "micro-rubrique";
+        var retrait = element("div");
+        retrait.className = "chips micro-retrait";
+        parent.before(rubrique);
+        retrait.append(...details);
+        rubrique.append(titre, retrait);
+      }
+      function mettreEnPageMicroscopie() {
+        var plaque = element("div");
+        plaque.id = "micro-plaque-choriale";
+        plaque.className = "micro-rubrique";
+        var titre = element("h3", "Plaque choriale");
+        titre.className = "sousTitre";
+        el("g_micro_04").before(plaque);
+        plaque.append(titre);
+        for (var [id, rubrique] of [["micro_05", "Vaisseaux"], ["micro_04", "Amnios"], ["micro_06", "Inflammation"]]) {
+          el("l_" + id).textContent = rubrique;
+          plaque.append(el("g_" + id));
+        }
+
+        var villosites = el("g_micro_08").querySelector(".chips");
+        var options = Array.from(villosites.children);
+        options[3].querySelector("span").textContent = "diffuses (plus de 25 % des villosités)";
+        options[7].querySelector("span").textContent = "lésions de malperfusion vasculaire d’origine fœtale";
+        villosites.prepend(options[VILLOSITES.normal], options[VILLOSITES.maturation]);
+        options[VILLOSITES.normalAncien].hidden = true;
+        options[VILLOSITES.avasculaireAncien].hidden = true;
+        grouperMicro(options[1], options[1], [options[VILLOSITES.focal], options[VILLOSITES.focalAncien], options[3]]);
+        options[VILLOSITES.focalAncien].querySelector("span").textContent += " — réponse antérieure";
+        grouperMicro(options[4], options[4], options.slice(5, 7));
+        var avasculaires = element("div");
+        avasculaires.className = "micro-avasculaires";
+        avasculaires.append(options[VILLOSITES.avasculaire], el("g_releve_villosites_avasculaires_pct"));
+        grouperMicro(options[7], options[7], [...options.slice(8, 14), avasculaires]);
+        grouperMicro(options[15], options[15], options.slice(16, 23));
+        grouperMicro(options[23], options[23], options.slice(24, 26));
+
+        var intervilleuse = Array.from(el("g_micro_09").querySelector(".chips").children);
+        grouperMicro(intervilleuse[4], element("h4", "Calcifications"), intervilleuse.slice(4, 8));
+        grouperMicro(intervilleuse[8], element("h4", "Infiltrat inflammatoire chronique"), intervilleuse.slice(8));
       }
       SECTIONS.forEach(function (s) {
         var section = element("section");
@@ -1239,21 +1430,21 @@ var VERSION = "1.2.0";
         row.className = "row";
         section.appendChild(row);
         s.champs.forEach(function (c) {
-          if (["macro_14", "macro_17", "macro_19", "macro_21"].includes(c.id)) {
-            row = element("div");
-            row.className = "row";
-            section.appendChild(row);
-          }
           var f = element("fieldset");
           f.id = "g_" + c.id;
-          f.className = "field" + (c.choix.length ? " large" : "");
+          f.className = "field" + (c.choix.length || c.multiligne ? " large" : "");
           var legend = element("legend", c.label);
           legend.id = "l_" + c.id;
           f.appendChild(legend);
           if (!c.choix.length) {
-            var input = element("input");
-            input.type = c.type === "nombre" ? "number" : "text";
-            if (c.type === "nombre") input.step = "any";
+            var input = element(c.multiligne ? "textarea" : "input");
+            if (c.multiligne) input.rows = 3;
+            else input.type = c.type === "nombre" ? "number" : "text";
+            if (c.type === "nombre") {
+              input.step = c.pas ?? "any";
+              if (c.min != null) input.min = c.min;
+              if (c.max != null) input.max = c.max;
+            }
             input.id = c.id;
             input.setAttribute("aria-labelledby", legend.id);
             f.appendChild(input);
@@ -1296,7 +1487,7 @@ var VERSION = "1.2.0";
                 majAutre(c);
               });
             }
-            var clear = element("button", "Effacer la réponse");
+            var clear = element("button", c.id === "releve_nidf" ? "Effacer" : "Effacer la réponse");
             clear.type = "button";
             clear.className = "mini effacer";
             clear.setAttribute("aria-label", "Effacer : " + c.label);
@@ -1319,12 +1510,25 @@ var VERSION = "1.2.0";
           var calcul = element("div");
           calcul.className = "calcul";
           calcul.innerHTML =
-            '<div class="sousTitre">Percentiles du poids placentaire</div><div class="row"><div class="field"><label for="terme_sa">Terme en SA</label><input type="number" id="terme_sa" step="1" min="0"><div class="hint" id="termeOrigine"></div></div><div class="field"><label for="conditions_masse">Conditions de pesée</label><select id="conditions_masse"><option value="non_documentees">Non précisées / pièce non parée</option><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option></select></div></div><div id="resultatsPercentilesPlacenta" aria-live="polite"></div><p class="hint" id="percentileTranscrit"></p><button type="button" class="mini" id="reprendreCalcul">Utiliser le calcul dans le champ Percentile placenta</button><p class="hint">Redline : position parmi P10, P50, P90, sans interpolation. Pas de comparaison des poids fixés ou de protocole inconnu. Le champ « Percentile placenta » reçoit la position calculée ou conserve une transcription manuelle.</p><p class="note" id="liaisonMesures">Les mesures numériques communes (poids, longueur, largeur, épaisseur) sont enregistrées dans les deux modules. Les autres constatations restent propres à chaque module.</p><div id="divergencesMesures" role="status"></div>';
-          var premiereLigne = section.querySelector(".row");
-          premiereLigne.insertBefore(calcul, el("g_macro_06"));
+            '<div class="sousTitre">Percentiles du poids placentaire</div><div class="row"><div class="field"><label for="terme_sa">Terme en SA</label><input type="number" id="terme_sa" step="1" min="0"><div class="hint" id="termeOrigine"></div></div><div class="field"><label for="conditions_masse">Conditions de pesée</label><select id="conditions_masse"><option value="non_documentees">Non précisées / pièce non parée</option><option value="fraiche_paree">Pièce fraîche parée (cordon et membranes retirés)</option><option value="fixe">Pièce fixée</option></select></div></div><div id="resultatsPercentilesPlacenta" aria-live="polite"></div><p class="hint" id="percentileTranscrit"></p><button type="button" class="mini" id="reprendreCalcul">Utiliser le calcul dans le champ Percentile placenta</button><p class="hint">Redline : percentile estimé par interpolation entre les seuils P10, P50 et P90. En dehors de ces seuils, seule la borne est indiquée. Comparaison réservée au poids frais paré.</p><p class="note" id="liaisonMesures">Les mesures numériques communes (poids, longueur, largeur, épaisseur) sont enregistrées dans les deux modules. Les autres constatations restent propres à chaque module.</p><div id="divergencesMesures" role="status"></div>';
+          calcul.querySelector(".sousTitre").textContent = "Poids placentaire selon Redline";
+          var reference = element("p");
+          reference.id = "referencePoidsPlacenta";
+          reference.className = "note reference-placenta";
+          calcul.append(reference);
+          mettreEnPageMacroscopie(row, calcul);
         }
+        if (s.id === "microscopie") mettreEnPageMicroscopie();
       });
-      function majChoix(){document.querySelectorAll("label.chip").forEach(function(l){l.classList.toggle("on",l.querySelector("input").checked);});}
+      function majChoix(e){
+        var focal = el("micro_08_" + VILLOSITES.focal);
+        var focalAncien = el("micro_08_" + VILLOSITES.focalAncien);
+        if (e?.target === focal && focal.checked) focalAncien.checked = false;
+        choixMicro("micro_08", VILLOSITES.focalAncien).hidden = !focalAncien.checked;
+        el("releve_villosites_avasculaires_pct").disabled = !el("micro_08_" + VILLOSITES.avasculaire).checked;
+        document.querySelectorAll("label.chip").forEach(function(l){l.classList.toggle("on",l.querySelector("input").checked);});
+        el("releve_nidf_pct").disabled = !el("releve_nidf_1").checked;
+      }
       el("sections").addEventListener("change",majChoix);
       function majAutre(c) {
         var autre = el("g_" + c.id).querySelector('input[value="Autre + texte libre"]');
@@ -1356,6 +1560,8 @@ var VERSION = "1.2.0";
           });
         });
         verifierEpaisseur();
+        el("g_macro_21").hidden = true;
+        majChoix();
         documentLu = {};
         percentileAuto = true;
       }
@@ -1383,6 +1589,15 @@ var VERSION = "1.2.0";
             else {
               var choix = c.autre && v && !Array.isArray(v) && typeof v === "object" ? v.choix : v;
               if (!Array.isArray(choix)) choix = [choix];
+              if (c.id === "micro_08") {
+                choix = choix.flatMap(function (valeur) {
+                  if (valeur === c.choix[VILLOSITES.normalAncien])
+                    return [c.choix[VILLOSITES.normal], c.choix[VILLOSITES.maturation]];
+                  if (valeur === c.choix[VILLOSITES.avasculaireAncien])
+                    return [c.choix[VILLOSITES.avasculaire]];
+                  return [valeur];
+                });
+              }
               document
                 .querySelectorAll('input[name="' + c.id + '"]')
                 .forEach(function (r) {
@@ -1395,13 +1610,14 @@ var VERSION = "1.2.0";
             }
           });
         });
+        el("g_macro_21").hidden = !el("macro_21").value.trim();
         verifierEpaisseur();
+        majChoix();
       }
       async function relire(o) {
         if (o.module !== MODULE || o.dossier !== el("dossier").value.trim())
           throw new Error("Saisie d'un autre module ou dossier");
         appliquer(o);
-        majChoix();
         await chargerLiaison();
         if (!el("operateur").value) el("operateur").value = o.operateur || "";
       }
@@ -1449,9 +1665,14 @@ var VERSION = "1.2.0";
             var v;
             if (c.type === "texte") v = el(c.id).value;
             else if (c.type === "nombre") {
-              if (el(c.id).validity.badInput)
-                throw new Error("Saisir une épaisseur maximale numérique.");
-              v = el(c.id).value === "" ? null : el(c.id).valueAsNumber;
+              var entree = el(c.id);
+              if (entree.validity.badInput)
+                throw new Error(c.label + " doit être numérique.");
+              if (c.id !== "macro_16" && (entree.validity.rangeUnderflow || entree.validity.rangeOverflow))
+                throw new Error(c.label + " est hors des limites autorisées.");
+              if (entree.validity.stepMismatch)
+                throw new Error(c.label + " doit être un nombre entier.");
+              v = entree.disabled || entree.value === "" ? null : entree.valueAsNumber;
             }
             else {
               var choix = Array.from(
@@ -1490,16 +1711,19 @@ var VERSION = "1.2.0";
       }
       function majCalcul() {
         var r = calculer();
+        var percentile = PlacentaPercentiles.libellePercentile(r);
+        el("ecartPoidsPlacenta").value = r.z_brut == null ? "—" :
+          (r.z_brut >= 0 ? "+" : "") + r.z_brut.toFixed(2).replace("-", "−").replace(".", ",");
         el("resultatsPercentilesPlacenta").innerHTML =
           PlacentaPercentiles.html(r);
-        if (percentileAuto) el("macro_02").value = r.position_percentile || "";
+        if (percentileAuto) el("macro_02").value = percentile || "";
         el("percentileTranscrit").textContent =
           !percentileAuto && el("macro_02").value
             ? "Transcription conservée : « " +
               el("macro_02").value +
               " ». Résultat de référence : " +
-              (r.position_percentile || r.motif)
-            : "La position calculée renseigne le champ Percentile placenta tant qu’il n’est pas modifié manuellement.";
+              (percentile || r.motif)
+            : "Le résultat renseigne le champ Percentile placenta tant qu’il n’est pas modifié manuellement.";
       }
       el("reprendreCalcul").onclick = function () {
         percentileAuto = true;
@@ -1515,6 +1739,8 @@ var VERSION = "1.2.0";
             "Lecture des mesures partagées impossible (HTTP " + r.status + ")",
           );
         liaison = await r.json();
+        el("referencePoidsPlacenta").textContent = liaison.reference_poids
+          ? "Référence bibliographique — " + liaison.reference_poids : "";
         Object.keys(liaison.valeurs).forEach(function (id) {
           if (!el(id).value && liaison.valeurs[id] != null)
             el(id).value = String(liaison.valeurs[id]);
@@ -1633,6 +1859,7 @@ var VERSION = "1.2.0";
         }
       }
       el("dossier").addEventListener("change", charger);
+      majChoix();
       SECTIONS.forEach(function (s) {
         s.champs
           .filter(function (c) {

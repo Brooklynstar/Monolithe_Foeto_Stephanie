@@ -27,9 +27,11 @@ Les captures montrent le dossier fictif fourni, aucune donnée clinique réelle.
 
 ## Calculs et mesures communes
 
-Le moteur Python, le moteur JavaScript et les tables sont repris **sans changement**
-de la version déjà présente dans `test-integration`. Ils sont inclus dans la
-branche autonome. Aucune loi normale ni interpolation de percentile n'est ajoutée.
+Les moteurs Python et JavaScript utilisent les seuils Redline P10, P50 et P90 de
+la table locale. Entre deux seuils, le rang est interpolé linéairement, arrondi
+à une décimale et marqué « estimé ». Hors de ces seuils, seule la borne est
+affichée. Le Z-score est calculé séparément à partir de la moyenne et de
+l’écart-type. Aucune loi normale n’est utilisée pour en déduire un percentile.
 
 Le terme administratif fait autorité et est affiché en lecture seule lorsqu'il
 existe ; sans terme administratif, il peut être renseigné pour le calcul.

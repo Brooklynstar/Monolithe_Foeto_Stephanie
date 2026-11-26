@@ -1,6 +1,7 @@
 {# titre: Compte rendu complet #}
-{# version: 3.0.5 #}
+{# version: 3.5.0 #}
 {# format: html #}
+{% from 'placenta_rubriques.inc' import rubrique_placenta, titre_placenta %}
 {%- macro serie_horizontale(serie) -%}
 {% for valeur, renvoi in serie %}{% if not loop.first %}&nbsp; {% endif %}<span style="display:inline-block;white-space:nowrap">{{ valeur }}<sup>{{ renvoi }}</sup></span>{% endfor %}
 {%- endmacro -%}
@@ -25,19 +26,44 @@
 </p>{% endif %}
 {%- endmacro -%}
 {%- macro bloc(section, niveau=2, espacer=true) -%}
-{% if section.titre %}<h{{ niveau }} style="font: bold {{ '12' if niveau == 2 else '10' }}pt Arial,sans-serif;margin:{{ '12' if espacer else '5' }}pt 0 2pt;break-after:avoid;page-break-after:avoid">{{ section.titre }}</h{{ niveau }}>{% endif %}
+{% if section.paragraphes is defined -%}
+{{ rubrique_placenta(section, niveau) }}
+{% else %}
+{% if section.titre_placenta_word %}
+{{ titre_placenta(niveau) }}
+{% elif section.titre %}<h{{ niveau }} style="font: bold {{ '12' if niveau == 2 else '10' }}pt Arial,sans-serif;margin:{{ '12' if espacer else '5' }}pt 0 2pt;break-after:avoid;page-break-after:avoid">{{ section.titre }}</h{{ niveau }}>{% endif %}
 {% for ligne in section.lignes %}<p style="margin:0 0 2pt;white-space:pre-line">{{ ligne }}</p>{% endfor %}
 {% if section.mesures %}
 {% set compact = (section.biometrie | default(false)) or section.titre == 'Poids des organes' %}
 {{ tableau(section.mesures, section.references_mesures, compact) }}
 {% endif %}
 {% for sous in section.sous %}{{ bloc(sous, [niveau + 1, 5] | min, (not loop.first or section.lignes or section.mesures)) }}{% endfor %}
+{% endif %}
+{%- endmacro -%}
+{%- macro administratif(section) -%}
+<section style="font:12pt/1.15 'Times New Roman',serif">
+<h2 style="font:bold 12pt Arial,sans-serif;margin:12pt 0 2pt;break-after:avoid;page-break-after:avoid">{{ section.titre }}</h2>
+{% for ligne in section.lignes %}
+{% if ligne is string %}
+<p style="margin:0 0 2pt;white-space:pre-line">{{ ligne }}</p>
+{% elif ligne.liste %}
+<p style="margin:0 0 2pt;break-after:avoid;page-break-after:avoid">{{ ligne.intitule }}&nbsp;:</p>
+<ul style="margin:0 0 2pt;padding-left:36pt;list-style-type:disc;list-style-type:'-  '">
+{% for antecedent in ligne.liste %}<li style="margin:0 0 2pt">{{ antecedent }}</li>{% endfor %}
+</ul>
+{% else %}
+<p style="margin:{{ '14' if ligne.espacer else '0' }}pt 0 2pt;white-space:pre-line"><u>{{ ligne.intitule }}</u>{% if ligne.texte %} : {{ ligne.texte }}{% else %}.{% endif %}</p>
+{% endif %}
+{% endfor %}
+</section>
 {%- endmacro -%}
 <article style="font:10pt/1.35 Arial,sans-serif;white-space:normal;color:#171717">
+<div style="font:12pt/1.15 'Times New Roman',serif">
 <h1 style="font:bold 16pt Arial,sans-serif;margin:0 0 4pt">Compte rendu d’examen fœtopathologique</h1>
 <p style="margin:0">Dossier n° {{ dossier }}{% if terme.sa is not none %} · {{ terme.texte }}{% endif %}</p>
 {% if demonstration %}<p style="margin:0">Cas de démonstration</p>{% endif %}
 {% if not demonstration and (identite.nom_mere or identite.prenom_mere) %}<p style="margin:0">Mère : {{ identite.nom_mere or '' }} {{ identite.prenom_mere or '' }}.</p>{% endif %}
 {% if circuit.date_examen %}<p style="margin:0">Examen du {{ date_variable(circuit.date_examen) }}.</p>{% endif %}
-{% for section in complet_sections() %}{{ bloc(section) }}{% endfor %}
+</div>
+{% for section in complet_sections() %}{{ administratif(section) if section.administratif else bloc(section) }}{% endfor %}
 </article>

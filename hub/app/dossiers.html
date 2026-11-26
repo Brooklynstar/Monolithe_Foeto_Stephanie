@@ -900,7 +900,7 @@ function rendreModule(s){
 /* ── Onglets ──────────────────────────────────────────────────────────────── */
 if (location.protocol !== "file:") $("lienTrameNormale").hidden = false;
 
-var accesMacroPlacenta = false;
+var accesMacroPlacenta = true;
 function macroGrisee(module){ return module === "macro_placenta" && !accesMacroPlacenta; }
 function libelleAccesMacro(){
   return accesMacroPlacenta ? "Griser Macro placenta" : "Autoriser l’accès à Macro placenta";

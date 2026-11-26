@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'hub/outils'))
-from verifier_placenta import schema_releve
+from verifier_placenta import schema_placenta, verifier_preservation_releve
 
 PORT = int(os.environ.get('MONOLITHE_TEST_PORT', '5005'))
 URL = f'http://127.0.0.1:{PORT}'
@@ -88,9 +88,10 @@ class ReunionPlacenta(unittest.TestCase):
                         page.wait_for_function('numeroCharge === "DEMO_SLO_001" && !charge')
                         self.assertEqual(page.locator('#sections section h2').evaluate_all('(hs)=>hs.map(h=>[...h.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join("").trim())'), ['Macroscopie', 'Microscopie', 'Conclusion'])
                         rendu = page.evaluate('SECTIONS.map(s=>[s.titre,s.champs.map(c=>[c.label,c.type,c.choix])])')
-                        self.assertEqual(rendu, json.loads(json.dumps(schema_releve())))
-                        self.assertEqual(page.locator('fieldset').count(), 32)
-                        self.assertEqual(page.locator('label.chip input').count(), 154)
+                        verifier_preservation_releve()
+                        self.assertEqual(rendu, schema_placenta())
+                        self.assertEqual(page.locator('fieldset').count(), sum(len(champs) for _, champs in schema_placenta()))
+                        self.assertEqual(page.locator('label.chip input').count(), sum(len(options) for _, champs in schema_placenta() for _, _, options in champs))
                         page.locator('#macro_01').fill('90')
                         page.locator('#macro_08_4').check()
                         page.locator('#macro_08_autre').fill('Essai de fusion — fictif')
@@ -101,7 +102,7 @@ class ReunionPlacenta(unittest.TestCase):
                             page.locator('#hubSave').click()
                         self.assertEqual(response.value.status, 200, response.value.text())
                         saved = context.request.get(URL + '/api/saisie/DEMO_SLO_001/placenta').json()
-                        print('OK deux onglets accessibles ; 32 champs et 154 choix conformes ; trois sections enregistrées')
+                        print('OK deux onglets accessibles ; trame étendue conforme ; trois sections enregistrées')
                         # Fermeture du navigateur et arrêt du vrai processus : relire uniquement depuis SQLite.
                         context.close()
                         browser.close()
@@ -127,7 +128,6 @@ class ReunionPlacenta(unittest.TestCase):
                         print('OK après redémarrage sur 5005 : trois sections et huit saisies préexistantes identiques')
                         page.goto(URL + '/?dossier=DEMO_SLO_001')
                         page.locator('#operateur').fill('TEST')
-                        page.locator('#panneau [data-acces-macro]').click()
                         page.locator('[data-o=m_macro_placenta]').click()
                         page.goto(URL + page.get_by_role('link', name='Rouvrir ce module').get_attribute('href'))
                         page.wait_for_function('document.getElementById("f_masse").value === "90"')

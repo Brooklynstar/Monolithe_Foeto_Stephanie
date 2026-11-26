@@ -59,6 +59,7 @@ def contexte(cx, numero):
     issue = docs.get('administratif', {}).get('issue') or {}
     return {'versions': {k: lignes[k]['id'] if k in lignes else None for k in ('administratif', 'placenta', 'macro_placenta')},
             'valeurs': valeurs, 'divergences': divergences,
+            'reference_poids': pp.BIBLIO_REDLINE,
             'terme_sa': issue.get('terme_sa'),
             'conditions_masse': pp.conditions_document(macro) if macro else 'non_documentees'}
 
@@ -95,7 +96,7 @@ def enregistrer(cx, racine, document):
     if module == 'placenta':
         doc['resultats_placentaires'] = resultat(cx, numero, doc)
         if doc.get('percentile_automatique') is True:
-            poser(doc, 'macroscopie', 'macro_02', doc['resultats_placentaires']['position_percentile'] or '')
+            poser(doc, 'macroscopie', 'macro_02', pp.libelle_percentile(doc['resultats_placentaires']) or '')
         if 'macro_placenta' in avant:
             macro = original(racine, avant['macro_placenta'])
             modifie = False
@@ -122,7 +123,7 @@ def enregistrer(cx, racine, document):
         placenta['conditions_masse'] = pp.conditions_document(doc)
         placenta['resultats_placentaires'] = resultat(cx, numero, placenta)
         if placenta.get('percentile_automatique') is True:
-            poser(placenta, 'macroscopie', 'macro_02', placenta['resultats_placentaires']['position_percentile'] or '')
+            poser(placenta, 'macroscopie', 'macro_02', pp.libelle_percentile(placenta['resultats_placentaires']) or '')
         if placenta != ancien:
             autres.append(placenta)
     for autre in autres:
@@ -145,11 +146,16 @@ def compte_rendu(cx, numero, doc):
     if not doc:
         return None
     valeurs = champs(doc)
-    position = resultat(cx, numero, doc)['position_percentile']
+    comparaison = resultat(cx, numero, doc)
     conditions = doc.get('conditions_masse')
+    macro = placenta_redaction.macroscopie_sections(
+        valeurs, pp.libelle_percentile(comparaison), nombre, paree=conditions == 'fraiche_paree',
+        z_brut=comparaison['z_brut'])
+    micro = placenta_redaction.microscopie_paragraphes(valeurs, OPTIONS, nombre)
     return {'sections': [
-        {'titre': 'Macroscopie', 'lignes': placenta_redaction.macroscopie(
-            valeurs, position, nombre, paree=conditions == 'fraiche_paree')},
-        {'titre': 'Microscopie', 'lignes': placenta_redaction.microscopie(valeurs, OPTIONS)},
+        {'titre': 'Macroscopie', 'lignes': [ligne for _, lignes in macro for ligne in lignes],
+         'paragraphes': [' '.join(lignes) for _, lignes in macro]},
+        {'titre': 'Microscopie', 'lignes': [ligne for paragraphe in micro for ligne in paragraphe],
+         'paragraphes': [' '.join(paragraphe) for paragraphe in micro]},
         {'titre': 'Conclusion', 'lignes': placenta_redaction.conclusion(valeurs)},
     ]}

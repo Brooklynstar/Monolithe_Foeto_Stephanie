@@ -13,7 +13,7 @@ if '--verifier' in sys.argv:
     if s!=source.read_text(encoding='utf-8'):raise SystemExit('Références JS périmées')
 else:source.write_text(s,encoding='utf-8')
 bloc='<!-- BEGIN percentiles_placenta.js -->\n<script>\n'+s.rstrip()+'\n</script>\n<!-- END percentiles_placenta.js -->'
-for rel in ('Macro/macro_placenta.html','hub/calculateur-unifie.html'):
+for rel in ('Macro/macro_placenta.html','Macro/placenta.html','hub/calculateur-unifie.html'):
     p=RACINE/rel;texte=p.read_text(encoding='utf-8')
     debut='<!-- BEGIN percentiles_placenta.js -->';fin='<!-- END percentiles_placenta.js -->'
     if debut in texte:

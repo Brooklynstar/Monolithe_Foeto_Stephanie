@@ -33,6 +33,8 @@ class PercentilesPlacenta(unittest.TestCase):
             for cle in ('P10','P50','P90'):
                 resultat=pp.calculer(sa,r[cle],'fraiche_paree')
                 self.assertEqual(resultat['position_percentile'],cle)
+                self.assertEqual(resultat['percentile_numerique'],int(cle[1:]))
+                self.assertFalse(resultat['percentile_interpole'])
                 self.assertEqual(resultat['z_brut'],(r[cle]-r['moyenne'])/r['sd'])
                 self.assertIsNone(resultat['percentile_exact'])
             self.assertEqual(pp.calculer(sa,r['P10']-.01,'fraiche_paree')['position_percentile'],'< P10')
@@ -40,6 +42,18 @@ class PercentilesPlacenta(unittest.TestCase):
         # P50 empirique ne coïncide pas avec la moyenne : ne pas transformer ce Z en P.
         r=pp.calculer(28,214,'fraiche_paree')
         self.assertEqual(r['position_percentile'],'P50');self.assertNotEqual(r['z_brut'],0)
+
+    def test_interpolation_sans_extrapolation(self):
+        for masse, p in ((180, 31.6), (250, 63.5)):
+            r = pp.calculer(28, masse, 'fraiche_paree')
+            self.assertEqual(r['percentile_numerique'], p)
+            self.assertTrue(r['percentile_interpole'])
+            self.assertIn('estimé', pp.libelle_percentile(r))
+        for masse, borne in ((139, '< P10'), (322, '> P90')):
+            r = pp.calculer(28, masse, 'fraiche_paree')
+            self.assertIsNone(r['percentile_numerique'])
+            self.assertIsNone(r['percentile_interpole'])
+            self.assertEqual(pp.libelle_percentile(r), borne)
 
     def test_limites_zero_et_conditions(self):
         for sa in (None,20.5,True,math.nan,50):

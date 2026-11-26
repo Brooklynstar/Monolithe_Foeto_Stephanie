@@ -32,7 +32,7 @@ const cas=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),url=process.argv[3
  await p.locator('#conditions_masse').selectOption('fixe');
  assert.ok(!(await p.locator('#resultatsPercentilesPlacenta').textContent()).includes('Position percentile'));
  await p.goto(url);await p.waitForFunction(()=>INDEX&&INDEX.dossiers.length);
- await p.locator('.cas[data-num="TEST-PLACENTA"]').click();await p.locator('#panneau [data-acces-macro]').click();await p.locator('[data-o=m_macro_placenta]').click();
+ await p.locator('.cas[data-num="TEST-PLACENTA"]').click();await p.locator('[data-o=m_macro_placenta]').click();
  await p.locator('#percentilesPlacentaHub table').waitFor();assert.ok((await p.locator('#percentilesPlacentaHub').textContent()).includes('P50'));
  const root=path.resolve(__dirname,'..'),statique=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end(fs.readFileSync(path.join(root,'hub/calculateur-unifie.html')));});
  await new Promise(resolve=>statique.listen(0,'127.0.0.1',resolve));

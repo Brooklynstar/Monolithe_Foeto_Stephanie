@@ -75,12 +75,12 @@ def constat_champ(c):
                   + (f" {c['unite']}" if c.get('unite') else ''))
 
 
-def bloc(titre, lignes_=(), sous=(), mesures=()):
+def bloc(titre, lignes_=(), sous=(), mesures=(), *, administratif=False):
     constats, sous_blocs, mesures = list(filter(None, lignes_)), list(filter(None, sous)), list(mesures)
     if constats or sous_blocs or mesures:
         lignes_mesures, renvois = tableau_mesures(mesures)
         return {'titre': titre, 'lignes': constats, 'sous': sous_blocs,
-                'mesures': lignes_mesures, 'references_mesures': renvois}
+                'mesures': lignes_mesures, 'references_mesures': renvois, 'administratif': administratif}
     return None
 
 
@@ -93,7 +93,10 @@ def texte_clinique(ctx):
     terme = f'{sa} SA' if sa is not None else ''
     if terme and jours:
         terme += f' + {jours} ' + ('jour' if jours in (1, '1') else 'jours')
-    groupe = ' '.join(filter(None, [atcd.get('groupe_sanguin'), atcd.get('rhesus')]))
+    abo = texte(atcd.get('groupe_sanguin'))
+    rhesus = texte(atcd.get('rhesus'))
+    signe_rhesus = {'POS': '+', 'NEG': '−', '+': '+', '-': '−'}.get(rhesus)
+    groupe = abo + signe_rhesus if abo and signe_rhesus else ' '.join(filter(None, (abo, rhesus)))
     groupe = ' — '.join(filter(None, (groupe, texte(atcd.get('groupe_sanguin_detail')))))
     saisie_consanguinite = atcd.get('consanguinite')
     libelle_consanguinite = {'true': 'Oui', 'false': 'Non', 'UNK': 'Inconnue'}.get(
@@ -108,22 +111,43 @@ def texte_clinique(ctx):
     gestite = ' '.join(f'{initiale}{obs[cle]}' for initiale, cle in [('G', 'gestite'), ('P', 'parite')]
                       if obs.get(cle) is not None)
     date = '/'.join(map(str, [ddg[k] for k in ('jour', 'mois', 'annee') if ddg.get(k)]))
-    return lignes(
-        (type_issue + (f' à {terme}' if terme else '')) if type_issue else '',
+    voie = {'VB': 'Accouchement voie basse', 'VB_INSTR': 'Accouchement voie basse instrumentale',
+            'CESARIENNE': 'Accouchement par césarienne', 'ASPIRATION': 'Aspiration / curetage',
+            'INCONNUE': 'Voie d’accouchement inconnue'}.get(issue.get('voie'))
+    issue_terme = (type_issue + (f' à {terme}' if terme else '')) if type_issue else ''
+    fdr = atcd.get('fdr') or {}
+    risques = [label for cle, label in (('hta', 'HTA'), ('diabete', 'Diabète'), ('tabac', 'Tabac'), ('alcool', 'Alcool'))
+               if str(fdr.get(cle)).lower() in ('true', '1', 'oui')]
+    commentaire = texte(atcd.get('fdr_commentaire'))
+    contexte = phrase(grossesse.get('contexte_clinique'))
+    antecedents = lignes(*texte(atcd.get('atcd_medicaux')).splitlines())
+    paragraphes = lignes(
+        ' '.join(lignes(issue_terme, voie)),
         f'Date de début de grossesse : {date}' if date else '',
-        gestite, f'Groupe sanguin : {groupe}' if groupe else '',
-        f"Consanguinité : {consanguinite}" if consanguinite else '',
-        f"Antécédents FCS : {fcs}" if fcs else '',
-        f"Traitement : {atcd['traitements']}" if atcd.get('traitements') else '',
-        atcd.get('atcd_medicaux'), issue.get('indication'), grossesse.get('histoire_clinique'),
-        grossesse.get('contexte_clinique'),
-        *(item.get('texte') for item in grossesse.get('chronologie') or []),
+        ' '.join(lignes(gestite, f'Antécédents FCS : {fcs}' if fcs else '')),
+        ' '.join(lignes(f'Groupe sanguin : {groupe}' if groupe else '',
+                        f'Consanguinité : {consanguinite}' if consanguinite else '')),
     )
+    if antecedents:
+        paragraphes.append({'intitule': 'ATCD médicaux', 'liste': antecedents})
+    paragraphes += lignes(
+        f"Facteurs de risque : {', '.join(risques)}" if risques else '',
+        f'Commentaire : {commentaire}' if commentaire else '',
+        f"Traitement : {atcd['traitements']}" if atcd.get('traitements') else '',
+        issue.get('indication'), grossesse.get('histoire_clinique'),
+    )
+    if contexte:
+        paragraphes.append({'intitule': 'Contexte clinique', 'texte': contexte})
+    return paragraphes + lignes(*(item.get('texte') for item in grossesse.get('chronologie') or []))
 
 
 def prenatal(ctx):
     donnees, grossesse = ctx['prenatal'], ctx['grossesse']
     resultats = []
+    risque = grossesse.get('risque_t21')
+    marqueurs = [f'{label} {nombre(grossesse[cle])} MoM'
+                 for cle, label in [('pappa', 'PAPP-A'), ('bhcg', 'β-hCG')]
+                 if grossesse.get(cle) not in (None, '')]
 
     def date_echo(date):
         if isinstance(date, dict):
@@ -161,15 +185,10 @@ def prenatal(ctx):
                          donnees.get(f'{prefixe}_commentaire'), donnees.get(f'{prefixe}_details'))
         if contexte or details:
             titre = f'Écho {libelle} ({contexte})' if contexte else f'Échographie {libelle}'
-            resultats.append(phrase(f"{titre} : {' '.join(details)}" if details else titre))
-
-    if risque := grossesse.get('risque_t21'):
-        resultats.append(phrase(f'Risque combiné T21 : {risque}'))
-    marqueurs = [f'{label} {nombre(grossesse[cle])} MoM'
-                 for cle, label in [('pappa', 'PAPP-A'), ('bhcg', 'β-hCG')]
-                 if grossesse.get(cle) not in (None, '')]
-    if marqueurs:
-        resultats.append(phrase('Marqueurs sériques : ' + ', '.join(marqueurs)))
+            resultats.append({'intitule': titre, 'texte': ' '.join(details), 'espacer': bool(resultats)})
+        if n == 't1':
+            resultats += lignes(f'Risque combiné T21 : {risque}' if risque else '',
+                                'Marqueurs sériques : ' + ', '.join(marqueurs) if marqueurs else '')
     return resultats + lignes(donnees.get('autres_examens'))
 
 
@@ -382,14 +401,19 @@ def placenta_bloc(ctx):
             bloc('Ensemble placentaire', [*gemellaire['ensemble'], gemellaire.get('distance')]),
             *placentas, bloc('Conclusion placentaire', gemellaire['conclusion']),
         ])
-    sections = {s['titre']: s['lignes'] for s in (ctx['placenta_formulaire'] or {}).get('sections', [])}
-    return bloc('Placenta', sous=[
-        bloc('Macroscopie', sections.get('Macroscopie', [])),
-        bloc('Microscopie', sections.get('Microscopie', [])),
+    sections = {s['titre']: s for s in (ctx['placenta_formulaire'] or {}).get('sections', [])}
+    macro = sections.get('Macroscopie', {})
+    micro = sections.get('Microscopie', {})
+    section = bloc('Placenta', sous=[
+        macro if macro.get('paragraphes') else None,
+        micro if micro.get('paragraphes') else None,
         bloc('Conclusion placentaire', [
-            l for l in sections.get('Conclusion', []) if not l.startswith('À relire :')
+            l for l in sections.get('Conclusion', {}).get('lignes', []) if not l.startswith('À relire :')
         ]),
     ])
+    if section and (macro.get('paragraphes') or micro.get('paragraphes')):
+        section['titre_placenta_word'] = True
+    return section
 
 
 def composition(ctx):
@@ -431,8 +455,8 @@ def composition(ctx):
         remarques_radio, arterio = remarques_radio[:titre.start()], remarques_radio[titre.end():]
     conclusion = ctx['conclusion_clinique']
     return [b for b in (
-        bloc('Renseignements cliniques', texte_clinique(ctx)),
-        bloc('Examens prénataux', prenatal(ctx)),
+        bloc('Renseignements cliniques', texte_clinique(ctx), administratif=True),
+        bloc('Examens prénataux', prenatal(ctx), administratif=True),
         radio(ctx, remarques_radio), bloc('Examen artériographique', lignes(arterio)), externe(ctx),
         bloc('Examen viscéral', sous=[
             bloc('Macroscopie', sous=[

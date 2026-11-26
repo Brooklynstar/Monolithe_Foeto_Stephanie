@@ -94,7 +94,7 @@ def compte_rendu(doc):
         macro = redaction.macroscopie(valeurs_macro, '', placenta_liaison.nombre)
         if fusionnes and (pourcentage := mesurer(valeurs_macro, 'pourcentage', maximum=100)):
             macro.append(f'Ce placenta représente {pourcentage} % de la galette placentaire.')
-        micro = redaction.microscopie(valeurs_micro, placenta_liaison.OPTIONS)
+        micro = redaction.microscopie(valeurs_micro, placenta_liaison.OPTIONS, placenta_liaison.nombre)
         if fusionnes and valeurs_micro.get('membrane_bichoriale', True) is True:
             micro.insert(0, 'La membrane est de type bichorial.')
         resultat['placentas'].append({'macroscopie': macro, 'microscopie': micro})

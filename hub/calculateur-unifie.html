@@ -245,8 +245,8 @@ var PlacentaPercentiles=(function(){
 /* END REFERENCES */;
   function calculer(sa,masse,conditions){
     var out={terme_sa:sa,masse_g:masse,conditions_masse:conditions,reference:'Redline',z_brut:null,
-      position_percentile:null,percentile_exact:null,seuils:null,motif:null,
-      methode:'position parmi P10, P50, P90 publiés ; pas de loi normale ni interpolation',
+      position_percentile:null,percentile_exact:null,percentile_numerique:null,percentile_interpole:null,seuils:null,motif:null,
+      methode:'Interpolation linéaire entre P10, P50 et P90 ; sans extrapolation ni loi normale.',
       limite_mb:'Müller-Brochut : moyenne/ET présents dans le calculateur, distribution et protocole non établis ; aucun percentile exact déduit.'};
     if(!Number.isInteger(sa)){out.motif='Terme entier nécessaire, sans arrondi ni extrapolation.';return out;}
     if(typeof masse!=='number'||!Number.isFinite(masse)||masse<0){out.motif='Masse manquante ou invalide.';return out;}
@@ -256,16 +256,26 @@ var PlacentaPercentiles=(function(){
     out.z_brut=(masse-ref.moyenne)/ref.sd;
     out.seuils={P10:ref.P10,P50:ref.P50,P90:ref.P90};
     out.position_percentile=masse===ref.P10?'P10':masse===ref.P50?'P50':masse===ref.P90?'P90':masse<ref.P10?'< P10':masse<ref.P50?'P10–P50':masse<ref.P90?'P50–P90':'> P90';
+    const {P10, P50, P90} = ref;
+    if (!(P10 < P50 && P50 < P90) || masse < P10 || masse > P90) return out;
+    const [bas, haut, pBas] = masse <= P50 ? [P10, P50, 10] : [P50, P90, 50];
+    const p = pBas + 40 * (masse - bas) / (haut - bas);
+    out.percentile_numerique = Math.floor(p * 10 + 0.5) / 10;
+    out.percentile_interpole = ![P10, P50, P90].includes(masse);
     return out;
+  }
+  function libellePercentile(r) {
+    if (r.percentile_numerique == null) return r.position_percentile;
+    return 'P' + String(r.percentile_numerique).replace('.', ',') + (r.percentile_interpole ? ' estimé' : '');
   }
   function html(r){
     function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-    var titres=['Valeur','Référence','Z-score','Position percentile','Limite'];
-    var cells=[r.masse_g==null?null:r.masse_g+' g',r.reference,r.z_brut==null?null:(r.z_brut>=0?'+':'')+r.z_brut.toFixed(2)+' DS',r.position_percentile,r.motif];
+    var titres=['Valeur','Référence','Z-score','Percentile','Limite'];
+    var cells=[r.masse_g==null?null:r.masse_g+' g',r.reference,r.z_brut==null?null:(r.z_brut>=0?'+':'')+r.z_brut.toFixed(2)+' DS',libellePercentile(r),r.motif];
     var style='border:1px solid #999;padding:5px 7px;word-break:normal;overflow-wrap:normal;text-decoration:none';
     return '<table style="font:11pt Cambria,\'Times New Roman\',serif;border-collapse:collapse;width:100%"><thead><tr>'+titres.map(function(t,i){return cells[i]==null?'':'<th style="'+style+';white-space:nowrap">'+e(t)+'</th>';}).join('')+'</tr></thead><tbody><tr>'+cells.map(function(c){return c==null?'':'<td style="'+style+'">'+e(c)+'</td>';}).join('')+'</tr></tbody></table>';
   }
-  return {calculer:calculer,html:html};
+  return {calculer:calculer,html:html,libellePercentile:libellePercentile};
 })();
 </script>
 <!-- END percentiles_placenta.js -->
@@ -692,7 +702,7 @@ function recompute(){
       if(v==null)return '—';
       if(item.id==='placenta'){
         const resultat=PlacentaPercentiles.calculer(sa,raw,document.getElementById('placenta_conditions').value);
-        return zFmt(v)+' DS · '+(src==='red'?(resultat.position_percentile || 'percentile indisponible'):'percentile non déterminable');
+        return zFmt(v)+' DS · '+(src==='red'?(PlacentaPercentiles.libellePercentile(resultat) || 'percentile indisponible'):'percentile non déterminable');
       }
       return (externe(item)||masseOrgane(item))?Percentiles.formaterZ(v)+' DS · '+Percentiles.formater(p[src]):zFmt(v);
     }

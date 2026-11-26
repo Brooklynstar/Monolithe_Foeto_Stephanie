@@ -1,5 +1,5 @@
 {# titre: Compte rendu placentaire #}
-{# version: 1.4.0 #}
+{# version: 1.8.0 #}
 {# format: html #}
 {#
    Le placenta est le gros de l'activité et se lit seul : macro parée, tranches,
@@ -20,6 +20,7 @@
 {{ '-' * (t | length) }}
 {%- endmacro -%}
 {% if placenta_formulaire %}
+{% set placenta_html = true %}
 {% include 'placenta_section.inc' %}
 {% else %}
 {% set p = placenta.champs %}

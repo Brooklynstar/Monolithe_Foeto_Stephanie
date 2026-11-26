@@ -117,6 +117,33 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
   max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
 .flash.on{opacity:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.date-avec-calendrier{position:relative}
+.date-avec-calendrier input.dat{padding-inline-end:40px}
+.date-avec-calendrier button{
+  border:0;border-radius:4px;background:transparent;color:var(--drape);
+  font:inherit;cursor:pointer}
+.date-avec-calendrier button:hover{background:var(--drape-soft)}
+.date-avec-calendrier button:focus-visible{outline:2px solid var(--drape);outline-offset:-2px}
+.date-avec-calendrier button:disabled{opacity:.35;cursor:default}
+.declencheur-calendrier{position:absolute;inset-inline-end:4px;top:4px;
+  width:34px;height:32px;display:grid;place-items:center}
+.icone-calendrier{display:block;position:relative;width:16px;height:15px;
+  border:1.5px solid currentColor;border-radius:3px}
+.icone-calendrier::before{content:"";position:absolute;inset:3px 0 auto;
+  border-top:1.5px solid currentColor}
+.icone-calendrier::after{content:"";position:absolute;top:-3px;left:3px;width:2px;height:4px;
+  border-radius:1px;background:currentColor;box-shadow:6px 0 currentColor}
+#calendrier{position:absolute;z-index:5;top:calc(100% + 5px);left:var(--decalage-calendrier,0px);
+  width:min(260px,calc(100vw - 24px));padding:9px;color:var(--ink);background:var(--card);
+  border:1px solid var(--rule);border-radius:6px;box-shadow:0 5px 18px rgba(22,29,28,.15)}
+#calendrier nav,#joursCalendrier{display:grid;gap:2px;align-items:center;text-align:center}
+#calendrier nav{grid-template-columns:24px minmax(0,1fr) 62px 24px;gap:4px;margin-bottom:6px}
+#calendrier nav select{font-size:13px;padding:4px 2px;color:var(--drape)}
+#calendrier nav button{font-size:20px;line-height:1.4}
+#joursCalendrier{grid-template-columns:repeat(7,1fr);font-size:13px}
+#joursCalendrier span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);padding:3px 0}
+#joursCalendrier button{min-height:29px;padding:2px}
+#joursCalendrier [aria-pressed=true]{background:var(--drape);color:#fff;font-weight:650}
 </style>
 </head>
 <body>
@@ -148,6 +175,17 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 <!-- 02+ — Trame -->
 <div id="trame"></div>
+<template id="modeleCalendrier">
+  <div id="calendrier" role="dialog" aria-label="Calendrier" hidden>
+    <nav aria-label="Choix du mois et de l’année">
+      <button type="button" id="moisAvant" aria-label="Mois précédent">‹</button>
+      <select id="choixMois" aria-label="Mois"></select>
+      <select id="choixAnnee" aria-label="Année"></select>
+      <button type="button" id="moisApres" aria-label="Mois suivant">›</button>
+    </nav>
+    <div id="joursCalendrier"></div>
+  </div>
+</template>
 
 <!-- Sortie -->
 <section id="secSortie" class="off">
@@ -190,7 +228,7 @@ td:first-child{color:var(--ink-soft);white-space:nowrap;padding-right:12px}
 
 var MODULE = "administratif";
 var SCHEMA = "0.3.0";
-var VERSION = "2.2.0";   /* version du document ; à incrémenter à chaque diffusion */
+var VERSION = "2.3.0";   /* version du document ; à incrémenter à chaque diffusion */
 var DB_NAME = "foeto-administratif", DB_VER = 1, db = null;
 
 /* ── Dates partielles ─────────────────────────────────────────────────────────
@@ -375,6 +413,7 @@ var TRAME = [
     { k:"fdr",            l:"Facteurs de risque",    t:"chks", w:true, o:[
         ["hta","HTA"],["diabete","Diabète"],["tabac","Tabac"],["alcool","Alcool"]
     ]},
+    { k:"fdr_commentaire", l:"Commentaire",          t:"txt", w:true },
     { k:"atcd_medicaux",  l:"Antécédents médicaux",  t:"txt", w:true },
     { k:"traitements",    l:"Traitements en cours",  t:"txt", w:true }
   ]},
@@ -564,7 +603,11 @@ function champHTML(c, pre){
       + ' step="' + (c.step || "1") + '">';
   } else if (c.t === "dat"){
     h = '<input type="text" id="' + id + '" class="dat" data-dat="1" inputmode="numeric"'
-      + ' autocomplete="off" spellcheck="false" placeholder="AAAA · MM/AAAA · JJ/MM/AAAA">'
+      + ' autocomplete="off" spellcheck="false" placeholder="AAAA · MM/AAAA · JJ/MM/AAAA">';
+    h = '<div class="date-avec-calendrier">' + h
+      + '<button type="button" class="declencheur-calendrier" aria-label="Calendrier — ' + esc(c.l) + '"'
+      + ' aria-haspopup="dialog" aria-controls="calendrier" aria-expanded="false" data-calendrier="' + id + '">'
+      + '<span class="icone-calendrier" aria-hidden="true"></span></button></div>'
       + '<div class="hint" id="d_' + id + '">Année seule acceptée.</div>';
   } else {
     h = '<input type="text" id="' + id + '" autocomplete="off"'
@@ -619,6 +662,122 @@ function champsPrenataux(g){
   $("trame").innerHTML = h;
   $("nSortie").textContent = ("0" + n).slice(-2); n++;
   $("nDiag").textContent   = ("0" + n).slice(-2);
+})();
+
+(function(){
+  const trame = $("trame");
+  trame.append($("modeleCalendrier").content.cloneNode(true));
+  const dialogue = $("calendrier");
+  const grille = $("joursCalendrier");
+  let bouton, champ;
+  const choixMois = $("choixMois"), choixAnnee = $("choixAnnee");
+  const nomMois = new Intl.DateTimeFormat("fr-FR", {month:"long"});
+  let moisAffiche;
+
+  for (let mois = 0; mois < 12; mois++){
+    choixMois.add(new Option(nomMois.format(new Date(2000, mois, 1)), mois));
+  }
+  for (let annee = 1900; annee <= 2100; annee++){
+    choixAnnee.add(new Option(annee, annee));
+  }
+  // La navigation du calendrier ne constitue pas une saisie administrative.
+  dialogue.addEventListener("input", e => e.stopPropagation());
+  dialogue.addEventListener("change", e => e.stopPropagation());
+  choixMois.onchange = function(){
+    moisAffiche.setMonth(Number(choixMois.value));
+    afficherMois();
+  };
+  choixAnnee.onchange = function(){
+    moisAffiche.setFullYear(Number(choixAnnee.value));
+    afficherMois();
+  };
+
+  function positionner(){
+    const place = bouton.parentElement.getBoundingClientRect().left;
+    const bordDroit = document.documentElement.clientWidth - dialogue.offsetWidth - 8;
+    dialogue.style.setProperty("--decalage-calendrier", Math.min(0, bordDroit - place) + "px");
+  }
+
+  function fermer(){
+    dialogue.hidden = true;
+    bouton.setAttribute("aria-expanded", "false");
+    trame.append(dialogue);
+    bouton = champ = null;
+  }
+
+  function afficherMois(){
+    const annee = moisAffiche.getFullYear(), mois = moisAffiche.getMonth() + 1;
+    const saisie = parseDate(champ.value);
+    choixMois.value = mois - 1;
+    choixAnnee.value = annee;
+    $("moisAvant").disabled = annee === 1900 && mois === 1;
+    $("moisApres").disabled = annee === 2100 && mois === 12;
+    grille.replaceChildren();
+    for (const libelle of ["Lu","Ma","Me","Je","Ve","Sa","Di"]){
+      const entete = document.createElement("span");
+      entete.textContent = libelle;
+      grille.append(entete);
+    }
+    for (let jour = 1; jour <= joursDansMois(mois, annee); jour++){
+      const choix = document.createElement("button");
+      choix.type = "button";
+      choix.textContent = jour;
+      choix.dataset.date = fmtDate({annee, mois, jour});
+      choix.setAttribute("aria-label", choix.dataset.date);
+      choix.setAttribute("aria-pressed", choix.dataset.date === fmtDate(saisie));
+      if (jour === 1) choix.style.gridColumnStart = (moisAffiche.getDay() + 6) % 7 + 1;
+      grille.append(choix);
+    }
+  }
+
+  trame.addEventListener("click", function(e){
+    const declencheur = e.target.closest("[data-calendrier]");
+    if (!declencheur || !dossier) return;
+    const memeChamp = bouton === declencheur;
+    if (!dialogue.hidden) fermer();
+    if (memeChamp) return;
+
+    bouton = declencheur;
+    champ = $(bouton.dataset.calendrier);
+    bouton.parentElement.append(dialogue);
+    dialogue.setAttribute("aria-label", bouton.getAttribute("aria-label"));
+    const saisie = parseDate(champ.value), maintenant = new Date();
+    moisAffiche = new Date(saisie?.annee ?? maintenant.getFullYear(),
+                           saisie?.annee ? (saisie.mois ?? 1) - 1 : maintenant.getMonth(), 1);
+    afficherMois();
+    dialogue.hidden = false;
+    bouton.setAttribute("aria-expanded", "true");
+    positionner();
+    choixMois.focus();
+  });
+  for (const [id, pas] of [["moisAvant",-1], ["moisApres",1]]){
+    $(id).onclick = function(){
+      moisAffiche.setMonth(moisAffiche.getMonth() + pas);
+      afficherMois();
+    };
+  }
+  grille.onclick = function(e){
+    if (!e.target.dataset.date) return;
+    champ.value = e.target.dataset.date;
+    champ.dispatchEvent(new Event("input", {bubbles:true}));
+    champ.dispatchEvent(new Event("change", {bubbles:true}));
+    champ.focus();
+    fermer();
+  };
+  function fermerHorsChamp(e){
+    if (bouton && !bouton.parentElement.contains(e.target)) fermer();
+  }
+  document.addEventListener("pointerdown", fermerHorsChamp);
+  document.addEventListener("focusin", fermerHorsChamp);
+  trame.addEventListener("keydown", function(e){
+    if (e.key !== "Escape" || !bouton) return;
+    e.preventDefault();
+    bouton.focus();
+    fermer();
+  });
+  window.addEventListener("resize", function(){
+    if (!dialogue.hidden) positionner();
+  });
 })();
 
 /* ── Grossesses précédentes, deux niveaux ─────────────────────────────────── */
@@ -1032,7 +1191,12 @@ document.addEventListener("change", function(e){
     $("f_type_issue").value = e.target.checked ? e.target.dataset.modeInterruption : "";
     majIssue();
   }
-  if (e.target.closest("#trame")){ recompter(); enregistrer(); }
+  if (!e.target.closest("#trame")) return;
+  if (e.target.dataset.dat){
+    const saisie = parseDate(e.target.value);
+    if (saisie?.precision === "jour") e.target.value = fmtDate(saisie);
+  }
+  recompter(); enregistrer();
 });
 $("btnAdd").onclick = function(){ ajouterGrossesse(); enregistrer(); };
 $("btnAddEvt").onclick = function(){ ajouterEvt(); enregistrer(); };
